@@ -2,48 +2,255 @@
   "nodes": [
     {
       "id": 1,
-      "label": "Algorithm",
-      "details": "A finite sequence of well-defined instructions, typically used to solve a class of specific problems or to perform a computation.",
-      "category": "Fundamentals"
+      "label": "アルゴリズム",
+      "details": "問題を解決するための一連の手順や計算方法。",
+      "category": "基礎理論"
     },
     {
       "id": 2,
-      "label": "Data Structure",
-      "details": "A particular way of organizing and storing data in a computer so that it can be accessed and modified efficiently.",
-      "category": "Fundamentals"
+      "label": "データ構造",
+      "details": "データの格納や整理の方法。効率的なアクセスや変更を可能にする。",
+      "category": "基礎理論"
     },
     {
       "id": 3,
-      "label": "Array",
-      "details": "A data structure consisting of a collection of elements, each identified by at least one array index or key.",
-      "category": "Data Structures"
+      "label": "計算量",
+      "details": "アルゴリズムの効率を評価する指標。時間計算量と空間計算量がある。",
+      "category": "基礎理論"
     },
     {
       "id": 4,
-      "label": "Sorting Algorithm",
-      "details": "An algorithm that puts elements of a list into a certain order (e.g., numerical or lexicographical).",
-      "category": "Algorithms"
+      "label": "オートマトン",
+      "details": "計算モデルの一つ。状態と遷移からなり、形式言語の理論などで用いられる。",
+      "category": "基礎理論"
     },
     {
       "id": 5,
-      "label": "Stack",
-      "details": "A linear data structure which follows the LIFO (Last In First Out) principle.",
-      "category": "Data Structures"
+      "label": "変数",
+      "details": "データを格納するための名前付きのメモリ領域。",
+      "category": "プログラミング"
     },
     {
       "id": 6,
-      "label": "Recursion",
-      "details": "A method of solving a problem where the solution depends on solutions to smaller instances of the same problem.",
-      "category": "Fundamentals"
+      "label": "関数",
+      "details": "特定のタスクを実行する一連のコードのまとまり。",
+      "category": "プログラミング"
+    },
+    {
+      "id": 7,
+      "label": "オブジェクト指向",
+      "details": "データと手続きを「オブジェクト」として一体化して考えるプログラミングの考え方。",
+      "category": "プログラミング"
+    },
+    {
+      "id": 8,
+      "label": "API",
+      "details": "ソフトウェアコンポーネントが互いにやり取りするためのインターフェースの仕様。",
+      "category": "プログラミング"
+    },
+    {
+      "id": 9,
+      "label": "ライブラリ",
+      "details": "汎用性の高い機能をまとめたプログラムの部品集。",
+      "category": "プログラミング"
+    },
+    {
+      "id": 10,
+      "label": "フレームワーク",
+      "details": "アプリケーション開発の土台となる、骨組みや規約の集合。",
+      "category": "プログラミング"
+    },
+    {
+      "id": 11,
+      "label": "プロトコル",
+      "details": "コンピュータネットワークで通信を行うための規約や手順。",
+      "category": "ネットワーク"
+    },
+    {
+      "id": 12,
+      "label": "IPアドレス",
+      "details": "ネットワーク上の機器を識別するための番号。",
+      "category": "ネットワーク"
+    },
+    {
+      "id": 13,
+      "label": "DNS",
+      "details": "ドメイン名とIPアドレスを対応させるシステム。",
+      "category": "ネットワーク"
+    },
+    {
+      "id": 14,
+      "label": "HTTP",
+      "details": "Webサーバーとクライアントがデータを送受信するためのプロトコル。",
+      "category": "ネットワーク"
+    },
+    {
+      "id": 15,
+      "label": "TCP/IP",
+      "details": "インターネットで標準的に利用されている通信プロトコルのセット。",
+      "category": "ネットワーク"
+    },
+    {
+      "id": 16,
+      "label": "データベース",
+      "details": "整理された情報の集合体。効率的な検索、追加、更新が可能。",
+      "category": "データベース"
+    },
+    {
+      "id": 17,
+      "label": "SQL",
+      "details": "リレーショナルデータベースを操作するための言語。",
+      "category": "データベース"
+    },
+    {
+      "id": 18,
+      "label": "NoSQL",
+      "details": "SQLを使わないデータベースの総称。柔軟なデータモデルが特徴。",
+      "category": "データベース"
+    },
+    {
+      "id": 19,
+      "label": "トランザクション",
+      "details": "分けることのできない一連の処理単位。ACID特性が重要。",
+      "category": "データベース"
     }
   ],
   "edges": [
-    { "from": 1, "to": 2 },
-    { "from": 2, "to": 3 },
-    { "from": 4, "to": 1 },
-    { "from": 4, "to": 3 },
-    { "from": 5, "to": 2 },
-    { "from": 6, "to": 1 },
-    { "from": 6, "to": 4 }
+    {
+      "from": 1,
+      "to": 2
+    },
+    {
+      "from": 1,
+      "to": 3
+    },
+    {
+      "from": 1,
+      "to": 4
+    },
+    {
+      "from": 1,
+      "to": 6
+    },
+    {
+      "from": 1,
+      "to": 10
+    },
+    {
+      "from": 1,
+      "to": 19
+    },
+    {
+      "from": 2,
+      "to": 3
+    },
+    {
+      "from": 2,
+      "to": 7
+    },
+    {
+      "from": 2,
+      "to": 9
+    },
+    {
+      "from": 2,
+      "to": 10
+    },
+    {
+      "from": 2,
+      "to": 11
+    },
+    {
+      "from": 2,
+      "to": 19
+    },
+    {
+      "from": 3,
+      "to": 4
+    },
+    {
+      "from": 3,
+      "to": 6
+    },
+    {
+      "from": 3,
+      "to": 10
+    },
+    {
+      "from": 3,
+      "to": 11
+    },
+    {
+      "from": 3,
+      "to": 19
+    },
+    {
+      "from": 4,
+      "to": 7
+    },
+    {
+      "from": 4,
+      "to": 10
+    },
+    {
+      "from": 4,
+      "to": 19
+    },
+    {
+      "from": 5,
+      "to": 6
+    },
+    {
+      "from": 5,
+      "to": 9
+    },
+    {
+      "from": 6,
+      "to": 9
+    },
+    {
+      "from": 7,
+      "to": 9
+    },
+    {
+      "from": 7,
+      "to": 10
+    },
+    {
+      "from": 7,
+      "to": 19
+    },
+    {
+      "from": 9,
+      "to": 10
+    },
+    {
+      "from": 9,
+      "to": 11
+    },
+    {
+      "from": 10,
+      "to": 11
+    },
+    {
+      "from": 10,
+      "to": 19
+    },
+    {
+      "from": 11,
+      "to": 12
+    },
+    {
+      "from": 11,
+      "to": 19
+    },
+    {
+      "from": 13,
+      "to": 14
+    },
+    {
+      "from": 17,
+      "to": 18
+    }
   ]
-} 
+}
