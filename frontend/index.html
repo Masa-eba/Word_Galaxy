@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS Concepts Mind Map</title>
+  <!-- Vis.js CDN for network visualization -->
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Main container for the mind map -->
+  <div id="network"></div>
+
+  <!-- Details overlay (hidden by default) -->
+  <div id="details-overlay" class="hidden">
+    <div id="details-box">
+      <button id="close-details">&times;</button>
+      <h3 id="details-title"></h3>
+      <p id="details-text"></p>
+    </div>
+  </div>
+
+  <!-- Flashcard view (hidden by default) -->
+  <div id="flashcard-view" class="hidden">
+    <div id="flashcard-container">
+      <div id="flashcard" class="card">
+        <div class="card-face card-front"></div>
+        <div class="card-face card-back"></div>
+      </div>
+      <div class="flashcard-controls">
+        <button id="prev-card">Previous</button>
+        <button id="next-card">Next</button>
+        <button id="back-to-map">Back to Map</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Flashcards button -->
+  <button id="create-flashcards" disabled>Create Flashcards</button>
+
+  <script src="app.js"></script>
+</body>
+</html> 
