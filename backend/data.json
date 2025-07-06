@@ -1,0 +1,49 @@
+{
+  "nodes": [
+    {
+      "id": 1,
+      "label": "Algorithm",
+      "details": "A finite sequence of well-defined instructions, typically used to solve a class of specific problems or to perform a computation.",
+      "category": "Fundamentals"
+    },
+    {
+      "id": 2,
+      "label": "Data Structure",
+      "details": "A particular way of organizing and storing data in a computer so that it can be accessed and modified efficiently.",
+      "category": "Fundamentals"
+    },
+    {
+      "id": 3,
+      "label": "Array",
+      "details": "A data structure consisting of a collection of elements, each identified by at least one array index or key.",
+      "category": "Data Structures"
+    },
+    {
+      "id": 4,
+      "label": "Sorting Algorithm",
+      "details": "An algorithm that puts elements of a list into a certain order (e.g., numerical or lexicographical).",
+      "category": "Algorithms"
+    },
+    {
+      "id": 5,
+      "label": "Stack",
+      "details": "A linear data structure which follows the LIFO (Last In First Out) principle.",
+      "category": "Data Structures"
+    },
+    {
+      "id": 6,
+      "label": "Recursion",
+      "details": "A method of solving a problem where the solution depends on solutions to smaller instances of the same problem.",
+      "category": "Fundamentals"
+    }
+  ],
+  "edges": [
+    { "from": 1, "to": 2 },
+    { "from": 2, "to": 3 },
+    { "from": 4, "to": 1 },
+    { "from": 4, "to": 3 },
+    { "from": 5, "to": 2 },
+    { "from": 6, "to": 1 },
+    { "from": 6, "to": 4 }
+  ]
+} 
