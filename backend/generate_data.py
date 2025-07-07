@@ -4,8 +4,33 @@ from transformers import BertJapaneseTokenizer, BertModel
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
+# ==============================================================================
+# 設定値
+# ==============================================================================
 # 類似度を判定する閾値（この値を調整するとエッジの数が変わる）
 SIMILARITY_THRESHOLD = 0.75
+
+# UI上のノード間の距離を定義
+# 類似度が最大のとき(1.0)の距離
+MIN_LENGTH = 50
+# 類似度が閾値のとき(SIMILARITY_THRESHOLD)の距離
+MAX_LENGTH = 200
+# ==============================================================================
+
+
+def calculate_edge_length(similarity):
+    """
+    類似度スコア(0.0 ~ 1.0)を、UI上のエッジの長さに変換する。
+    類似度が高いほど、距離は短くなる。
+    """
+    # SIMILARITY_THRESHOLDから1.0の範囲を、0.0から1.0の範囲に正規化
+    normalized_similarity = (similarity - SIMILARITY_THRESHOLD) / (1.0 - SIMILARITY_THRESHOLD)
+    
+    # 距離を線形にマッピング
+    # 正規化された類似度が1.0(最大)のときにMIN_LENGTHに、0.0(最小)のときにMAX_LENGTHになる
+    length = MAX_LENGTH - (normalized_similarity * (MAX_LENGTH - MIN_LENGTH))
+    
+    return int(length)
 
 def generate_it_word_graph():
     """
@@ -72,12 +97,14 @@ def generate_it_word_graph():
             if similarity > SIMILARITY_THRESHOLD:
                 term_from = term_list[i]
                 term_to = term_list[j]
-                
+                # 類似度からエッジの長さを計算して追加
+                edge_length = calculate_edge_length(similarity)
                 edges.append({
                     "from": term_to_id[term_from],
-                    "to": term_to_id[term_to]
+                    "to": term_to_id[term_to],
+                    "length": edge_length
                 })
-                print(f"  - エッジ発見: {term_from} <-> {term_to} (類似度: {similarity:.2f})")
+                print(f"  - エッジ発見: {term_from} <-> {term_to} (類似度: {similarity:.2f}, 距離: {edge_length})")
 
     # 6. 最終的なグラフデータを結合
     graph_data = {
