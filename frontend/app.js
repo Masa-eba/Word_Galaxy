@@ -8,6 +8,7 @@ let edges = [];
 let selectedNodeIds = [];
 let flashcards = [];
 let currentCardIndex = 0;
+let isSelectingFlashcards = false;
 
 // DOM elements
 const detailsOverlay = document.getElementById('details-overlay');
@@ -22,6 +23,9 @@ const cardBack = document.querySelector('.card-back');
 const prevCardBtn = document.getElementById('prev-card');
 const nextCardBtn = document.getElementById('next-card');
 const backToMapBtn = document.getElementById('back-to-map');
+const selectControls = document.getElementById('flashcard-select-controls');
+const createSelectBtn = document.getElementById('create-flashcard-select');
+const cancelSelectBtn = document.getElementById('cancel-flashcard-select');
 
 // Fetch data from backend API
 async function loadData() {
@@ -93,19 +97,25 @@ function renderNetwork() {
   // Node click: show details
   network.on('click', function(params) {
     if (params.nodes.length === 1) {
-      const nodeId = params.nodes[0];
-      showNodeDetails(nodeId);
+      if (!isSelectingFlashcards) {
+        const nodeId = params.nodes[0];
+        showNodeDetails(nodeId);
+      }
     }
   });
 
   // Node select: handle multi-select
   network.on('selectNode', function(params) {
-    selectedNodeIds = params.nodes;
-    updateCreateFlashcardsBtn();
+    if (isSelectingFlashcards) {
+      selectedNodeIds = params.nodes;
+      updateCreateFlashcardsBtn();
+    }
   });
   network.on('deselectNode', function(params) {
-    selectedNodeIds = params.nodes;
-    updateCreateFlashcardsBtn();
+    if (isSelectingFlashcards) {
+      selectedNodeIds = params.nodes;
+      updateCreateFlashcardsBtn();
+    }
   });
 }
 
@@ -143,7 +153,7 @@ function hideNodeDetails() {
 
 // Enable/disable Create Flashcards button
 function updateCreateFlashcardsBtn() {
-  createFlashcardsBtn.disabled = selectedNodeIds.length < 2;
+  createFlashcardsBtn.disabled = false;
 }
 
 // Generate flashcards from selected nodes
@@ -214,13 +224,62 @@ window.addEventListener('click', function(e) {
 });
 
 // Create flashcards from selected nodes
-createFlashcardsBtn.addEventListener('click', createFlashcards);
+createFlashcardsBtn.addEventListener('click', function() {
+  enterFlashcardSelectMode();
+});
 
 // Flashcard controls
 flashcard.addEventListener('click', flipFlashcard);
 nextCardBtn.addEventListener('click', nextFlashcard);
 prevCardBtn.addEventListener('click', prevFlashcard);
 backToMapBtn.addEventListener('click', hideFlashcardView);
+
+// 選択モードの切り替え
+function enterFlashcardSelectMode() {
+  isSelectingFlashcards = true;
+  selectControls.classList.remove('hidden');
+  createFlashcardsBtn.style.display = 'none';
+  // ノード選択解除
+  network.unselectAll();
+  selectedNodeIds = [];
+  updateCreateFlashcardsBtn();
+}
+function exitFlashcardSelectMode() {
+  isSelectingFlashcards = false;
+  selectControls.classList.add('hidden');
+  createFlashcardsBtn.style.display = '';
+  network.unselectAll();
+  selectedNodeIds = [];
+  updateCreateFlashcardsBtn();
+}
+
+// Createでサーバー保存し、元の画面に戻る
+createSelectBtn.addEventListener('click', async function() {
+  if (selectedNodeIds.length < 2) {
+    alert('2つ以上の単語を選択してください');
+    return;
+  }
+  // 単語のidリストの作成
+  const ids = selectedNodeIds.map(id => Number(id));
+  // 送信
+  const res = await fetch('/api/flashcards', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids })
+  });
+  if (res.ok) {
+    const data = await res.json();
+    alert('単語帳を保存しました: ' + data.name);
+  } else {
+    alert('単語帳の保存に失敗しました');
+  }
+  // 送信が終わってから選択モード終了
+  exitFlashcardSelectMode();
+});
+// Cancelで選択解除
+cancelSelectBtn.addEventListener('click', function() {
+  exitFlashcardSelectMode();
+});
 
 // --- Initialize app ---
 (async function init() {
