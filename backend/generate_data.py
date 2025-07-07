@@ -17,7 +17,7 @@ def generate_it_word_graph():
     # ==============================================================================
     print("外部ファイル 'vocabulary.json' を読み込んでいます...")
     try:
-        with open('./backend/vocabulary.json', 'r', encoding='utf-8') as f:
+        with open('vocabulary.json', 'r', encoding='utf-8') as f:
             IT_VOCABULARY = json.load(f)
     except FileNotFoundError:
         print("エラー: 'vocabulary.json' が見つかりません。スクリプトと同じディレクトリに配置してください。")

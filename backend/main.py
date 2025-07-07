@@ -16,6 +16,11 @@ def index():
 def static_files(path):
     return send_from_directory(app.static_folder, path)
 
+# Serve flashcards page
+@app.route('/flashcards.html')
+def flashcards_page():
+    return send_from_directory(app.static_folder, 'flashcards.html')
+
 # API endpoint to serve data.json
 @app.route('/api/data')
 def get_data():
