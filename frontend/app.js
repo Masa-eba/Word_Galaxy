@@ -14,6 +14,7 @@ let isTestMode = false; // テストモードのフラグ
 let testQuestions = []; // テスト問題の配列
 let currentTestIndex = 0; // 現在のテスト問題インデックス
 let testResults = []; // テスト結果の配列
+let searchResultsArray = []; // 検索結果の配列
 
 // DOM要素
 const detailsOverlay = document.getElementById('details-overlay');
@@ -48,7 +49,17 @@ const testCurrentNumber = document.getElementById('test-current-number');
 const testTotalQuestions = document.getElementById('test-total-questions');
 const testProgressFill = document.querySelector('.test-progress-fill');
 
+<<<<<<< Updated upstream
 // スワイプ用変数
+=======
+// Search elements
+const searchInput = document.getElementById('search-input');
+const searchBtn = document.getElementById('search-btn');
+const clearSearchBtn = document.getElementById('clear-search-btn');
+const searchResultsElement = document.getElementById('search-results');
+
+// Swipe variables
+>>>>>>> Stashed changes
 let startX = 0;
 let startY = 0;
 let endX = 0;
@@ -664,7 +675,135 @@ cancelSelectBtn.addEventListener('click', function() {
   exitFlashcardSelectMode();
 });
 
+<<<<<<< Updated upstream
 // --- アプリの初期化 ---
+=======
+// --- Search functionality ---
+function searchNodes(query) {
+  if (!query.trim()) {
+    searchResultsArray = [];
+    hideSearchResults();
+    return;
+  }
+  
+  const searchTerm = query.toLowerCase();
+  searchResultsArray = nodes.filter(node => 
+    node.label.toLowerCase().includes(searchTerm) ||
+    node.details.toLowerCase().includes(searchTerm)
+  );
+  
+  showSearchResults();
+}
+
+function showSearchResults() {
+  if (searchResultsArray.length === 0) {
+    hideSearchResults();
+    return;
+  }
+  
+  searchResultsElement.innerHTML = '';
+  searchResultsArray.forEach(node => {
+    const resultItem = document.createElement('div');
+    resultItem.className = 'search-result-item';
+    resultItem.innerHTML = `
+      <div class="search-result-term">${node.label}</div>
+      <div class="search-result-details">${node.details.substring(0, 100)}${node.details.length > 100 ? '...' : ''}</div>
+    `;
+    resultItem.addEventListener('click', () => {
+      focusOnNode(node.id);
+      searchInput.value = '';
+    });
+    searchResultsElement.appendChild(resultItem);
+  });
+  
+  searchResultsElement.classList.remove('hidden');
+  clearSearchBtn.classList.remove('hidden');
+}
+
+function hideSearchResults() {
+  searchResultsElement.classList.add('hidden');
+  clearSearchBtn.classList.add('hidden');
+}
+
+function focusOnNode(nodeId) {
+  // ノードを選択状態にする
+  network.selectNodes([nodeId]);
+  
+  // ノードの位置を取得
+  const positions = network.getPositions([nodeId]);
+  const nodePosition = positions[nodeId];
+  
+  if (nodePosition) {
+    // ノードにズームイン
+    network.focus(nodeId, {
+      scale: 1.5,
+      animation: {
+        duration: 1000,
+        easingFunction: 'easeInOutQuad'
+      }
+    });
+  }
+  
+  // 検索候補欄を隠す
+  hideSearchResults();
+}
+
+// Search event listeners
+searchInput.addEventListener('input', function() {
+  searchNodes(this.value);
+});
+
+searchInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    if (searchResultsArray.length > 0) {
+      // 最初の結果にフォーカス
+      focusOnNode(searchResultsArray[0].id);
+      hideSearchResults();
+      this.value = '';
+    } else {
+      // 検索結果がない場合は候補欄を隠す
+      hideSearchResults();
+    }
+  } else if (e.key === 'Escape') {
+    hideSearchResults();
+    this.value = '';
+  }
+});
+
+searchBtn.addEventListener('click', function() {
+  if (searchResultsArray.length > 0) {
+    focusOnNode(searchResultsArray[0].id);
+    hideSearchResults();
+    searchInput.value = '';
+  } else {
+    hideSearchResults();
+  }
+});
+
+clearSearchBtn.addEventListener('click', function() {
+  searchInput.value = '';
+  hideSearchResults();
+  // 選択を解除
+  network.unselectAll();
+});
+
+// 検索結果以外をクリックしたら検索結果を隠す
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#search-container')) {
+    hideSearchResults();
+  }
+});
+
+// 検索入力フィールドからフォーカスが外れた時にも候補欄を隠す
+searchInput.addEventListener('blur', function() {
+  // 少し遅延を入れて、検索結果をクリックする時間を確保
+  setTimeout(() => {
+    hideSearchResults();
+  }, 200);
+});
+
+// --- Initialize app ---
+>>>>>>> Stashed changes
 (async function init() {
   await loadData();
   renderNetwork();
