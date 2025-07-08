@@ -48,6 +48,7 @@ const backFromTestBtn = document.getElementById('back-from-test');
 const testCurrentNumber = document.getElementById('test-current-number');
 const testTotalQuestions = document.getElementById('test-total-questions');
 const testProgressFill = document.querySelector('.test-progress-fill');
+const testPassBtn = document.getElementById('test-pass-btn');
 
 // スワイプ用変数
 // Search elements
@@ -830,4 +831,9 @@ clearSearchBtn.addEventListener('click', function() {
     } catch(e) {}
     localStorage.removeItem('editFlashcard');
   }
+
+  // テスト画面の「パス」ボタンのイベントリスナー
+  testPassBtn.addEventListener('click', function() {
+    nextTestQuestion();
+  });
 })(); 

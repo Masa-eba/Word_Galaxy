@@ -191,6 +191,7 @@
             <button class="simple-btn test-btn" title="テスト" data-id="${flashcard.id}">テスト</button>
             <button class="simple-btn study-btn" title="ビュー" data-id="${flashcard.id}">ビュー</button>
             <button class="simple-btn random-btn" title="ランダム" data-id="${flashcard.id}">ランダム</button>
+            <button class="simple-btn delete-btn" title="削除" data-id="${flashcard.id}" style="background:#2d1a1a;color:#ffd7d7;">削除</button>
           </div>
         `;
         tabList.appendChild(content);
@@ -239,6 +240,19 @@
             localStorage.setItem('studyFlashcard', JSON.stringify(shuffled));
             window.location.href = '/';
           }
+        });
+      });
+      tabList.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async function(e) {
+          e.stopPropagation();
+          const id = this.getAttribute('data-id');
+          if (!confirm('本当にこの単語帳を削除しますか？')) return;
+          try {
+            const res = await fetch(`/api/flashcards/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+              window.location.reload();
+            }
+          } catch {}
         });
       });
     }
