@@ -7,13 +7,17 @@
   <!-- Vis.js CDN for network visualization -->
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   <link rel="stylesheet" href="style.css">
+  <style>
+    #flashcard-view .mode-controls,
+    #test-view .mode-controls {
+      display: none !important;
+    }
+  </style>
 </head>
 <body>
-<<<<<<< Updated upstream
   <!-- マインドマップのメインコンテナ -->
-=======
   <!-- Search bar -->
-  <div id="search-container">
+  <div id="search-container" class="">
     <div id="search-box">
       <input type="text" id="search-input" placeholder="単語を検索..." autocomplete="off">
       <button id="search-btn">🔍</button>
@@ -25,7 +29,6 @@
   </div>
 
   <!-- Main container for the mind map -->
->>>>>>> Stashed changes
   <div id="network"></div>
 
   <!-- 詳細オーバーレイ（デフォルトは非表示） -->
@@ -110,7 +113,7 @@
       
       <div class="test-controls">
         <button id="test-next-btn" class="control-btn">
-          <span>次の問題</span>
+          <span>next</span>
         </button>
       </div>
       

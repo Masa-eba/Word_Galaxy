@@ -49,9 +49,7 @@ const testCurrentNumber = document.getElementById('test-current-number');
 const testTotalQuestions = document.getElementById('test-total-questions');
 const testProgressFill = document.querySelector('.test-progress-fill');
 
-<<<<<<< Updated upstream
 // スワイプ用変数
-=======
 // Search elements
 const searchInput = document.getElementById('search-input');
 const searchBtn = document.getElementById('search-btn');
@@ -59,7 +57,6 @@ const clearSearchBtn = document.getElementById('clear-search-btn');
 const searchResultsElement = document.getElementById('search-results');
 
 // Swipe variables
->>>>>>> Stashed changes
 let startX = 0;
 let startY = 0;
 let endX = 0;
@@ -219,6 +216,7 @@ function showFlashcardView() {
   createFlashcardsBtn.style.display = 'none';
   currentCardIndex = 0;
   renderFlashcard();
+  document.getElementById('search-container').classList.add('hidden');
 }
 
 // フラッシュカードビューを非表示
@@ -226,10 +224,13 @@ function hideFlashcardView() {
   flashcardView.classList.add('hidden');
   document.getElementById('network').style.display = '';
   createFlashcardsBtn.style.display = '';
-  // 戻る際にノードを選択解除
   network.unselectAll();
   selectedNodeIds = [];
   updateCreateFlashcardsBtn();
+  // 検索欄を再表示
+  if (testView.classList.contains('hidden')) {
+    document.getElementById('search-container').classList.remove('hidden');
+  }
 }
 
 // 現在のフラッシュカードを描画
@@ -406,6 +407,7 @@ function showTestView() {
   testResults = [];
   generateTestQuestions();
   renderTestQuestion();
+  document.getElementById('search-container').classList.add('hidden');
 }
 
 function hideTestView() {
@@ -413,8 +415,11 @@ function hideTestView() {
   flashcardView.classList.remove('hidden');
   document.getElementById('network').style.display = '';
   createFlashcardsBtn.style.display = 'none';
-  // フラッシュカードを再表示
   renderFlashcard();
+  // 検索欄を再表示
+  if (flashcardView.classList.contains('hidden')) {
+    document.getElementById('search-container').classList.remove('hidden');
+  }
 }
 
 function renderTestQuestion() {
@@ -675,9 +680,6 @@ cancelSelectBtn.addEventListener('click', function() {
   exitFlashcardSelectMode();
 });
 
-<<<<<<< Updated upstream
-// --- アプリの初期化 ---
-=======
 // --- Search functionality ---
 function searchNodes(query) {
   if (!query.trim()) {
@@ -710,8 +712,7 @@ function showSearchResults() {
       <div class="search-result-details">${node.details.substring(0, 100)}${node.details.length > 100 ? '...' : ''}</div>
     `;
     resultItem.addEventListener('click', () => {
-      focusOnNode(node.id);
-      searchInput.value = '';
+      focusOnNode(node.id, true);
     });
     searchResultsElement.appendChild(resultItem);
   });
@@ -725,16 +726,15 @@ function hideSearchResults() {
   clearSearchBtn.classList.add('hidden');
 }
 
-function focusOnNode(nodeId) {
-  // ノードを選択状態にする
+function focusOnNode(nodeId, hideAfterZoom = false) {
   network.selectNodes([nodeId]);
-  
-  // ノードの位置を取得
   const positions = network.getPositions([nodeId]);
   const nodePosition = positions[nodeId];
-  
+
   if (nodePosition) {
-    // ノードにズームイン
+    if (hideAfterZoom) {
+      hideSearchResults(); // ズーム開始と同時に非表示
+    }
     network.focus(nodeId, {
       scale: 1.5,
       animation: {
@@ -742,10 +742,9 @@ function focusOnNode(nodeId) {
         easingFunction: 'easeInOutQuad'
       }
     });
+  } else if (hideAfterZoom) {
+    hideSearchResults();
   }
-  
-  // 検索候補欄を隠す
-  hideSearchResults();
 }
 
 // Search event listeners
@@ -757,53 +756,25 @@ searchInput.addEventListener('keydown', function(e) {
   if (e.key === 'Enter') {
     if (searchResultsArray.length > 0) {
       // 最初の結果にフォーカス
-      focusOnNode(searchResultsArray[0].id);
-      hideSearchResults();
-      this.value = '';
-    } else {
-      // 検索結果がない場合は候補欄を隠す
-      hideSearchResults();
+      focusOnNode(searchResultsArray[0].id, true); // ズーム前に消す
     }
-  } else if (e.key === 'Escape') {
-    hideSearchResults();
-    this.value = '';
   }
+  // Escapeキーや他のキーでは何もしない
 });
 
 searchBtn.addEventListener('click', function() {
   if (searchResultsArray.length > 0) {
-    focusOnNode(searchResultsArray[0].id);
-    hideSearchResults();
-    searchInput.value = '';
-  } else {
-    hideSearchResults();
+    focusOnNode(searchResultsArray[0].id, true);
   }
 });
 
 clearSearchBtn.addEventListener('click', function() {
   searchInput.value = '';
-  hideSearchResults();
   // 選択を解除
   network.unselectAll();
 });
 
-// 検索結果以外をクリックしたら検索結果を隠す
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('#search-container')) {
-    hideSearchResults();
-  }
-});
-
-// 検索入力フィールドからフォーカスが外れた時にも候補欄を隠す
-searchInput.addEventListener('blur', function() {
-  // 少し遅延を入れて、検索結果をクリックする時間を確保
-  setTimeout(() => {
-    hideSearchResults();
-  }, 200);
-});
-
 // --- Initialize app ---
->>>>>>> Stashed changes
 (async function init() {
   await loadData();
   renderNetwork();

@@ -1,11 +1,9 @@
-<<<<<<< Updated upstream
 /* 全体のフォントをサンセリフに統一 */
 html, body {
   font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Arial, Helvetica, sans-serif;
 }
 
 /* メインネットワークコンテナはビューポート全体を埋める */
-=======
 /* Search bar styles */
 #search-container {
   position: fixed;
@@ -15,6 +13,10 @@ html, body {
   z-index: 30;
   width: 400px;
   max-width: 90vw;
+}
+
+#search-container.hidden {
+  display: none !important;
 }
 
 #search-box {
@@ -101,7 +103,6 @@ html, body {
 }
 
 /* Main network container fills the viewport */
->>>>>>> Stashed changes
 #network {
   width: 100vw;
   height: 100vh;
@@ -677,4 +678,8 @@ html, body {
 }
 #flashcard-select-controls button:hover {
   background: #3a3f4b;
+}
+
+.hidden {
+  display: none !important;
 } 
