@@ -1,4 +1,9 @@
-/* Main network container fills the viewport */
+/* 全体のフォントをサンセリフに統一 */
+html, body {
+  font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Arial, Helvetica, sans-serif;
+}
+
+/* メインネットワークコンテナはビューポート全体を埋める */
 #network {
   width: 100vw;
   height: 100vh;
@@ -8,7 +13,7 @@
   background: #181a1b;
 }
 
-/* Details overlay styles */
+/* 詳細オーバーレイのスタイル */
 #details-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -39,7 +44,7 @@
   cursor: pointer;
 }
 
-/* Flashcard view styles */
+/* フラッシュカードビューのスタイル */
 #flashcard-view {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -62,7 +67,7 @@
   box-sizing: border-box;
 }
 
-/* Flashcard header */
+/* フラッシュカードヘッダー */
 .flashcard-header {
   display: flex;
   justify-content: space-between;
@@ -93,7 +98,7 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Cards wrapper */
+/* カードラッパー */
 .cards-wrapper {
   flex: 1;
   display: flex;
@@ -154,7 +159,7 @@
   transform: rotateY(0deg);
 }
 
-/* Card content */
+/* カード内容 */
 .card-content {
   width: 100%;
   height: 100%;
@@ -195,7 +200,7 @@
   color: #ccc;
 }
 
-/* Flashcard controls */
+/* フラッシュカードコントロール */
 .flashcard-controls {
   display: flex;
   gap: 1.5rem;
@@ -233,7 +238,7 @@
   background: rgba(247, 200, 115, 0.3);
 }
 
-/* Mode controls */
+/* モードコントロール */
 .mode-controls {
   display: flex;
   justify-content: center;
@@ -263,7 +268,7 @@
   color: #f7c873;
 }
 
-/* Test mode styles */
+/* テストモードスタイル */
 #test-view {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -440,7 +445,7 @@
   background: linear-gradient(135deg, #ffd700 0%, #f7c873 100%);
 }
 
-/* Progress bar */
+/* 進捗バー */
 .progress-bar {
   width: 100%;
   height: 4px;
@@ -457,7 +462,7 @@
   transition: width 0.3s ease;
 }
 
-/* Create Flashcards button */
+/* フラッシュカード作成ボタン */
 #create-flashcards {
   position: fixed;
   bottom: 2rem;
@@ -482,7 +487,7 @@
   cursor: not-allowed;
 }
 
-/* View Flashcards button */
+/* フラッシュカード表示ボタン */
 #view-flashcards {
   position: fixed;
   bottom: 2rem;
@@ -504,7 +509,7 @@
   background: #3a3f4b;
 }
 
-/* Node selection highlight (Vis.js override) */
+/* ノード選択ハイライト（Vis.jsオーバーライド） */
 .vis-selected {
   box-shadow: 0 0 0 4px #f7c873, 0 0 16px #f7c873;
   border-color: #f7c873 !important;

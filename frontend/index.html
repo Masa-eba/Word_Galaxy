@@ -3,16 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CS Concepts Mind Map</title>
+  <title>情報系単語マインドマップ</title>
   <!-- Vis.js CDN for network visualization -->
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Main container for the mind map -->
+  <!-- マインドマップのメインコンテナ -->
   <div id="network"></div>
 
-  <!-- Details overlay (hidden by default) -->
+  <!-- 詳細オーバーレイ（デフォルトは非表示） -->
   <div id="details-overlay" class="hidden">
     <div id="details-box">
       <button id="close-details">&times;</button>
@@ -21,7 +21,7 @@
     </div>
   </div>
 
-  <!-- Flashcard view (hidden by default) -->
+  <!-- フラッシュカードビュー（デフォルトは非表示） -->
   <div id="flashcard-view" class="hidden">
     <div id="flashcard-container">
       <div class="flashcard-header">
@@ -75,7 +75,7 @@
     </div>
   </div>
 
-  <!-- Test mode view (hidden by default) -->
+  <!-- テストモードビュー（デフォルトは非表示） -->
   <div id="test-view" class="hidden">
     <div id="test-container">
       <div class="test-header">
@@ -104,21 +104,21 @@
     </div>
   </div>
 
-  <!-- Create Flashcards button -->
-  <button id="create-flashcards">Create Flashcards</button>
+  <!-- フラッシュカード作成ボタン -->
+  <button id="create-flashcards">フラッシュカード作成</button>
   
-  <!-- View Flashcards button -->
-  <button id="view-flashcards" onclick="window.location.href='/flashcards.html'">View Flashcards</button>
+  <!-- フラッシュカード一覧ボタン -->
+  <button id="view-flashcards" onclick="window.location.href='/flashcards.html'">フラッシュカード一覧</button>
 
-  <!-- Create/Cancel for flashcard selection -->
+  <!-- フラッシュカード選択用の作成/キャンセル -->
   <div id="flashcard-select-controls" class="hidden">
     <div class="flashcard-name-input">
       <label for="flashcard-name">単語帳の名前:</label>
       <input type="text" id="flashcard-name" placeholder="例: 基礎単語帳" maxlength="50">
     </div>
     <div class="flashcard-buttons">
-      <button id="create-flashcard-select">Create</button>
-      <button id="cancel-flashcard-select">Cancel</button>
+      <button id="create-flashcard-select">作成</button>
+      <button id="cancel-flashcard-select">キャンセル</button>
     </div>
   </div>
 
