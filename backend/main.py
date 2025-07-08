@@ -6,27 +6,27 @@ from flashcard import flashcard_bp
 app = Flask(__name__, static_folder='../frontend', static_url_path='')
 app.register_blueprint(flashcard_bp)
 
-# Serve the main page
+# メインページを提供
 @app.route('/')
 def index():
     return send_from_directory(app.static_folder, 'index.html')
 
-# Serve static files (CSS, JS, etc.)
+# 静的ファイル（CSS、JSなど）を提供
 @app.route('/<path:path>')
 def static_files(path):
     return send_from_directory(app.static_folder, path)
 
-# Serve flashcards page
+# フラッシュカードページを提供
 @app.route('/flashcards.html')
 def flashcards_page():
     return send_from_directory(app.static_folder, 'flashcards.html')
 
-# API endpoint to serve data.json
+# data.json を提供するAPIエンドポイント
 @app.route('/api/data')
 def get_data():
     """
     事前に生成された data.json ファイルを読み込み、
-    その内容をJSON形式でクライアントに返します。
+    その内容をJSON形式でクライアントに返す
     """
     try:
         # このスクリプトと同じ階層にある data.json へのパスを取得
@@ -48,5 +48,5 @@ def get_data():
 
 if __name__ == '__main__':
     # 開発用サーバーを起動
-    # host='0.0.0.0' は、外部からのアクセスを許可します
+    # host='0.0.0.0' は、外部からのアクセスを許可
     app.run(host='0.0.0.0', port=5000, debug=True)

@@ -6,220 +6,210 @@
   <title>フラッシュカード一覧</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    .flashcard-list {
-      max-width: 800px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-    }
-    .flashcard-item {
-      background: #23272e;
-      border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1rem;
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background: radial-gradient(ellipse at 60% 40%, #2b2e4a 0%, #1b1d2b 60%, #0a0a1a 100%);
+      background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
       color: #fff;
-      box-shadow: 0 2px 16px rgba(0,0,0,0.2);
+      overflow-x: hidden;
     }
-    .flashcard-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
+    .galaxy-stars {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      pointer-events: none;
+      z-index: 0;
     }
-    .flashcard-name-container {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+    .tab-list {
+      max-width: 700px;
+      margin: 3rem auto 0 auto;
+      background: rgba(30, 32, 50, 0.7);
+      border-radius: 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      padding: 1.5rem 1rem;
     }
-    .flashcard-name {
-      font-size: 1.2rem;
+    .tab {
+      background: linear-gradient(90deg, #23244a 0%, #2b2e4a 100%);
+      color: #fff;
+      border-radius: 12px 12px 0 0;
+      margin-bottom: 0.5rem;
+      padding: 1.1rem 1.5rem;
+      font-size: 1.1rem;
       font-weight: bold;
-      color: #f7c873;
-    }
-    .edit-name-btn {
-      background: none;
-      border: none;
-      color: #888;
-      font-size: 1rem;
       cursor: pointer;
-      padding: 0.2rem;
-      border-radius: 4px;
-      transition: color 0.2s;
+      border: none;
+      outline: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transition: background 0.2s;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      user-select: none;
     }
-    .edit-name-btn:hover {
-      color: #f7c873;
+    .tab .tab-arrow {
+      margin-right: 0.7em;
+      transition: transform 0.3s;
+      width: 1.1em;
+      height: 1.1em;
+      fill: #ffd700;
+      flex-shrink: 0;
     }
-    .flashcard-count {
-      background: #3a3f4b;
-      padding: 0.3rem 0.8rem;
-      border-radius: 20px;
+    .tab.open .tab-arrow {
+      transform: rotate(90deg);
+    }
+    .tab .tab-count {
+      background: #ffd70033;
+      color: #ffd700;
+      border-radius: 10px;
+      padding: 0.1rem 0.7rem;
       font-size: 0.9rem;
+      margin-left: auto;
+    }
+    .tab-content {
+      display: none;
+      background: rgba(30, 32, 50, 0.85);
+      border-radius: 0 0 12px 12px;
+      margin-bottom: 1.5rem;
+      padding: 1.5rem 2rem 1.5rem 2rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      animation: fadeIn 0.5s;
+    }
+    .tab-content.open {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .word-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      display: flex;
+      flex-wrap: wrap;
       gap: 0.5rem;
+      margin-bottom: 1.2rem;
     }
     .word-item {
-      background: #2d313a;
-      padding: 0.5rem;
-      border-radius: 6px;
-      font-size: 0.9rem;
+      background: rgba(255,255,255,0.08);
+      color: #ffd700;
+      border-radius: 8px;
+      padding: 0.4rem 1rem;
+      font-size: 0.98rem;
+      margin-bottom: 0.2rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .action-buttons {
+      display: flex;
+      gap: 0.7rem;
+      margin-top: 0.5rem;
+    }
+    .simple-btn {
+      background: linear-gradient(135deg, #23244a 0%, #2b2e4a 100%);
+      color: #ffd700;
+      border: none;
+      border-radius: 18px;
+      padding: 0.5rem 1.3rem;
+      font-size: 1.05rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      letter-spacing: 0.03em;
+    }
+    .simple-btn:hover {
+      background: #ffd70033;
+      color: #fff;
+      box-shadow: 0 4px 16px #ffd70044;
+    }
+    .empty-state {
+      text-align: center;
+      color: #aaa;
+      margin-top: 4rem;
+      font-size: 1.1rem;
     }
     .back-btn {
       position: fixed;
       top: 2rem;
       left: 2rem;
-      background: #2d313a;
-      color: #fff;
+      background: rgba(30,32,50,0.8);
+      color: #ffd700;
       border: none;
       border-radius: 8px;
       padding: 0.8rem 1.5rem;
       font-size: 1rem;
       cursor: pointer;
       transition: background 0.2s;
+      z-index: 10;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
     .back-btn:hover {
-      background: #3a3f4b;
-    }
-    .empty-state {
-      text-align: center;
-      color: #888;
-      margin-top: 4rem;
-      font-size: 1.1rem;
-    }
-    .action-buttons {
-      display: flex;
-      gap: 0.8rem;
-      margin-top: 1.5rem;
-      flex-wrap: wrap;
-    }
-    .study-btn {
-      background: linear-gradient(135deg, #f7c873 0%, #ffd700 100%);
-      color: #1a1d23;
-      border: none;
-      border-radius: 12px;
-      padding: 1rem 2rem;
-      font-size: 1.2rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 100%;
-      box-shadow: 0 4px 16px rgba(247, 200, 115, 0.3);
-    }
-    .study-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(247, 200, 115, 0.4);
-      background: linear-gradient(135deg, #ffd700 0%, #f7c873 100%);
-    }
-    .study-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 8px rgba(247, 200, 115, 0.3);
-    }
-    .test-btn {
-      background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
+      background: #ffd70033;
       color: #fff;
-      border: none;
-      border-radius: 12px;
-      padding: 1rem 2rem;
-      font-size: 1.2rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 100%;
-      box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
-    }
-    .test-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
-      background: linear-gradient(135deg, #8bc34a 0%, #4caf50 100%);
-    }
-    .test-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
-    }
-    .edit-btn {
-      background: linear-gradient(135deg, #2196f3 0%, #03a9f4 100%);
-      color: #fff;
-      border: none;
-      border-radius: 12px;
-      padding: 1rem 2rem;
-      font-size: 1.2rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 100%;
-      box-shadow: 0 4px 16px rgba(33, 150, 243, 0.3);
-    }
-    .edit-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
-      background: linear-gradient(135deg, #03a9f4 0%, #2196f3 100%);
-    }
-    .edit-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
     }
   </style>
 </head>
 <body>
   <button class="back-btn" onclick="window.location.href='/'">← 戻る</button>
-  
-  <div class="flashcard-list">
-    <h1>フラッシュカード一覧</h1>
-    <div id="flashcards-container">
-      <!-- フラッシュカード一覧がここに表示されます -->
-    </div>
+  <div class="tab-list" id="tab-list">
+    <!-- タブと内容がここに動的に入る -->
   </div>
-
-
-
+  <div class="empty-state" id="empty-state" style="display:none;">まだフラッシュカードが作成されていません<br>メインページで単語を選択してフラッシュカードを作成してください</div>
   <script>
-    // フラッシュカード一覧を読み込む
     async function loadFlashcards() {
       try {
         const response = await fetch('/api/flashcards');
         const flashcards = await response.json();
-        renderFlashcards(flashcards);
+        renderTabs(flashcards);
       } catch (error) {
-        console.error('フラッシュカードの読み込みに失敗しました:', error);
-        showEmptyState();
+        document.getElementById('empty-state').style.display = '';
       }
     }
-
-    // フラッシュカード一覧を表示
-    function renderFlashcards(flashcards) {
-      const container = document.getElementById('flashcards-container');
-      
-      if (flashcards.length === 0) {
-        showEmptyState();
+    function renderTabs(flashcards) {
+      const tabList = document.getElementById('tab-list');
+      if (!flashcards.length) {
+        tabList.style.display = 'none';
+        document.getElementById('empty-state').style.display = '';
         return;
       }
-
-      container.innerHTML = flashcards.map((flashcard, idx) => `
-        <div class="flashcard-item">
-          <div class="flashcard-header">
-            <div class="flashcard-name-container">
-              <span class="flashcard-name" id="name-${flashcard.id}">${flashcard.name}</span>
-              <button class="edit-name-btn" onclick="editName(${flashcard.id})">✏️</button>
-            </div>
-            <div class="flashcard-count">${flashcard.words.length}個の単語</div>
-          </div>
+      tabList.innerHTML = '';
+      flashcards.forEach((flashcard, idx) => {
+        // タブ
+        const tab = document.createElement('button');
+        tab.className = 'tab';
+        tab.innerHTML = `
+          <svg class="tab-arrow" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          <span>${flashcard.name}</span><span class="tab-count">${flashcard.words.length}</span>`;
+        tab.dataset.idx = idx;
+        tabList.appendChild(tab);
+        // 内容
+        const content = document.createElement('div');
+        content.className = 'tab-content';
+        content.innerHTML = `
           <div class="word-list">
-            ${flashcard.words.map(word => `
-              <div class="word-item">${word.label}</div>
-            `).join('')}
+            ${flashcard.words.map(word => `<div class="word-item">${word.label}</div>`).join('')}
           </div>
           <div class="action-buttons">
-            <button class="study-btn" data-id="${flashcard.id}">学習する</button>
-            <button class="test-btn" data-id="${flashcard.id}">テストする</button>
-            <button class="edit-btn" data-id="${flashcard.id}">編集する</button>
+            <button class="simple-btn test-btn" title="テスト" data-id="${flashcard.id}">テスト</button>
+            <button class="simple-btn study-btn" title="ビュー" data-id="${flashcard.id}">ビュー</button>
+            <button class="simple-btn random-btn" title="ランダム" data-id="${flashcard.id}">ランダム</button>
+            <button class="simple-btn delete-btn" title="削除" data-id="${flashcard.id}" style="background:#2d1a1a;color:#ffd7d7;">削除</button>
           </div>
-        </div>
-      `).join('');
-
-      // 学習ボタンにイベントを付与
-      document.querySelectorAll('.study-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        `;
+        tabList.appendChild(content);
+      });
+      // タブ開閉（アコーディオン式、複数同時開閉可）
+      const tabs = tabList.querySelectorAll('.tab');
+      const contents = tabList.querySelectorAll('.tab-content');
+      tabs.forEach((tab, i) => {
+        tab.addEventListener('click', () => {
+          const isOpen = tab.classList.contains('open');
+          tab.classList.toggle('open', !isOpen);
+          contents[i].classList.toggle('open', !isOpen);
+        });
+      });
+      // 学習・テスト・ランダムボタン
+      tabList.querySelectorAll('.study-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
           const id = this.getAttribute('data-id');
           const card = flashcards.find(f => String(f.id) === String(id));
           if (card) {
@@ -228,10 +218,9 @@
           }
         });
       });
-
-      // テストボタンにイベントを付与
-      document.querySelectorAll('.test-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+      tabList.querySelectorAll('.test-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
           const id = this.getAttribute('data-id');
           const card = flashcards.find(f => String(f.id) === String(id));
           if (card) {
@@ -240,65 +229,34 @@
           }
         });
       });
-
-      // 編集ボタンにイベントを付与
-      document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+      tabList.querySelectorAll('.random-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
           const id = this.getAttribute('data-id');
           const card = flashcards.find(f => String(f.id) === String(id));
           if (card) {
-            // 編集モードでメインページに遷移
-            localStorage.setItem('editFlashcard', JSON.stringify({
-              id: card.id,
-              name: card.name,
-              words: card.words
-            }));
+            // ランダム順に並び替えて保存
+            const shuffled = [...card.words].sort(() => Math.random() - 0.5);
+            localStorage.setItem('studyFlashcard', JSON.stringify(shuffled));
             window.location.href = '/';
           }
         });
       });
+      tabList.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async function(e) {
+          e.stopPropagation();
+          const id = this.getAttribute('data-id');
+          if (!confirm('本当にこの単語帳を削除しますか？')) return;
+          try {
+            const res = await fetch(`/api/flashcards/${id}`, { method: 'DELETE' });
+            if (res.ok) {
+              window.location.reload();
+            }
+          } catch {}
+        });
+      });
     }
-
-    // 空の状態を表示
-    function showEmptyState() {
-      const container = document.getElementById('flashcards-container');
-      container.innerHTML = `
-        <div class="empty-state">
-          <p>まだフラッシュカードが作成されていません</p>
-          <p>メインページで単語を選択してフラッシュカードを作成してください</p>
-        </div>
-      `;
-    }
-
-    // 名前編集機能
-    async function editName(id) {
-      const nameElement = document.getElementById(`name-${id}`);
-      const currentName = nameElement.textContent;
-      const newName = prompt('単語帳の名前を入力してください:', currentName);
-      
-      if (newName && newName.trim() && newName !== currentName) {
-        try {
-          const response = await fetch(`/api/flashcards/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: newName.trim() })
-          });
-          
-          if (response.ok) {
-            nameElement.textContent = newName.trim();
-          } else {
-            alert('名前の更新に失敗しました');
-          }
-        } catch (error) {
-          console.error('名前更新エラー:', error);
-          alert('名前の更新に失敗しました');
-        }
-      }
-    }
-
-    // ページ読み込み時にフラッシュカード一覧を読み込む
     document.addEventListener('DOMContentLoaded', loadFlashcards);
-
   </script>
 </body>
 </html> 

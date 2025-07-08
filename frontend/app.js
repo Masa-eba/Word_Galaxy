@@ -1,7 +1,7 @@
-// app.js - Main logic for CS Concepts Mind Map
-// Loads data, renders mind map, handles interactions and flashcards
+// app.js - CS概念マインドマップのメインロジック
+// データの読み込み、マインドマップの描画、インタラクションとフラッシュカードの処理
 
-// Global state
+// グローバル状態
 let network = null;
 let nodes = [];
 let edges = [];
@@ -14,8 +14,9 @@ let isTestMode = false; // テストモードのフラグ
 let testQuestions = []; // テスト問題の配列
 let currentTestIndex = 0; // 現在のテスト問題インデックス
 let testResults = []; // テスト結果の配列
+let searchResultsArray = []; // 検索結果の配列
 
-// DOM elements
+// DOM要素
 const detailsOverlay = document.getElementById('details-overlay');
 const detailsTitle = document.getElementById('details-title');
 const detailsText = document.getElementById('details-text');
@@ -47,6 +48,14 @@ const backFromTestBtn = document.getElementById('back-from-test');
 const testCurrentNumber = document.getElementById('test-current-number');
 const testTotalQuestions = document.getElementById('test-total-questions');
 const testProgressFill = document.querySelector('.test-progress-fill');
+const testPassBtn = document.getElementById('test-pass-btn');
+
+// スワイプ用変数
+// Search elements
+const searchInput = document.getElementById('search-input');
+const searchBtn = document.getElementById('search-btn');
+const clearSearchBtn = document.getElementById('clear-search-btn');
+const searchResultsElement = document.getElementById('search-results');
 
 // Swipe variables
 let startX = 0;
@@ -55,7 +64,7 @@ let endX = 0;
 let endY = 0;
 let minSwipeDistance = 50; // スワイプの最小距離
 
-// Fetch data from backend API
+// バックエンドAPIからデータを取得
 async function loadData() {
   const res = await fetch('/api/data');
   const data = await res.json();
@@ -63,30 +72,36 @@ async function loadData() {
   edges = data.edges;
 }
 
-// Render the mind map using Vis.js
+// Vis.jsでマインドマップを描画
 function renderNetwork() {
-  // Prepare Vis.js DataSets
+  // Vis.js DataSetの準備
   const visNodes = new vis.DataSet(nodes.map(n => ({
     id: n.id,
-    // Use a small dot for the node
+    // ノードには小さなドットを使用
     shape: 'dot',
-    size: 14, // small dot
+    size: 14, // 小さなドット
     color: '#f7c873',
     borderWidth: 0,
-    // No label inside the dot
+    // ドット内にラベルは表示しない
     label: '',
-    // Store the label for external rendering
+    // 外部描画用にラベルを保持
     _externalLabel: n.label
   })));
   const visEdges = new vis.DataSet(edges.map(e => ({
     from: e.from,
     to: e.to
-    // No label for edges
+    // エッジにはラベルなし
   })));
 
-  // Vis.js network options
+  // Vis.jsネットワークのオプション
   const options = {
-    physics: { stabilization: false },
+    physics: {
+      stabilization: {
+        enabled: true,
+        iterations: 10, // Adjust as needed for your graph size
+        updateInterval: 25
+      }
+    },
     nodes: {
       borderWidthSelected: 6,
       color: {
@@ -110,19 +125,20 @@ function renderNetwork() {
     }
   };
 
-  // Create the network
+  // ネットワークを作成
   const container = document.getElementById('network');
   network = new vis.Network(container, { nodes: visNodes, edges: visEdges }, options);
 
-  // Render external labels after network is stabilized
-  network.once('stabilized', function() {
-    renderExternalLabels(visNodes);
+  // Stop physics after initial stabilization for performance
+  network.once('stabilizationIterationsDone', function () {
+    network.setOptions({ physics: false });
   });
+
   network.on('afterDrawing', function() {
     renderExternalLabels(visNodes);
   });
 
-  // Node click: show details
+  // ノードクリック: 詳細を表示
   network.on('click', function(params) {
     if (params.nodes.length === 1) {
       if (!isSelectingFlashcards) {
@@ -132,7 +148,7 @@ function renderNetwork() {
     }
   });
 
-  // Node select: handle multi-select
+  // ノード選択: 複数選択を処理
   network.on('selectNode', function(params) {
     if (isSelectingFlashcards) {
       selectedNodeIds = params.nodes;
@@ -147,7 +163,7 @@ function renderNetwork() {
   });
 }
 
-// Render labels outside the dots
+// ドットの外側にラベルを描画
 function renderExternalLabels(visNodes) {
   const container = document.getElementById('network');
   const ctx = network.canvas.getContext();
@@ -165,7 +181,7 @@ function renderExternalLabels(visNodes) {
   ctx.restore();
 }
 
-// Show node details overlay
+// ノード詳細オーバーレイを表示
 function showNodeDetails(nodeId) {
   const node = nodes.find(n => n.id === nodeId);
   if (!node) return;
@@ -174,17 +190,17 @@ function showNodeDetails(nodeId) {
   detailsOverlay.classList.remove('hidden');
 }
 
-// Hide details overlay
+// 詳細オーバーレイを非表示
 function hideNodeDetails() {
   detailsOverlay.classList.add('hidden');
 }
 
-// Enable/disable Create Flashcards button
+// 「フラッシュカード作成」ボタンの有効/無効を切り替え
 function updateCreateFlashcardsBtn() {
   createFlashcardsBtn.disabled = false;
 }
 
-// Generate flashcards from selected nodes
+// 選択したノードからフラッシュカードを生成
 function createFlashcards() {
   flashcards = selectedNodeIds.map(id => {
     const node = nodes.find(n => n.id === id);
@@ -194,27 +210,31 @@ function createFlashcards() {
   showFlashcardView();
 }
 
-// Show flashcard view
+// フラッシュカードビューを表示
 function showFlashcardView() {
   flashcardView.classList.remove('hidden');
   document.getElementById('network').style.display = 'none';
   createFlashcardsBtn.style.display = 'none';
   currentCardIndex = 0;
   renderFlashcard();
+  document.getElementById('search-container').classList.add('hidden');
 }
 
-// Hide flashcard view
+// フラッシュカードビューを非表示
 function hideFlashcardView() {
   flashcardView.classList.add('hidden');
   document.getElementById('network').style.display = '';
   createFlashcardsBtn.style.display = '';
-  // Deselect all nodes when returning
   network.unselectAll();
   selectedNodeIds = [];
   updateCreateFlashcardsBtn();
+  // 検索欄を再表示
+  if (testView.classList.contains('hidden')) {
+    document.getElementById('search-container').classList.remove('hidden');
+  }
 }
 
-// Render the current flashcard
+// 現在のフラッシュカードを描画
 function renderFlashcard() {
   if (!flashcards.length) return;
   
@@ -225,21 +245,21 @@ function renderFlashcard() {
   
 
   
-  // Update counter
+  // カウンターを更新
   currentCardNumber.textContent = currentCardIndex + 1;
   totalCards.textContent = flashcards.length;
   
-  // Update progress bar
+  // 進捗バーを更新
   const progress = ((currentCardIndex + 1) / flashcards.length) * 100;
   progressFill.style.width = progress + '%';
 }
 
-// Flip the flashcard
+// フラッシュカードを裏返す
 function flipFlashcard() {
   flashcard.classList.toggle('flipped');
 }
 
-// Swipe functions
+// スワイプ関数
 function handleTouchStart(e) {
   console.log('Touch start'); // デバッグ用
   startX = e.touches[0].clientX;
@@ -281,7 +301,7 @@ function handleTouchEnd(e) {
   }, 100);
 }
 
-// Show next flashcard
+// 次のフラッシュカードを表示
 function nextFlashcard() {
   if (isRandomMode) {
     // ランダムモードの場合、ランダムなカードを選択
@@ -296,7 +316,7 @@ function nextFlashcard() {
   renderFlashcard();
 }
 
-// Show previous flashcard
+// 前のフラッシュカードを表示
 function prevFlashcard() {
   if (isRandomMode) {
     // ランダムモードの場合、ランダムなカードを選択
@@ -311,21 +331,21 @@ function prevFlashcard() {
   renderFlashcard();
 }
 
-// --- Event Listeners ---
+// --- イベントリスナー ---
 
-// Close details overlay
+// 詳細オーバーレイを閉じる
 closeDetailsBtn.addEventListener('click', hideNodeDetails);
-// Hide details overlay on outside click
+// 詳細オーバーレイを外部クリックで閉じる
 window.addEventListener('click', function(e) {
   if (e.target === detailsOverlay) hideNodeDetails();
 });
 
-// Create flashcards from selected nodes
+// 選択したノードからフラッシュカードを作成
 createFlashcardsBtn.addEventListener('click', function() {
   enterFlashcardSelectMode();
 });
 
-// Flashcard controls
+// フラッシュカードコントロール
 let isClick = false; // クリックとスワイプを区別するためのフラグ
 
 flashcard.addEventListener('click', function(e) {
@@ -338,7 +358,7 @@ nextCardBtn.addEventListener('click', nextFlashcard);
 prevCardBtn.addEventListener('click', prevFlashcard);
 backToMapBtn.addEventListener('click', hideFlashcardView);
 
-// Random mode toggle
+// ランダムモード切り替え
 randomModeBtn.addEventListener('click', function() {
   isRandomMode = !isRandomMode;
   if (isRandomMode) {
@@ -350,7 +370,7 @@ randomModeBtn.addEventListener('click', function() {
   }
 });
 
-// Test mode functions
+// テストモード関数
 function generateTestQuestions() {
   testQuestions = [];
   const shuffledCards = [...flashcards].sort(() => Math.random() - 0.5);
@@ -388,6 +408,7 @@ function showTestView() {
   testResults = [];
   generateTestQuestions();
   renderTestQuestion();
+  document.getElementById('search-container').classList.add('hidden');
 }
 
 function hideTestView() {
@@ -395,8 +416,11 @@ function hideTestView() {
   flashcardView.classList.remove('hidden');
   document.getElementById('network').style.display = '';
   createFlashcardsBtn.style.display = 'none';
-  // フラッシュカードを再表示
   renderFlashcard();
+  // 検索欄を再表示
+  if (flashcardView.classList.contains('hidden')) {
+    document.getElementById('search-container').classList.remove('hidden');
+  }
 }
 
 function renderTestQuestion() {
@@ -497,7 +521,7 @@ function showTestResults() {
   });
 }
 
-// Test mode toggle
+// テストモード切り替え
 testModeBtn.addEventListener('click', function() {
   if (flashcards.length === 0) {
     alert('テストするカードがありません。まずフラッシュカードを作成してください。');
@@ -506,11 +530,11 @@ testModeBtn.addEventListener('click', function() {
   showTestView();
 });
 
-// Test controls
+// テストコントロール
 testNextBtn.addEventListener('click', nextTestQuestion);
 backFromTestBtn.addEventListener('click', hideTestView);
 
-// Swipe event listeners
+// スワイプイベントリスナー
 flashcard.addEventListener('touchstart', handleTouchStart, { passive: false });
 flashcard.addEventListener('touchmove', handleTouchMove, { passive: false });
 flashcard.addEventListener('touchend', handleTouchEnd, { passive: false });
@@ -657,6 +681,100 @@ cancelSelectBtn.addEventListener('click', function() {
   exitFlashcardSelectMode();
 });
 
+// --- Search functionality ---
+function searchNodes(query) {
+  if (!query.trim()) {
+    searchResultsArray = [];
+    hideSearchResults();
+    return;
+  }
+  
+  const searchTerm = query.toLowerCase();
+  searchResultsArray = nodes.filter(node => 
+    node.label.toLowerCase().includes(searchTerm) ||
+    node.details.toLowerCase().includes(searchTerm)
+  );
+  
+  showSearchResults();
+}
+
+function showSearchResults() {
+  if (searchResultsArray.length === 0) {
+    hideSearchResults();
+    return;
+  }
+  
+  searchResultsElement.innerHTML = '';
+  searchResultsArray.forEach(node => {
+    const resultItem = document.createElement('div');
+    resultItem.className = 'search-result-item';
+    resultItem.innerHTML = `
+      <div class="search-result-term">${node.label}</div>
+      <div class="search-result-details">${node.details.substring(0, 100)}${node.details.length > 100 ? '...' : ''}</div>
+    `;
+    resultItem.addEventListener('click', () => {
+      focusOnNode(node.id, true);
+    });
+    searchResultsElement.appendChild(resultItem);
+  });
+  
+  searchResultsElement.classList.remove('hidden');
+  clearSearchBtn.classList.remove('hidden');
+}
+
+function hideSearchResults() {
+  searchResultsElement.classList.add('hidden');
+  clearSearchBtn.classList.add('hidden');
+}
+
+function focusOnNode(nodeId, hideAfterZoom = false) {
+  network.selectNodes([nodeId]);
+  const positions = network.getPositions([nodeId]);
+  const nodePosition = positions[nodeId];
+
+  if (nodePosition) {
+    if (hideAfterZoom) {
+      hideSearchResults(); // ズーム開始と同時に非表示
+    }
+    network.focus(nodeId, {
+      scale: 1.5,
+      animation: {
+        duration: 1000,
+        easingFunction: 'easeInOutQuad'
+      }
+    });
+  } else if (hideAfterZoom) {
+    hideSearchResults();
+  }
+}
+
+// Search event listeners
+searchInput.addEventListener('input', function() {
+  searchNodes(this.value);
+});
+
+searchInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') {
+    if (searchResultsArray.length > 0) {
+      // 最初の結果にフォーカス
+      focusOnNode(searchResultsArray[0].id, true); // ズーム前に消す
+    }
+  }
+  // Escapeキーや他のキーでは何もしない
+});
+
+searchBtn.addEventListener('click', function() {
+  if (searchResultsArray.length > 0) {
+    focusOnNode(searchResultsArray[0].id, true);
+  }
+});
+
+clearSearchBtn.addEventListener('click', function() {
+  searchInput.value = '';
+  // 選択を解除
+  network.unselectAll();
+});
+
 // --- Initialize app ---
 (async function init() {
   await loadData();
@@ -713,4 +831,9 @@ cancelSelectBtn.addEventListener('click', function() {
     } catch(e) {}
     localStorage.removeItem('editFlashcard');
   }
+
+  // テスト画面の「パス」ボタンのイベントリスナー
+  testPassBtn.addEventListener('click', function() {
+    nextTestQuestion();
+  });
 })(); 

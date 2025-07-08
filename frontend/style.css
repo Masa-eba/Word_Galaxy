@@ -1,3 +1,107 @@
+/* 全体のフォントをサンセリフに統一 */
+html, body {
+  font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Arial, Helvetica, sans-serif;
+}
+
+/* メインネットワークコンテナはビューポート全体を埋める */
+/* Search bar styles */
+#search-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  width: 400px;
+  max-width: 90vw;
+}
+
+#search-container.hidden {
+  display: none !important;
+}
+
+#search-box {
+  display: flex;
+  align-items: center;
+  background: rgba(34, 37, 42, 0.95);
+  border-radius: 25px;
+  padding: 8px 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(247, 200, 115, 0.2);
+}
+
+#search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  padding: 8px 12px;
+  outline: none;
+}
+
+#search-input::placeholder {
+  color: #888;
+}
+
+#search-btn, #clear-search-btn {
+  background: none;
+  border: none;
+  color: #f7c873;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+#search-btn:hover, #clear-search-btn:hover {
+  background: rgba(247, 200, 115, 0.1);
+}
+
+#search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(34, 37, 42, 0.95);
+  border-radius: 12px;
+  margin-top: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(247, 200, 115, 0.2);
+}
+
+.search-result-item {
+  padding: 12px 16px;
+  color: #fff;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background 0.2s;
+}
+
+.search-result-item:hover {
+  background: rgba(247, 200, 115, 0.1);
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-term {
+  font-weight: bold;
+  color: #f7c873;
+  margin-bottom: 4px;
+}
+
+.search-result-details {
+  font-size: 14px;
+  color: #ccc;
+  line-height: 1.4;
+}
+
 /* Main network container fills the viewport */
 #network {
   width: 100vw;
@@ -8,7 +112,7 @@
   background: #181a1b;
 }
 
-/* Details overlay styles */
+/* 詳細オーバーレイのスタイル */
 #details-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -39,7 +143,7 @@
   cursor: pointer;
 }
 
-/* Flashcard view styles */
+/* フラッシュカードビューのスタイル */
 #flashcard-view {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -62,7 +166,7 @@
   box-sizing: border-box;
 }
 
-/* Flashcard header */
+/* フラッシュカードヘッダー */
 .flashcard-header {
   display: flex;
   justify-content: space-between;
@@ -93,7 +197,7 @@
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* Cards wrapper */
+/* カードラッパー */
 .cards-wrapper {
   flex: 1;
   display: flex;
@@ -154,7 +258,7 @@
   transform: rotateY(0deg);
 }
 
-/* Card content */
+/* カード内容 */
 .card-content {
   width: 100%;
   height: 100%;
@@ -195,7 +299,7 @@
   color: #ccc;
 }
 
-/* Flashcard controls */
+/* フラッシュカードコントロール */
 .flashcard-controls {
   display: flex;
   gap: 1.5rem;
@@ -233,7 +337,7 @@
   background: rgba(247, 200, 115, 0.3);
 }
 
-/* Mode controls */
+/* モードコントロール */
 .mode-controls {
   display: flex;
   justify-content: center;
@@ -263,7 +367,7 @@
   color: #f7c873;
 }
 
-/* Test mode styles */
+/* テストモードスタイル */
 #test-view {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -440,7 +544,7 @@
   background: linear-gradient(135deg, #ffd700 0%, #f7c873 100%);
 }
 
-/* Progress bar */
+/* 進捗バー */
 .progress-bar {
   width: 100%;
   height: 4px;
@@ -457,7 +561,7 @@
   transition: width 0.3s ease;
 }
 
-/* Create Flashcards button */
+/* フラッシュカード作成ボタン */
 #create-flashcards {
   position: fixed;
   bottom: 2rem;
@@ -482,7 +586,7 @@
   cursor: not-allowed;
 }
 
-/* View Flashcards button */
+/* フラッシュカード表示ボタン */
 #view-flashcards {
   position: fixed;
   bottom: 2rem;
@@ -504,7 +608,7 @@
   background: #3a3f4b;
 }
 
-/* Node selection highlight (Vis.js override) */
+/* ノード選択ハイライト（Vis.jsオーバーライド） */
 .vis-selected {
   box-shadow: 0 0 0 4px #f7c873, 0 0 16px #f7c873;
   border-color: #f7c873 !important;
@@ -574,4 +678,8 @@
 }
 #flashcard-select-controls button:hover {
   background: #3a3f4b;
+}
+
+.hidden {
+  display: none !important;
 } 

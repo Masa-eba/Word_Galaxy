@@ -107,3 +107,12 @@ def update_flashcard_content(flashcard_id):
     save_flashcards(flashcards)
     
     return jsonify(flashcard), 200
+
+@flashcard_bp.route('/api/flashcards/<int:flashcard_id>', methods=['DELETE'])
+def delete_flashcard(flashcard_id):
+    flashcards = load_flashcards()
+    new_flashcards = [f for f in flashcards if f.get('id') != flashcard_id]
+    if len(new_flashcards) == len(flashcards):
+        return jsonify({'error': '単語帳が見つかりません'}), 404
+    save_flashcards(new_flashcards)
+    return jsonify({'message': '削除しました'}), 200
