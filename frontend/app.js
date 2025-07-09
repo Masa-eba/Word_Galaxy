@@ -15,6 +15,10 @@ let testQuestions = []; // テスト問題の配列
 let currentTestIndex = 0; // 現在のテスト問題インデックス
 let testResults = []; // テスト結果の配列
 let searchResultsArray = []; // 検索結果の配列
+let currentSearchIndex = -1; // 現在の検索結果インデックス
+let isSearchNavigationMode = false; // 検索ナビゲーションモードのフラグ
+let connectedNodesArray = []; // 現在のノードから接続されているノードの配列
+let currentConnectedIndex = -1; // 現在の接続ノードインデックス
 
 // DOM要素
 const detailsOverlay = document.getElementById('details-overlay');
@@ -215,14 +219,140 @@ function renderExternalLabels(visNodes) {
 function showNodeDetails(nodeId) {
   const node = nodes.find(n => n.id === nodeId);
   if (!node) return;
+  
+  // 接続されているノードを取得
+  connectedNodesArray = getConnectedNodes(nodeId);
+  currentConnectedIndex = -1;
+  
   detailsTitle.textContent = node.label;
   detailsText.textContent = node.details;
+  
+  // 既存のナビゲーション要素を削除
+  const existingNavigation = detailsOverlay.querySelector('.details-navigation');
+  if (existingNavigation) {
+    existingNavigation.remove();
+  }
+  
+  // 接続ノードがある場合はナビゲーションボタンを追加
+  if (connectedNodesArray.length > 0) {
+    const navigationHtml = `
+      <div class="details-navigation">
+        <button id="details-prev-btn" class="details-nav-btn">←</button>
+        <span id="details-counter" class="details-counter">接続ノード: 0 / ${connectedNodesArray.length}</span>
+        <button id="details-next-btn" class="details-nav-btn">→</button>
+      </div>
+    `;
+    detailsText.insertAdjacentHTML('afterend', navigationHtml);
+    
+    // ナビゲーションボタンのイベントリスナーを設定
+    const prevBtn = document.getElementById('details-prev-btn');
+    const nextBtn = document.getElementById('details-next-btn');
+    
+    prevBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Previous button clicked');
+      navigateConnectedNodes('prev');
+    });
+    nextBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Next button clicked');
+      navigateConnectedNodes('next');
+    });
+    
+    // ナビゲーション状態を初期化
+    updateConnectedNavigation();
+  }
+  
   detailsOverlay.classList.remove('hidden');
+}
+
+// 接続されているノードを取得
+function getConnectedNodes(nodeId) {
+  const connectedIds = [];
+  
+  // エッジから接続されているノードIDを取得
+  edges.forEach(edge => {
+    if (edge.from === nodeId) {
+      connectedIds.push(edge.to);
+    } else if (edge.to === nodeId) {
+      connectedIds.push(edge.from);
+    }
+  });
+  
+  // ノード情報を取得
+  return nodes.filter(node => connectedIds.includes(node.id));
+}
+
+// 接続ノード間をナビゲーション
+function navigateConnectedNodes(direction) {
+  console.log('navigateConnectedNodes called with direction:', direction);
+  console.log('connectedNodesArray length:', connectedNodesArray.length);
+  console.log('currentConnectedIndex:', currentConnectedIndex);
+  
+  if (connectedNodesArray.length === 0) return;
+  
+  if (direction === 'prev') {
+    if (currentConnectedIndex > 0) {
+      currentConnectedIndex--;
+    } else {
+      currentConnectedIndex = connectedNodesArray.length - 1; // 最後にループ
+    }
+  } else if (direction === 'next') {
+    if (currentConnectedIndex < connectedNodesArray.length - 1) {
+      currentConnectedIndex++;
+    } else {
+      currentConnectedIndex = 0; // 最初にループ
+    }
+  }
+  
+  console.log('New currentConnectedIndex:', currentConnectedIndex);
+  
+  // 選択されたノードにフォーカス
+  const selectedNode = connectedNodesArray[currentConnectedIndex];
+  if (selectedNode) {
+    console.log('Selected node:', selectedNode.label);
+    focusOnNode(selectedNode.id, false);
+    
+    // 詳細オーバーレイの内容を更新
+    detailsTitle.textContent = selectedNode.label;
+    detailsText.textContent = selectedNode.details;
+    
+    // ナビゲーション状態を更新
+    updateConnectedNavigation();
+  }
+}
+
+// 接続ノードナビゲーションの状態を更新
+function updateConnectedNavigation() {
+  const prevBtn = document.getElementById('details-prev-btn');
+  const nextBtn = document.getElementById('details-next-btn');
+  const counter = document.getElementById('details-counter');
+  
+  if (!prevBtn || !nextBtn || !counter) return;
+  
+  if (connectedNodesArray.length === 0) {
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+    counter.textContent = '接続ノード: 0 / 0';
+    return;
+  }
+  
+  // ボタンの有効/無効を設定
+  prevBtn.disabled = false;
+  nextBtn.disabled = false;
+  
+  // カウンターを更新
+  const current = currentConnectedIndex >= 0 ? currentConnectedIndex + 1 : 0;
+  counter.textContent = `接続ノード: ${current} / ${connectedNodesArray.length}`;
 }
 
 // 詳細オーバーレイを非表示
 function hideNodeDetails() {
   detailsOverlay.classList.add('hidden');
+  connectedNodesArray = [];
+  currentConnectedIndex = -1;
 }
 
 // 「フラッシュカード作成」ボタンの有効/無効を切り替え
@@ -369,11 +499,34 @@ function prevFlashcard() {
 closeDetailsBtn.addEventListener('click', hideNodeDetails);
 // 詳細オーバーレイを外部クリックで閉じる
 window.addEventListener('click', function(e) {
-  if (e.target === detailsOverlay) hideNodeDetails();
+  if (e.target === detailsOverlay) {
+    // ナビゲーションボタンがクリックされた場合は閉じない
+    if (e.target.closest('.details-nav-btn')) {
+      return;
+    }
+    hideNodeDetails();
+  }
+});
+
+// キーボードショートカット
+window.addEventListener('keydown', function(e) {
+  // 詳細オーバーレイが表示されている場合
+  if (!detailsOverlay.classList.contains('hidden')) {
+    if (e.key === 'ArrowLeft' && connectedNodesArray.length > 0) {
+      e.preventDefault();
+      navigateConnectedNodes('prev');
+    } else if (e.key === 'ArrowRight' && connectedNodesArray.length > 0) {
+      e.preventDefault();
+      navigateConnectedNodes('next');
+    } else if (e.key === 'Escape') {
+      hideNodeDetails();
+    }
+  }
 });
 
 // 選択したノードからフラッシュカードを作成
 createFlashcardsBtn.addEventListener('click', function() {
+  console.log('createFlashcardsBtn clicked');
   enterFlashcardSelectMode();
 });
 
@@ -638,12 +791,32 @@ document.addEventListener('mouseup', function() {
 
 // 選択モードの切り替え
 function enterFlashcardSelectMode() {
+  console.log('enterFlashcardSelectMode called');
+  console.log('selectControls:', selectControls);
+  console.log('createFlashcardsBtn:', createFlashcardsBtn);
+  
   isSelectingFlashcards = true;
-  selectControls.classList.remove('hidden');
-  createFlashcardsBtn.style.display = 'none';
+  
+  if (selectControls) {
+    selectControls.classList.remove('hidden');
+    console.log('selectControls hidden class removed');
+  } else {
+    console.error('selectControls element not found');
+  }
+  
+  if (createFlashcardsBtn) {
+    createFlashcardsBtn.style.display = 'none';
+    console.log('createFlashcardsBtn hidden');
+  } else {
+    console.error('createFlashcardsBtn element not found');
+  }
+  
   document.body.classList.add('hide-corner-btns');
   // 名前入力をリセット
-  document.getElementById('flashcard-name').value = '';
+  const nameInput = document.getElementById('flashcard-name');
+  if (nameInput) {
+    nameInput.value = '';
+  }
   // ノード選択解除
   network.unselectAll();
   selectedNodeIds = [];
@@ -745,7 +918,19 @@ function showSearchResults() {
   }
   
   searchResultsElement.innerHTML = '';
-  searchResultsArray.forEach(node => {
+  
+  // ナビゲーションボタンを追加
+  const navigationContainer = document.createElement('div');
+  navigationContainer.className = 'search-navigation';
+  navigationContainer.innerHTML = `
+    <button id="search-prev-btn" class="search-nav-btn" disabled>←</button>
+    <span id="search-counter" class="search-counter">0 / 0</span>
+    <button id="search-next-btn" class="search-nav-btn" disabled>→</button>
+  `;
+  searchResultsElement.appendChild(navigationContainer);
+  
+  // 検索結果を表示
+  searchResultsArray.forEach((node, index) => {
     const resultItem = document.createElement('div');
     resultItem.className = 'search-result-item';
     resultItem.innerHTML = `
@@ -758,13 +943,82 @@ function showSearchResults() {
     searchResultsElement.appendChild(resultItem);
   });
   
+  // ナビゲーションボタンのイベントリスナーを設定
+  const prevBtn = document.getElementById('search-prev-btn');
+  const nextBtn = document.getElementById('search-next-btn');
+  const counter = document.getElementById('search-counter');
+  
+  prevBtn.addEventListener('click', () => navigateSearchResults('prev'));
+  nextBtn.addEventListener('click', () => navigateSearchResults('next'));
+  
+  // 初期状態を設定
+  currentSearchIndex = -1;
+  updateSearchNavigation();
+  
   searchResultsElement.classList.remove('hidden');
   clearSearchBtn.classList.remove('hidden');
+}
+
+function navigateSearchResults(direction) {
+  if (searchResultsArray.length === 0) return;
+  
+  if (direction === 'prev') {
+    if (currentSearchIndex > 0) {
+      currentSearchIndex--;
+    } else {
+      currentSearchIndex = searchResultsArray.length - 1; // 最後にループ
+    }
+  } else if (direction === 'next') {
+    if (currentSearchIndex < searchResultsArray.length - 1) {
+      currentSearchIndex++;
+    } else {
+      currentSearchIndex = 0; // 最初にループ
+    }
+  }
+  
+  // 選択されたノードにフォーカス
+  const selectedNode = searchResultsArray[currentSearchIndex];
+  if (selectedNode) {
+    focusOnNode(selectedNode.id, false);
+    updateSearchNavigation();
+  }
+}
+
+function updateSearchNavigation() {
+  const prevBtn = document.getElementById('search-prev-btn');
+  const nextBtn = document.getElementById('search-next-btn');
+  const counter = document.getElementById('search-counter');
+  
+  if (searchResultsArray.length === 0) {
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+    counter.textContent = '0 / 0';
+    return;
+  }
+  
+  // ボタンの有効/無効を設定
+  prevBtn.disabled = false;
+  nextBtn.disabled = false;
+  
+  // カウンターを更新
+  const current = currentSearchIndex >= 0 ? currentSearchIndex + 1 : 0;
+  counter.textContent = `${current} / ${searchResultsArray.length}`;
+  
+  // 検索結果アイテムのハイライトを更新
+  const resultItems = searchResultsElement.querySelectorAll('.search-result-item');
+  resultItems.forEach((item, index) => {
+    item.classList.remove('selected');
+    if (index === currentSearchIndex) {
+      item.classList.add('selected');
+    }
+  });
 }
 
 function hideSearchResults() {
   searchResultsElement.classList.add('hidden');
   clearSearchBtn.classList.add('hidden');
+  currentSearchIndex = -1;
+  isSearchNavigationMode = false;
 }
 
 function focusOnNode(nodeId, hideAfterZoom = false) {
@@ -797,15 +1051,25 @@ searchInput.addEventListener('keydown', function(e) {
   if (e.key === 'Enter') {
     if (searchResultsArray.length > 0) {
       // 最初の結果にフォーカス
-      focusOnNode(searchResultsArray[0].id, true); // ズーム前に消す
+      currentSearchIndex = 0;
+      focusOnNode(searchResultsArray[0].id, true);
+      updateSearchNavigation();
     }
+  } else if (e.key === 'ArrowLeft' && searchResultsArray.length > 0) {
+    e.preventDefault();
+    navigateSearchResults('prev');
+  } else if (e.key === 'ArrowRight' && searchResultsArray.length > 0) {
+    e.preventDefault();
+    navigateSearchResults('next');
   }
   // Escapeキーや他のキーでは何もしない
 });
 
 searchBtn.addEventListener('click', function() {
   if (searchResultsArray.length > 0) {
+    currentSearchIndex = 0;
     focusOnNode(searchResultsArray[0].id, true);
+    updateSearchNavigation();
   }
 });
 
@@ -813,10 +1077,17 @@ clearSearchBtn.addEventListener('click', function() {
   searchInput.value = '';
   // 選択を解除
   network.unselectAll();
+  hideSearchResults();
 });
 
 // --- 初期化 ---
 (async function init() {
+  console.log('Initializing app...');
+  console.log('selectControls:', selectControls);
+  console.log('createFlashcardsBtn:', createFlashcardsBtn);
+  console.log('createSelectBtn:', createSelectBtn);
+  console.log('cancelSelectBtn:', cancelSelectBtn);
+  
   await loadData();
   renderNetwork();
   // localStorageにstudyFlashcardがあれば自動でカードUIを表示
@@ -854,6 +1125,8 @@ clearSearchBtn.addEventListener('click', function() {
     try {
       const editData = JSON.parse(edit);
       if (editData.words && Array.isArray(editData.words) && editData.words.length > 0) {
+        console.log('Edit mode detected:', editData);
+        
         // 既存の単語を選択状態にする
         const wordIds = editData.words.map(word => word.id);
         selectedNodeIds = wordIds;
@@ -862,13 +1135,26 @@ clearSearchBtn.addEventListener('click', function() {
         enterFlashcardSelectMode();
         
         // 名前を設定
-        document.getElementById('flashcard-name').value = editData.name || '編集中の単語帳';
+        const nameInput = document.getElementById('flashcard-name');
+        if (nameInput) {
+          nameInput.value = editData.name || '編集中の単語帳';
+        }
         
         // 編集フラグを設定
         window.isEditingFlashcard = true;
         window.editingFlashcardId = editData.id;
+        
+        // 選択されたノードを視覚的にハイライト
+        setTimeout(() => {
+          if (network) {
+            network.selectNodes(wordIds);
+            console.log('Selected nodes for editing:', wordIds);
+          }
+        }, 1000);
       }
-    } catch(e) {}
+    } catch(e) {
+      console.error('Error parsing editFlashcard data:', e);
+    }
     localStorage.removeItem('editFlashcard');
   }
 

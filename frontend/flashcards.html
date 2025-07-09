@@ -191,7 +191,8 @@
             <button class="simple-btn test-btn" title="テスト" data-id="${flashcard.id}">テスト</button>
             <button class="simple-btn study-btn" title="ビュー" data-id="${flashcard.id}">ビュー</button>
             <button class="simple-btn random-btn" title="ランダム" data-id="${flashcard.id}">ランダム</button>
-            <button class="simple-btn delete-btn" title="削除" data-id="${flashcard.id}" style="background:#2d1a1a;color:#ffd7d7;">削除</button>
+            <button class="simple-btn edit-btn" title="編集" data-id="${flashcard.id}" style="background:#2d4a1a;color:#d7ffd7;">✏️ 編集</button>
+            <button class="simple-btn delete-btn" title="削除" data-id="${flashcard.id}" style="background:#2d1a1a;color:#ffd7d7;">🗑️ 削除</button>
           </div>
         `;
         tabList.appendChild(content);
@@ -238,6 +239,17 @@
             // ランダム順に並び替えて保存
             const shuffled = [...card.words].sort(() => Math.random() - 0.5);
             localStorage.setItem('studyFlashcard', JSON.stringify(shuffled));
+            window.location.href = '/';
+          }
+        });
+      });
+      tabList.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const id = this.getAttribute('data-id');
+          const card = flashcards.find(f => String(f.id) === String(id));
+          if (card) {
+            localStorage.setItem('editFlashcard', JSON.stringify(card));
             window.location.href = '/';
           }
         });
