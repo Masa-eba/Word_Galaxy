@@ -168,11 +168,22 @@ function renderNetwork() {
     renderExternalLabels(visNodes);
   });
 
-  // ノードクリック: 詳細を表示
+  // ノードクリック: 詳細を表示または選択トグル
   network.on('click', function(params) {
     if (params.nodes.length === 1) {
-      if (!isSelectingFlashcards) {
-        const nodeId = params.nodes[0];
+      const nodeId = params.nodes[0];
+      if (isSelectingFlashcards) {
+        // すでに選択されていれば解除、なければ追加
+        const idx = selectedNodeIds.indexOf(nodeId);
+        if (idx === -1) {
+          selectedNodeIds.push(nodeId);
+        } else {
+          selectedNodeIds.splice(idx, 1);
+        }
+        // Vis.jsの選択状態を手動で反映
+        network.selectNodes(selectedNodeIds);
+        updateCreateFlashcardsBtn();
+      } else {
         showNodeDetails(nodeId);
       }
     }
@@ -181,14 +192,16 @@ function renderNetwork() {
   // ノード選択: 複数選択を処理
   network.on('selectNode', function(params) {
     if (isSelectingFlashcards) {
-      selectedNodeIds = params.nodes;
-      updateCreateFlashcardsBtn();
+      // ここは何もしない（クリックで制御するため）
+      // selectedNodeIds = params.nodes;
+      // updateCreateFlashcardsBtn();
     }
   });
   network.on('deselectNode', function(params) {
     if (isSelectingFlashcards) {
-      selectedNodeIds = params.nodes;
-      updateCreateFlashcardsBtn();
+      // ここは何もしない（クリックで制御するため）
+      // selectedNodeIds = params.nodes;
+      // updateCreateFlashcardsBtn();
     }
   });
 }
