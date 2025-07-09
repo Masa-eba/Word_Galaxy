@@ -244,7 +244,7 @@ html, body {
   text-align: center;
 }
 
-/* フラッシュカードビューのスタイル */
+/* 単語帳ビューのスタイル */
 #flashcard-view {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -267,7 +267,7 @@ html, body {
   box-sizing: border-box;
 }
 
-/* フラッシュカードヘッダー */
+/* 単語帳ヘッダー */
 .flashcard-header {
   display: flex;
   justify-content: space-between;
@@ -400,7 +400,7 @@ html, body {
   color: #ccc;
 }
 
-/* フラッシュカードコントロール */
+/* 単語帳コントロール */
 .flashcard-controls {
   display: flex;
   gap: 1.5rem;
@@ -657,7 +657,7 @@ html, body {
   transition: width 0.3s ease;
 }
 
-/* フラッシュカード作成ボタン */
+/* 単語帳作成ボタン */
 #create-flashcards {
   position: fixed;
   right: 2rem;
@@ -680,7 +680,7 @@ html, body {
   cursor: not-allowed;
 }
 
-/* フラッシュカード表示ボタン */
+/* 単語帳表示ボタン */
 #view-flashcards {
   position: fixed;
   right: 2rem;

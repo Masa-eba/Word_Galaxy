@@ -372,7 +372,7 @@ function updateCreateFlashcardsBtn() {
   createFlashcardsBtn.disabled = false;
 }
 
-// 選択したノードからフラッシュカードを生成
+// 選択したノードから単語帳を生成
 function createFlashcards() {
   flashcards = selectedNodeIds.map(id => {
     const node = nodes.find(n => n.id === id);
@@ -382,7 +382,7 @@ function createFlashcards() {
   showFlashcardView();
 }
 
-// フラッシュカードビューを表示
+// 単語帳ビューを表示
 function showFlashcardView() {
   flashcardView.classList.remove('hidden');
   document.getElementById('network').style.display = 'none';
@@ -390,11 +390,11 @@ function showFlashcardView() {
   currentCardIndex = 0;
   renderFlashcard();
   document.getElementById('search-container').classList.add('hidden');
-  // フラッシュカードビュー表示時にボタンを非表示
+  // 単語帳ビュー表示時にボタンを非表示
   document.body.classList.add('hide-corner-btns');
 }
 
-// フラッシュカードビューを非表示
+// 単語帳ビューを非表示
 function hideFlashcardView() {
   flashcardView.classList.add('hidden');
   document.getElementById('network').style.display = '';
@@ -406,11 +406,11 @@ function hideFlashcardView() {
   if (testView.classList.contains('hidden')) {
     document.getElementById('search-container').classList.remove('hidden');
   }
-  // フラッシュカードビュー非表示時にボタンを再表示
+  // 単語帳ビュー非表示時にボタンを再表示
   document.body.classList.remove('hide-corner-btns');
 }
 
-// 現在のフラッシュカードを描画
+// 現在の単語帳を描画
 function renderFlashcard() {
   if (!flashcards.length) return;
   
@@ -428,7 +428,7 @@ function renderFlashcard() {
   progressFill.style.width = progress + '%';
 }
 
-// フラッシュカードを裏返す
+// 単語帳を裏返す
 function flipFlashcard() {
   flashcard.classList.toggle('flipped');
 }
@@ -475,7 +475,7 @@ function handleTouchEnd(e) {
   }, 100);
 }
 
-// 次のフラッシュカードを表示
+// 次の単語帳を表示
 function nextFlashcard() {
   if (isRandomMode) {
     // ランダムモードの場合、ランダムなカードを選択
@@ -490,7 +490,7 @@ function nextFlashcard() {
   renderFlashcard();
 }
 
-// 前のフラッシュカードを表示
+// 前の単語帳を表示
 function prevFlashcard() {
   if (isRandomMode) {
     // ランダムモードの場合、ランダムなカードを選択
@@ -536,13 +536,13 @@ window.addEventListener('keydown', function(e) {
   }
 });
 
-// 選択したノードからフラッシュカードを作成
+// 選択したノードから単語帳を生成
 createFlashcardsBtn.addEventListener('click', function() {
   console.log('createFlashcardsBtn clicked');
   enterFlashcardSelectMode();
 });
 
-// フラッシュカードコントロール
+// 単語帳コントロール
 let isClick = false; // クリックとスワイプを区別するためのフラグ
 
 flashcard.addEventListener('click', function(e) {
@@ -727,7 +727,7 @@ function showTestResults() {
 // テストモード切り替え
 testModeBtn.addEventListener('click', function() {
   if (flashcards.length === 0) {
-    alert('テストするカードがありません。まずフラッシュカードを作成してください。');
+    alert('テストする単語帳がありません。まず単語帳を作成してください。');
     return;
   }
   showTestView();
@@ -1102,7 +1102,7 @@ clearSearchBtn.addEventListener('click', function() {
   
   await loadData();
   renderNetwork();
-  // localStorageにstudyFlashcardがあれば自動でカードUIを表示
+  // localStorageにstudyFlashcardがあれば自動で単語帳UIを表示
   const study = localStorage.getItem('studyFlashcard');
   if (study) {
     try {
