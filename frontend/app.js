@@ -186,6 +186,9 @@ function renderNetwork() {
       } else {
         showNodeDetails(nodeId);
       }
+    } else if (isSelectingFlashcards && params.nodes.length === 0) {
+      // 空間クリック時は選択状態を維持
+      network.selectNodes(selectedNodeIds);
     }
   });
 
@@ -193,15 +196,11 @@ function renderNetwork() {
   network.on('selectNode', function(params) {
     if (isSelectingFlashcards) {
       // ここは何もしない（クリックで制御するため）
-      // selectedNodeIds = params.nodes;
-      // updateCreateFlashcardsBtn();
     }
   });
   network.on('deselectNode', function(params) {
     if (isSelectingFlashcards) {
       // ここは何もしない（クリックで制御するため）
-      // selectedNodeIds = params.nodes;
-      // updateCreateFlashcardsBtn();
     }
   });
 }
