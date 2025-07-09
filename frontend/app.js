@@ -50,14 +50,37 @@ const testTotalQuestions = document.getElementById('test-total-questions');
 const testProgressFill = document.querySelector('.test-progress-fill');
 const testPassBtn = document.getElementById('test-pass-btn');
 
+// zoomOutBtnの動的生成を削除し、DOMから取得するだけにする
+const zoomOutBtn = document.getElementById('zoom-out-btn');
+zoomOutBtn.addEventListener('click', function() {
+  if (network) {
+    network.fit({ animation: true, scale: 1 });
+  }
+});
+
+// 検索バーを左上に移動
+const searchContainer = document.getElementById('search-container');
+if (searchContainer) {
+  searchContainer.style.position = 'fixed';
+  searchContainer.style.top = '2rem';
+  searchContainer.style.left = '2rem';
+  searchContainer.style.right = '';
+  searchContainer.style.zIndex = 40;
+}
+
+// zoomOutBtnと検索バーを垂直に並べる
+zoomOutBtn.style.position = 'fixed';
+zoomOutBtn.style.top = '2rem';
+zoomOutBtn.style.left = '2rem';
+zoomOutBtn.style.right = '';
+zoomOutBtn.style.zIndex = 40;
+
 // スワイプ用変数
-// Search elements
 const searchInput = document.getElementById('search-input');
 const searchBtn = document.getElementById('search-btn');
 const clearSearchBtn = document.getElementById('clear-search-btn');
 const searchResultsElement = document.getElementById('search-results');
 
-// Swipe variables
 let startX = 0;
 let startY = 0;
 let endX = 0;
@@ -79,7 +102,7 @@ function renderNetwork() {
     id: n.id,
     // ノードには小さなドットを使用
     shape: 'dot',
-    size: 14, // 小さなドット
+    size: 14, 
     color: '#f7c873',
     borderWidth: 0,
     // ドット内にラベルは表示しない
@@ -129,10 +152,17 @@ function renderNetwork() {
   const container = document.getElementById('network');
   network = new vis.Network(container, { nodes: visNodes, edges: visEdges }, options);
 
-  // Stop physics after initial stabilization for performance
-  network.once('stabilizationIterationsDone', function () {
-    network.setOptions({ physics: false });
-  });
+  // 起動時に全ノードを表示するように自動でズームアウト
+  setTimeout(function () {
+    if (network) {
+      network.fit({ animation: true, scale: 0.1 });
+    }
+  }, 500);
+
+  // ノード動作の停止
+  // network.once('stabilizationIterationsDone', function () {
+  //   network.setOptions({ physics: false });
+  // });
 
   network.on('afterDrawing', function() {
     renderExternalLabels(visNodes);
@@ -218,6 +248,8 @@ function showFlashcardView() {
   currentCardIndex = 0;
   renderFlashcard();
   document.getElementById('search-container').classList.add('hidden');
+  // フラッシュカードビュー表示時にボタンを非表示
+  document.body.classList.add('hide-corner-btns');
 }
 
 // フラッシュカードビューを非表示
@@ -232,6 +264,8 @@ function hideFlashcardView() {
   if (testView.classList.contains('hidden')) {
     document.getElementById('search-container').classList.remove('hidden');
   }
+  // フラッシュカードビュー非表示時にボタンを再表示
+  document.body.classList.remove('hide-corner-btns');
 }
 
 // 現在のフラッシュカードを描画
@@ -242,8 +276,6 @@ function renderFlashcard() {
   cardTitle.textContent = card.front;
   cardDescription.textContent = card.back;
   flashcard.classList.remove('flipped');
-  
-
   
   // カウンターを更新
   currentCardNumber.textContent = currentCardIndex + 1;
@@ -409,6 +441,8 @@ function showTestView() {
   generateTestQuestions();
   renderTestQuestion();
   document.getElementById('search-container').classList.add('hidden');
+  // テストモード表示時にボタンを非表示
+  document.body.classList.add('hide-corner-btns');
 }
 
 function hideTestView() {
@@ -420,6 +454,10 @@ function hideTestView() {
   // 検索欄を再表示
   if (flashcardView.classList.contains('hidden')) {
     document.getElementById('search-container').classList.remove('hidden');
+  }
+  // テストモード非表示時にボタンを再表示（ただしフラッシュカードビューが非表示の場合のみ）
+  if (flashcardView.classList.contains('hidden')) {
+    document.body.classList.remove('hide-corner-btns');
   }
 }
 
@@ -603,6 +641,7 @@ function enterFlashcardSelectMode() {
   isSelectingFlashcards = true;
   selectControls.classList.remove('hidden');
   createFlashcardsBtn.style.display = 'none';
+  document.body.classList.add('hide-corner-btns');
   // 名前入力をリセット
   document.getElementById('flashcard-name').value = '';
   // ノード選択解除
@@ -617,6 +656,7 @@ function exitFlashcardSelectMode() {
   network.unselectAll();
   selectedNodeIds = [];
   updateCreateFlashcardsBtn();
+  document.body.classList.remove('hide-corner-btns');
   // 編集フラグをリセット
   window.isEditingFlashcard = false;
   window.editingFlashcardId = null;
@@ -681,7 +721,7 @@ cancelSelectBtn.addEventListener('click', function() {
   exitFlashcardSelectMode();
 });
 
-// --- Search functionality ---
+// 検索機能
 function searchNodes(query) {
   if (!query.trim()) {
     searchResultsArray = [];
@@ -775,7 +815,7 @@ clearSearchBtn.addEventListener('click', function() {
   network.unselectAll();
 });
 
-// --- Initialize app ---
+// --- 初期化 ---
 (async function init() {
   await loadData();
   renderNetwork();
