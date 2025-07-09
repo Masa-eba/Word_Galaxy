@@ -1,4 +1,4 @@
-// app.js - CS概念マインドマップのメインロジック
+// app.js - マインドマップのメインロジック
 // データの読み込み、マインドマップの描画、インタラクションとフラッシュカードの処理
 
 // グローバル状態
@@ -99,6 +99,19 @@ async function loadData() {
   edges = data.edges;
 }
 
+// --- importance値から色を計算する関数 ---
+function getColorFromImportance(importance) {
+  // importance値を0～100の範囲にクランプする
+  const clampedImportance = Math.max(0, Math.min(100, importance));
+  const ratio = clampedImportance / 100;
+  // 開始色: オレンジ rgb(180, 120, 60)
+  // 終了色: 白 rgb(255, 255, 255)
+  const r = Math.round(180 + (75 * ratio));
+  const g = Math.round(120 + (135 * ratio));
+  const b = Math.round(60 + (195 * ratio));
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
 // Vis.jsでマインドマップを描画
 function renderNetwork() {
   // Vis.js DataSetの準備
@@ -107,7 +120,7 @@ function renderNetwork() {
     // ノードには小さなドットを使用
     shape: 'dot',
     size: 14, 
-    color: '#f7c873',
+    color: getColorFromImportance(n.importance), // ここをimportanceベースに
     borderWidth: 0,
     // ドット内にラベルは表示しない
     label: '',
@@ -125,7 +138,7 @@ function renderNetwork() {
     physics: {
       stabilization: {
         enabled: true,
-        iterations: 10, // Adjust as needed for your graph size
+        iterations: 10, // グラフのサイズに応じて調整可能
         updateInterval: 25
       }
     },
@@ -140,7 +153,7 @@ function renderNetwork() {
     edges: {
       smooth: true,
       width: 2,
-      color: { color: '#aaa' }
+      color: { color: '#444' }
     },
     interaction: {
       multiselect: true,
@@ -220,8 +233,11 @@ function renderExternalLabels(visNodes) {
   visNodes.forEach(function(node) {
     const pos = network.getPositions([node.id])[node.id];
     if (pos) {
-      ctx.fillStyle = '#fff';
-      ctx.fillText(nodes.find(n => n.id === node.id).label, pos.x, pos.y + 16);
+      // ノード情報を取得
+      const nodeData = nodes.find(n => n.id === node.id);
+      // importance値から色を取得（なければ白）
+      ctx.fillStyle = nodeData && typeof nodeData.importance !== 'undefined' ? getColorFromImportance(nodeData.importance) : '#fff';
+      ctx.fillText(nodeData ? nodeData.label : '', pos.x, pos.y + 16);
     }
   });
   ctx.restore();
@@ -1174,4 +1190,14 @@ clearSearchBtn.addEventListener('click', function() {
   testPassBtn.addEventListener('click', function() {
     nextTestQuestion();
   });
+
+  // --- 単語帳モードまたはテストモードでない場合はコーナーボタンを表示する ---
+  const flashcardViewElem = document.getElementById('flashcard-view');
+  const testViewElem = document.getElementById('test-view');
+  if (
+    (!flashcardViewElem || flashcardViewElem.classList.contains('hidden')) &&
+    (!testViewElem || testViewElem.classList.contains('hidden'))
+  ) {
+    document.body.classList.remove('hide-corner-btns');
+  }
 })(); 

@@ -662,8 +662,6 @@ html, body {
   position: fixed;
   right: 2rem;
   left: auto;
-  width: auto;
-  max-width: 300px;
   border-radius: 50px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.15);
   padding: 0.8rem 2rem;
@@ -674,7 +672,6 @@ html, body {
 }
 #create-flashcards:enabled {
   opacity: 1;
-  background: #3a3f4b;
 }
 #create-flashcards:disabled {
   cursor: not-allowed;
@@ -685,8 +682,6 @@ html, body {
   position: fixed;
   right: 2rem;
   left: auto;
-  width: auto;
-  max-width: 300px;
   border-radius: 50px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.15);
   padding: 0.8rem 2rem;
@@ -774,38 +769,43 @@ html, body {
 
 /* ボタンを垂直に並べる */
 .corner-btn-group {
-  position: fixed !important;
-  right: 2rem !important;
-  bottom: 2rem !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-end !important;
-  gap: 1.5rem !important;
-  z-index: 9999 !important;
+  position: fixed;
+  right: 2rem;
+  bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1.5rem;
+  z-index: 9999;
 }
 
 .corner-btn {
-  width: 300px !important;
-  min-width: 200px !important;
-  max-width: 300px !important;
-  height: 56px !important;
-  border-radius: 50px !important;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.15) !important;
-  padding: 0 !important;
-  font-size: 1.1rem !important;
-  opacity: 0.85 !important;
-  background: #2d313a !important;
-  color: #fff !important;
-  border: none !important;
-  cursor: pointer !important;
-  transition: opacity 0.2s, background 0.2s !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
+  width: 200px;
+  height: 56px;
+  border-radius: 50px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  padding: 0;
+  margin: 0; 
+  font-size: 1.1rem;
+  font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Arial, Helvetica, sans-serif;
+  font-weight: 400;
+  opacity: 0.85;
+  background: #2d313a;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .corner-btn:hover {
-  opacity: 1 !important;
-  background: #3a3f4b !important;
+  opacity: 1;
+  background: #3a3f4b;
 }
 
 /* スタック表示のため、個別のbottom位置指定を削除 */
