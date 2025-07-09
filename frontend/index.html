@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>情報系単語マインドマップ</title>
-  <!-- Vis.js CDN for network visualization -->
+  <!-- ネットワーク可視化用のVis.js CDN -->
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   <link rel="stylesheet" href="style.css">
   <style>
@@ -38,6 +38,24 @@
       <h3 id="details-title"></h3>
       <p id="details-text"></p>
     </div>
+  </div>
+
+  <!-- フラッシュカード選択用の作成/キャンセル -->
+  <div id="flashcard-select-controls" class="hidden">
+    <div class="flashcard-name-input">
+      <label for="flashcard-name">単語帳の名前:</label>
+      <input type="text" id="flashcard-name" placeholder="例: 基礎単語帳" maxlength="50">
+    </div>
+    <div class="flashcard-buttons">
+      <button id="create-flashcard-select">作成</button>
+      <button id="cancel-flashcard-select">キャンセル</button>
+    </div>
+  </div>
+
+  <div class="corner-btn-group">
+    <button id="zoom-out-btn" class="corner-btn">全体表示</button>
+    <button id="view-flashcards" class="corner-btn" onclick="window.location.href='/flashcards.html'">フラッシュカード一覧</button>
+    <button id="create-flashcards" class="corner-btn">フラッシュカード作成</button>
   </div>
 
   <!-- フラッシュカードビュー（デフォルトは非表示） -->
@@ -123,24 +141,6 @@
       <div class="test-progress-bar">
         <div class="test-progress-fill"></div>
       </div>
-    </div>
-  </div>
-
-  <!-- フラッシュカード作成ボタン -->
-  <button id="create-flashcards">フラッシュカード作成</button>
-  
-  <!-- フラッシュカード一覧ボタン -->
-  <button id="view-flashcards" onclick="window.location.href='/flashcards.html'">フラッシュカード一覧</button>
-
-  <!-- フラッシュカード選択用の作成/キャンセル -->
-  <div id="flashcard-select-controls" class="hidden">
-    <div class="flashcard-name-input">
-      <label for="flashcard-name">単語帳の名前:</label>
-      <input type="text" id="flashcard-name" placeholder="例: 基礎単語帳" maxlength="50">
-    </div>
-    <div class="flashcard-buttons">
-      <button id="create-flashcard-select">作成</button>
-      <button id="cancel-flashcard-select">キャンセル</button>
     </div>
   </div>
 

@@ -49,4 +49,4 @@ def get_data():
 if __name__ == '__main__':
     # 開発用サーバーを起動
     # host='0.0.0.0' は、外部からのアクセスを許可
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
