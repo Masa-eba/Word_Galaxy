@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>フラッシュカード一覧</title>
+  <title>単語帳一覧</title>
   <link rel="stylesheet" href="style.css">
   <style>
     body {
@@ -145,24 +145,61 @@
       background: #ffd70033;
       color: #fff;
     }
+    .page-header {
+      text-align: center;
+      margin: 2rem 0 1rem 0;
+      color: #000;
+      font-size: 2rem;
+      font-weight: bold;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .page-subtitle {
+      text-align: center;
+      margin: 0 0 2rem 0;
+      color: #ccc;
+      font-size: 1rem;
+    }
   </style>
 </head>
 <body>
   <button class="back-btn" onclick="window.location.href='/'">← 戻る</button>
+  
+  <div class="page-header">単語帳一覧！</div>
+  <div class="page-subtitle">作成した単語帳を管理できます</div>
+  
   <div class="tab-list" id="tab-list">
     <!-- タブと内容がここに動的に入る -->
   </div>
-  <div class="empty-state" id="empty-state" style="display:none;">まだフラッシュカードが作成されていません<br>メインページで単語を選択してフラッシュカードを作成してください</div>
+  <div class="empty-state" id="empty-state" style="display:none;">まだ単語帳が作成されていません<br>メインページで単語を選択して単語帳を作成してください</div>
   <script>
     async function loadFlashcards() {
       try {
         const response = await fetch('/api/flashcards');
         const flashcards = await response.json();
         renderTabs(flashcards);
+        updateHeader(flashcards.length);
       } catch (error) {
         document.getElementById('empty-state').style.display = '';
+        updateHeader(0);
       }
     }
+    
+    function updateHeader(count) {
+      const header = document.querySelector('.page-header');
+      const subtitle = document.querySelector('.page-subtitle');
+      
+      if (count === 0) {
+        header.textContent = '単語帳一覧';
+        subtitle.textContent = 'まだ単語帳がありません';
+      } else if (count === 1) {
+        header.textContent = '単語帳一覧';
+        subtitle.textContent = `${count}個の単語帳があります`;
+      } else {
+        header.textContent = '単語帳一覧';
+        subtitle.textContent = `${count}個の単語帳があります`;
+      }
+    }
+    
     function renderTabs(flashcards) {
       const tabList = document.getElementById('tab-list');
       if (!flashcards.length) {
@@ -170,6 +207,8 @@
         document.getElementById('empty-state').style.display = '';
         return;
       }
+      tabList.style.display = 'block';
+      document.getElementById('empty-state').style.display = 'none';
       tabList.innerHTML = '';
       flashcards.forEach((flashcard, idx) => {
         // タブ
@@ -262,7 +301,11 @@
           try {
             const res = await fetch(`/api/flashcards/${id}`, { method: 'DELETE' });
             if (res.ok) {
-              window.location.reload();
+              // 削除後にページを再読み込み
+              const updatedResponse = await fetch('/api/flashcards');
+              const updatedFlashcards = await updatedResponse.json();
+              renderTabs(updatedFlashcards);
+              updateHeader(updatedFlashcards.length);
             }
           } catch {}
         });
