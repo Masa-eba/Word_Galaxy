@@ -628,18 +628,13 @@ function showTestView() {
 
 function hideTestView() {
   testView.classList.add('hidden');
-  flashcardView.classList.remove('hidden');
+  flashcardView.classList.add('hidden'); 
   document.getElementById('network').style.display = '';
-  createFlashcardsBtn.style.display = 'none';
-  renderFlashcard();
+  createFlashcardsBtn.style.display = '';
   // 検索欄を再表示
-  if (flashcardView.classList.contains('hidden')) {
-    document.getElementById('search-container').classList.remove('hidden');
-  }
-  // テストモード非表示時にボタンを再表示（ただしフラッシュカードビューが非表示の場合のみ）
-  if (flashcardView.classList.contains('hidden')) {
-    document.body.classList.remove('hide-corner-btns');
-  }
+  document.getElementById('search-container').classList.remove('hidden');
+  // コーナーボタンを再表示
+  document.body.classList.remove('hide-corner-btns');
 }
 
 function renderTestQuestion() {
@@ -1161,7 +1156,6 @@ clearSearchBtn.addEventListener('click', function() {
         
         // 選択モードに入る
         enterFlashcardSelectMode();
-        
         // 名前を設定
         const nameInput = document.getElementById('flashcard-name');
         if (nameInput) {
@@ -1191,12 +1185,14 @@ clearSearchBtn.addEventListener('click', function() {
     nextTestQuestion();
   });
 
-  // --- 単語帳モードまたはテストモードでない場合はコーナーボタンを表示する ---
+  // --- 単語帳モードまたはテストモードまたは選択モードでない場合はコーナーボタンを表示する ---
   const flashcardViewElem = document.getElementById('flashcard-view');
   const testViewElem = document.getElementById('test-view');
+  const selectControlsElem = document.getElementById('flashcard-select-controls');
   if (
     (!flashcardViewElem || flashcardViewElem.classList.contains('hidden')) &&
-    (!testViewElem || testViewElem.classList.contains('hidden'))
+    (!testViewElem || testViewElem.classList.contains('hidden')) &&
+    (selectControlsElem && selectControlsElem.classList.contains('hidden'))
   ) {
     document.body.classList.remove('hide-corner-btns');
   }
