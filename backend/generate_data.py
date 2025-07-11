@@ -9,9 +9,9 @@ import queue
 # 設定値
 # ==============================================================================
 # 【カテゴリ内】の類似度を判定する閾値
-SIMILARITY_THRESHOLD = 0.75
+SIMILARITY_THRESHOLD = 0.85
 # 【カテゴリ間】のハブ単語を接続するための類似度閾値 (少し緩め)
-HUB_SIMILARITY_THRESHOLD = 0.70
+HUB_SIMILARITY_THRESHOLD = 0.75
 
 # UI上のノード間の距離を定義
 # 類似度が最大のとき(1.0)の距離
