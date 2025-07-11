@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,21 +7,15 @@
   <!-- ネットワーク可視化用のVis.js CDN -->
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   <link rel="stylesheet" href="style.css">
-  <style>
-    #flashcard-view .mode-controls,
-    #test-view .mode-controls {
-      display: none !important;
-    }
-  </style>
 </head>
-<body class="hide-corner-btns">
+<body>
   <!-- マインドマップのメインコンテナ -->
   <!-- Search bar -->
   <div id="search-container" class="">
     <div id="search-box">
       <input type="text" id="search-input" placeholder="単語を検索..." autocomplete="off">
       <button id="search-btn">🔍</button>
-      <button id="clear-search-btn" class="hidden">✕</button>
+      <button id="clear-search-btn" class="hidden">&times;</button>
     </div>
     <div id="search-results" class="hidden">
       <!-- Search results will be populated here -->
@@ -42,13 +36,31 @@
 
   <!-- 単語帳選択用の作成/キャンセル -->
   <div id="flashcard-select-controls" class="hidden">
-    <div class="flashcard-name-input">
-      <label for="flashcard-name">単語帳の名前:</label>
-      <input type="text" id="flashcard-name" placeholder="例: 基礎単語帳" maxlength="50">
+    <div class="edit-panel-header">
+      <h3>単語帳作成</h3>
     </div>
-    <div class="flashcard-buttons">
-      <button id="create-flashcard-select">作成</button>
-      <button id="cancel-flashcard-select">キャンセル</button>
+    <div class="selected-words-container">
+      <div class="selected-words-section">
+        <h4>選択された単語</h4>
+        <div id="selected-words-list">
+          <!-- 選択された単語がここに表示されます -->
+        </div>
+      </div>
+      <div class="add-word-section">
+        <h4>単語を追加</h4>
+        <input type="text" id="add-word-input" placeholder="単語を検索して追加...">
+        <div id="add-word-suggestions" class="hidden">
+          <!-- 検索候補がここに表示されます -->
+        </div>
+      </div>
+      <div class="edit-panel-name-input">
+        <label for="flashcard-name">単語帳の名前:</label>
+        <input type="text" id="flashcard-name" placeholder="例: 基礎単語帳" maxlength="50">
+      </div>
+      <div class="edit-panel-buttons">
+        <button id="create-flashcard-select" class="edit-btn">作成</button>
+        <button id="cancel-flashcard-select" class="edit-btn">キャンセル</button>
+      </div>
     </div>
   </div>
 
@@ -56,6 +68,7 @@
     <button id="zoom-out-btn" class="corner-btn">全体表示</button>
     <button id="view-flashcards" class="corner-btn" onclick="window.location.href='/flashcards.html'">単語帳一覧</button>
     <button id="create-flashcards" class="corner-btn">単語帳作成</button>
+    <button id="toggle-rotate-btn" class="corner-btn">回転ON</button>
   </div>
 
   <!-- 単語帳ビュー（デフォルトは非表示） -->
@@ -65,7 +78,7 @@
         <div class="card-counter">
           <span id="current-card-number">1</span> / <span id="total-cards">0</span>
         </div>
-        <button id="back-to-map" class="close-btn">×</button>
+        <button id="back-to-map" class="close-btn">&times;</button>
       </div>
       
       <div class="cards-wrapper">
@@ -97,14 +110,7 @@
         </button>
       </div>
       
-      <div class="mode-controls">
-        <button id="random-mode-btn" class="mode-btn">
-          <span>🎲 ランダム</span>
-        </button>
-        <button id="test-mode-btn" class="mode-btn">
-          <span>📝 テスト</span>
-        </button>
-      </div>
+
       
       <div class="progress-bar">
         <div class="progress-fill"></div>
@@ -119,7 +125,7 @@
         <div class="test-counter">
           <span id="test-current-number">1</span> / <span id="test-total-questions">0</span>
         </div>
-        <button id="back-from-test" class="close-btn">×</button>
+        <button id="back-from-test" class="close-btn">&times;</button>
       </div>
       
       <div class="test-question">
@@ -144,6 +150,9 @@
     </div>
   </div>
 
+
+
   <script src="app.js"></script>
+  
 </body>
 </html> 
