@@ -1,7 +1,7 @@
-// flashcard_view.js - Standalone flashcard/test view logic
+// flashcard_view.js - スタンドアロンのフラッシュカード/テスト表示ロジック
 
 document.addEventListener('DOMContentLoaded', () => {
-  // DOM elements
+  // DOM要素
   const flashcardView = document.getElementById('flashcard-view');
   const flashcard = document.getElementById('flashcard');
   const cardTitle = document.querySelector('.card-title');
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const totalCards = document.getElementById('total-cards');
   const progressFill = document.querySelector('.progress-fill');
 
-  // Test view elements
+  // テスト表示要素
   const testView = document.getElementById('test-view');
   const testQuestionText = document.getElementById('test-question-text');
   const testOptions = document.getElementById('test-options');
@@ -26,13 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const testProgressFill = document.querySelector('.test-progress-fill');
   const testPassBtn = document.getElementById('test-pass-btn');
 
-  // State
+  // 状態
   let flashcards = [];
   let currentCardIndex = 0;
   let testQuestions = [];
   let currentTestIndex = 0;
 
-  // Load from localStorage
+  // localStorageから読み込み
   function loadFlashcardData() {
     let study = localStorage.getItem('studyFlashcard');
     let test = localStorage.getItem('testFlashcard');
@@ -74,12 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.removeItem('editFlashcard');
       return;
     }
-    // If nothing found, show empty
+    // 何も見つからない場合、空で表示
     flashcards = [];
     showFlashcardView();
   }
 
-  // Flashcard view logic
+  // フラッシュカード表示ロジック
   function showFlashcardView() {
     flashcardView.classList.remove('hidden');
     testView.classList.add('hidden');
@@ -100,10 +100,10 @@ document.addEventListener('DOMContentLoaded', () => {
     cardTitle.textContent = card.front;
     cardDescription.textContent = card.back;
     cardHint.textContent = 'タップして裏面を見る';
-    // Remove subtitle rendering from card back (handled in HTML)
+    // カード裏面からサブタイトル表示を削除（HTMLで処理）
     const cardBack = flashcard.querySelector('.card-back .card-content');
     if (cardBack) {
-      // Remove subtitle if present
+      // サブタイトルが存在する場合は削除
       const subtitle = cardBack.querySelector('.card-subtitle');
       if (subtitle) subtitle.remove();
     }
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Event listeners
+  // イベントリスナー
   if (flashcard) {
     flashcard.addEventListener('click', function () {
       flipFlashcard();
@@ -145,13 +145,13 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = 'flashcard_menu.html';
   });
 
-  // Test mode logic
+  // テストモードロジック
   function generateTestQuestions() {
     testQuestions = [];
     const shuffledCards = [...flashcards].sort(() => Math.random() - 0.5);
     shuffledCards.forEach(card => {
       const correctAnswer = card.back;
-      // For demo, just use card.back as correct, and 3 random wrongs
+      // デモ用に、card.backを正解として使用し、3つのランダムな不正解を生成
       const wrongAnswers = shuffledCards
         .filter(c => c.back !== correctAnswer)
         .sort(() => Math.random() - 0.5)
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const progress = ((currentTestIndex + 1) / testQuestions.length) * 100;
     testProgressFill.style.width = progress + '%';
     testNextBtn.disabled = true;
-    // Option click
+    // オプションクリック
     testOptions.querySelectorAll('.test-option').forEach((el, i) => {
       el.addEventListener('click', () => {
         selectTestOption(i);
@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const q = testQuestions[currentTestIndex];
     q.userAnswer = q.options[idx];
     q.isCorrect = q.userAnswer === q.correctAnswer;
-    // Style
+    // スタイル
     testOptions.querySelectorAll('.test-option').forEach((el, i) => {
       el.classList.remove('selected', 'correct', 'incorrect');
       if (i === idx) {
@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function showTestResults() {
-    // Hide test controls and progress bar
+    // テストコントロールとプログレスバーを非表示
     const testControls = document.querySelector('.test-controls');
     const testProgressBar = document.querySelector('.test-progress-bar');
     if (testControls) testControls.style.display = 'none';
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     `;
     document.getElementById('retry-test').addEventListener('click', () => {
-      // Restore controls and progress bar
+      // コントロールとプログレスバーを復元
       if (testControls) testControls.style.display = '';
       if (testProgressBar) testProgressBar.style.display = '';
       currentTestIndex = 0;
@@ -260,6 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   if (testPassBtn) testPassBtn.addEventListener('click', nextTestQuestion);
 
-  // Start
+  // 開始
   loadFlashcardData();
 }); 

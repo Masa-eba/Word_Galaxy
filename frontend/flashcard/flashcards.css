@@ -1,26 +1,45 @@
 /* flashcards.css - 単語帳一覧ページのスタイル */
 
+html {
+  min-height: 100vh;
+  height: 100%;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #1a1d23 0%, #2d313a 100%);
+  background-color: #181a1b;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
 body {
   min-height: 100vh;
+  height: 100vh;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #1a1d23 0%, #2d313a 100%);
+  background-color: #181a1b;
   margin: 0;
-  background: #1a1a2e;
-  color: #fff;
+  padding: 0;
   overflow-x: hidden;
+  overflow-y: auto;
+  color: #fff;
+  font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Arial, Helvetica, sans-serif;
+  position: relative;
 }
 
 .tab-list {
   max-width: 700px;
   margin: 3rem auto 0 auto;
-  background: rgba(30, 32, 50, 0.7);
-  border-radius: 18px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-  padding: 1.5rem 1rem;
+  background: transparent;
+  border-radius: 12px;
+  box-shadow: none;
+  padding: 2rem;
 }
 
 .tab {
-  background: linear-gradient(90deg, #23244a 0%, #2b2e4a 100%);
+  background: rgba(255,255,255,0.1);
   color: #fff;
-  border-radius: 12px 12px 0 0;
+  border-radius: 12px;
   margin-bottom: 0.5rem;
   padding: 1.1rem 1.5rem;
   font-size: 1.1rem;
@@ -35,6 +54,10 @@ body {
   align-items: center;
   gap: 0.7rem;
   user-select: none;
+}
+
+.tab:hover {
+  background: rgba(255,255,255,0.2);
 }
 
 .tab .tab-arrow {
@@ -59,9 +82,14 @@ body {
   margin-left: auto;
 }
 
+.tab span:first-of-type {
+  color: #f7c873;
+  font-weight: bold;
+}
+
 .tab-content {
   display: none;
-  background: rgba(30, 32, 50, 0.85);
+  background: rgba(255,255,255,0.1);
   border-radius: 0 0 12px 12px;
   margin-bottom: 1.5rem;
   padding: 1.5rem 2rem 1.5rem 2rem;
@@ -86,8 +114,8 @@ body {
 }
 
 .word-item {
-  background: rgba(255,255,255,0.08);
-  color: #ffd700;
+  background: rgba(255,255,255,0.1);
+  color: #f7c873;
   border-radius: 8px;
   padding: 0.4rem 1rem;
   font-size: 0.98rem;
@@ -102,23 +130,25 @@ body {
 }
 
 .simple-btn {
-  background: linear-gradient(135deg, #23244a 0%, #2b2e4a 100%);
-  color: #ffd700;
+  background: rgba(255,255,255,0.1);
+  color: #f7c873;
   border: none;
-  border-radius: 18px;
+  border-radius: 50px;
   padding: 0.5rem 1.3rem;
   font-size: 1.05rem;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: opacity 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
   letter-spacing: 0.03em;
+  opacity: 0.85;
 }
 
 .simple-btn:hover {
-  background: #ffd70033;
+  opacity: 1;
+  background: rgba(255,255,255,0.2);
   color: #fff;
-  box-shadow: 0 4px 16px #ffd70044;
+  box-shadow: 0 4px 16px #f7c87344;
 }
 
 .empty-state {
@@ -132,7 +162,7 @@ body {
   position: fixed;
   top: 2rem;
   left: 2rem;
-  background: rgba(30,32,50,0.8);
+  background: rgba(255,255,255,0.1);
   color: #ffd700;
   border: none;
   border-radius: 8px;
@@ -145,23 +175,27 @@ body {
 }
 
 .back-btn:hover {
-  background: #ffd70033;
+  background: rgba(255,255,255,0.2);
   color: #fff;
 }
 
 .nav-btn {
-  position: fixed;
-  top: 2rem;
-  background: rgba(30,32,50,0.8);
-  color: #ffd700;
+  /* Match .corner-btn and #view-3d from main2D/style.css */
+  background: rgba(255,255,255,0.1);
+  color: #f7c873;
   border: none;
-  border-radius: 8px;
+  border-radius: 50px;
   padding: 0.8rem 1.5rem;
   font-size: 1rem;
+  font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: opacity 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
   z-index: 10;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  opacity: 0.85;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-btn:first-of-type {
@@ -173,43 +207,53 @@ body {
 }
 
 .nav-btn:hover {
-  background: #ffd70033;
+  opacity: 1;
+  background: rgba(255,255,255,0.2);
   color: #fff;
 }
 
 /* 新しいナビゲーションボタン（右上に配置） */
 .nav-buttons {
   position: fixed;
-  top: 2rem;
+  bottom: 2rem;
   right: 2rem;
+  top: auto;
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 1rem;
   z-index: 10;
 }
 
 .nav-buttons .nav-btn {
   position: static;
-  background: rgba(30,32,50,0.8);
-  color: #ffd700;
+  background: rgba(255,255,255,0.1);
+  color: #f7c873;
   border: none;
-  border-radius: 8px;
-  padding: 0.8rem 1.2rem;
-  font-size: 1rem;
+  border-radius: 50px;
+  width: 200px;
+  height: 56px;
+  padding: 0;
+  font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: opacity 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  opacity: 0.85;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .nav-buttons .nav-btn:hover {
-  background: #ffd70033;
+  opacity: 1;
+  background: rgba(255,255,255,0.2);
   color: #fff;
 }
 
 .page-header {
   text-align: center;
   margin: 2rem 0 1rem 0;
-  color: #ffd700;
+  color: #f7c873;
   font-size: 2rem;
   font-weight: bold;
   text-shadow: 0 2px 8px rgba(0,0,0,0.3);
@@ -460,10 +504,11 @@ body {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 600px;
+  max-width: 900px;
   height: 100vh;
   padding: 2rem;
   box-sizing: border-box;
+  position: relative;
 }
 
 .test-header {
@@ -471,7 +516,7 @@ body {
   justify-content: center;
   align-items: center;
   width: 100%;
-  margin-bottom: 2rem;
+  margin-bottom: 0.5rem;
   position: relative;
 }
 
@@ -505,16 +550,19 @@ body {
   flex-direction: column;
   gap: 1rem;
   width: 100%;
-  max-width: 400px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .test-option {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
-  border: 2px solid transparent;
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(255,255,255,0.1);
   border-radius: 12px;
   padding: 1rem 1.5rem;
   font-size: 1.1rem;
+  color: #fff;
+  border: 2px solid transparent;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: left;
@@ -546,8 +594,11 @@ body {
 .test-controls {
   display: flex;
   justify-content: center;
-  margin: 2rem 0;
   gap: 2rem;
+  margin-top: auto;
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 700px;
 }
 
 .test-progress-bar {
@@ -590,24 +641,26 @@ body {
 }
 
 .result-btn {
-  background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
-  color: #fff;
+  background: rgba(255,255,255,0.1);
+  color: #f7c873;
   font-size: 1.3rem;
   font-weight: bold;
   padding: 1.2rem 2rem;
   margin: 1.5rem auto 0 auto;
   display: block;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-  transition: background 0.3s, color 0.2s;
+  border-radius: 50px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  transition: opacity 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
   border: none;
   text-align: center;
   width: 260px;
   max-width: 90vw;
   min-width: 200px;
+  opacity: 0.85;
 }
 .result-btn:hover {
-  background: linear-gradient(135deg, #8bc34a 0%, #4caf50 100%);
+  opacity: 1;
+  background: rgba(255,255,255,0.2);
   color: #fff;
 }
 
