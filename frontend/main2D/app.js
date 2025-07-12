@@ -250,8 +250,10 @@ function renderExternalLabels(visNodes) {
       const nodeData = nodes.find(n => n.id === node.id);
       // importance値から色を取得（なければ白）
       ctx.fillStyle = nodeData && typeof nodeData.importance !== 'undefined' ? getColorFromImportance(nodeData.importance) : '#fff';
-      const label = nodeData ? nodeData.label : '';
-      const lines = splitLabelByParentheses(label);
+      let label = nodeData ? nodeData.label : '';
+      // 括弧とその中身を除去（全角・半角両方対応）
+      label = label.replace(/\s*\([^)]*\)/g, '').replace(/\s*（[^）]*）/g, '');
+      const lines = [label];
       lines.forEach((line, i) => {
         ctx.fillText(line, pos.x, pos.y + 16 + i * 18);
       });
