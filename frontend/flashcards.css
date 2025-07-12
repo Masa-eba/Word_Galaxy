@@ -149,6 +149,34 @@ body {
   color: #fff;
 }
 
+.nav-btn {
+  position: fixed;
+  top: 2rem;
+  background: rgba(30,32,50,0.8);
+  color: #ffd700;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.nav-btn:first-of-type {
+  left: 8rem;
+}
+
+.nav-btn:last-of-type {
+  left: 16rem;
+}
+
+.nav-btn:hover {
+  background: #ffd70033;
+  color: #fff;
+}
+
 .page-header {
   text-align: center;
   margin: 2rem 0 1rem 0;

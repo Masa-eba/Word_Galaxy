@@ -3,6 +3,18 @@ html, body {
   font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Arial, Helvetica, sans-serif;
 }
 
+/* ページタイトル */
+.page-title {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  color: #f7c873;
+  font-size: 1.5rem;
+  font-weight: bold;
+  z-index: 10;
+  text-shadow: 0 0 10px rgba(247, 200, 115, 0.5);
+}
+
 /* ローディング画面 */
 #loading-overlay {
   position: fixed;
