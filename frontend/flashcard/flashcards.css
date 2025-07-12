@@ -232,3 +232,397 @@ body {
   background: #2d1a1a !important;
   color: #ffd7d7 !important;
 } 
+
+#flashcard-view {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, #1a1d23 0%, #2d313a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+#flashcard-view.hidden { display: none; }
+
+#flashcard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.flashcard-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 400px;
+  margin: 0 auto 2rem auto;
+  width: 100%;
+  position: relative;
+}
+
+.card-counter {
+  color: #f7c873;
+  font-size: 1.1rem;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: fixed;
+  top: 32px;
+  right: 32px;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.cards-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  position: relative;
+}
+
+.card {
+  width: min(90vw, 520px);
+  max-width: 520px;
+  height: 340px;
+  perspective: 1500px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+
+.card:hover {
+  transform: scale(1.02);
+}
+
+.card-face {
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #2d313a 0%, #23272e 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  backface-visibility: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  padding: 1.2rem;
+  box-sizing: border-box;
+  text-align: center;
+  border: 2px solid rgba(247, 200, 115, 0.1);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-front { 
+  z-index: 2;
+  background: linear-gradient(145deg, #3a3f4b 0%, #2d313a 100%);
+}
+
+.card-back {
+  transform: rotateY(180deg);
+  z-index: 1;
+  background: linear-gradient(145deg, #23272e 0%, #1a1d23 100%);
+}
+
+.card.flipped .card-front {
+  transform: rotateY(180deg);
+}
+
+.card.flipped .card-back {
+  transform: rotateY(0deg);
+}
+
+.card-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.card-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #f7c873;
+  margin: 0;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.card-hint {
+  font-size: 0.9rem;
+  color: #888;
+  margin: 0;
+  text-align: center;
+}
+
+.card-subtitle {
+  font-size: 1.2rem;
+  color: #f7c873;
+  margin: 0 0 1rem 0;
+}
+
+.card-description {
+  font-size: 1.35rem;
+  line-height: 1.6;
+  margin: 0;
+  text-align: center;
+  color: #ccc;
+}
+
+.flashcard-controls {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+  max-width: 400px;
+  margin: 2rem auto 0 auto;
+  width: 100%;
+}
+
+.control-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 72px;
+  height: 72px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.flip-btn {
+  background: rgba(247, 200, 115, 0.2);
+  color: #f7c873;
+}
+
+.flip-btn:hover {
+  background: rgba(247, 200, 115, 0.3);
+}
+
+#test-view {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, #1a1d23 0%, #2d313a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+#test-view.hidden { display: none; }
+
+#test-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.test-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.test-counter {
+  color: #f7c873;
+  font-size: 1.1rem;
+  font-weight: bold;
+  text-align: center;
+  width: 100%;
+}
+
+.test-question {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+}
+
+#test-question-text {
+  font-size: 1.8rem;
+  color: #fff;
+  margin-bottom: 2rem;
+  line-height: 1.4;
+}
+
+.test-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.test-option {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
+
+.test-option:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #f7c873;
+}
+
+.test-option.selected {
+  background: rgba(247, 200, 115, 0.3);
+  border-color: #f7c873;
+  color: #f7c873;
+}
+
+.test-option.correct {
+  background: rgba(76, 175, 80, 0.3);
+  border-color: #4caf50;
+  color: #4caf50;
+}
+
+.test-option.incorrect {
+  background: rgba(244, 67, 54, 0.3);
+  border-color: #f44336;
+  color: #f44336;
+}
+
+.test-controls {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+  gap: 2rem;
+}
+
+.test-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.test-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.test-results {
+  text-align: center;
+  color: #fff;
+}
+
+.test-results h3 {
+  color: #f7c873;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.test-results p {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.result-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.result-btn {
+  background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: bold;
+  padding: 1.2rem 2rem;
+  margin: 1.5rem auto 0 auto;
+  display: block;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  transition: background 0.3s, color 0.2s;
+  border: none;
+  text-align: center;
+  width: 260px;
+  max-width: 90vw;
+  min-width: 200px;
+}
+.result-btn:hover {
+  background: linear-gradient(135deg, #8bc34a 0%, #4caf50 100%);
+  color: #fff;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 2.5rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f7c873 0%, #ffd700 100%);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+} 

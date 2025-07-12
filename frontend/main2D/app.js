@@ -142,16 +142,14 @@ function renderNetwork() {
       barnesHut: {
         gravitationalConstant: -2000,
         centralGravity: 0.3,
-        springLength: function (edge) {
-          // length値に基づいてスプリング長を調整
-          const length = edge.length || 100;
-          // length値をスプリング長に変換 (50-200 → 50-200)
-          return Math.max(50, Math.min(200, length));
-        },
+        springLength: 100, 
         springConstant: 0.04,
         damping: 0.09,
         avoidOverlap: 0.1
       }
+    },
+    layout: {
+      improvedLayout: false 
     },
     nodes: {
       borderWidthSelected: 6,
@@ -558,6 +556,7 @@ function showFlashcardView() {
   if (cornerBtnGroup) {
     cornerBtnGroup.classList.remove('visible');
   }
+  update3dBtnVisibility();
 }
 
 // 単語帳ビューを非表示
@@ -578,6 +577,7 @@ function hideFlashcardView() {
   if (cornerBtnGroup) {
     cornerBtnGroup.classList.add('visible');
   }
+  update3dBtnVisibility();
 }
 
 // 現在の単語帳を描画
@@ -688,25 +688,79 @@ window.addEventListener('keydown', function (e) {
 });
 
 // 選択したノードから単語帳を生成
-createFlashcardsBtn.addEventListener('click', function () {
-  enterFlashcardSelectMode();
-});
+if (createFlashcardsBtn) {
+  createFlashcardsBtn.addEventListener('click', function () {
+    enterFlashcardSelectMode();
+  });
+}
 
 // 単語帳コントロール
 let isClick = false; // クリックとスワイプを区別するためのフラグ
 
-flashcard.addEventListener('click', function (e) {
-  if (!isClick) {
-    flipFlashcard();
-  }
-});
-flipCardBtn.addEventListener('click', flipFlashcard);
-nextCardBtn.addEventListener('click', nextFlashcard);
-prevCardBtn.addEventListener('click', prevFlashcard);
-backToMapBtn.addEventListener('click', function () {
-  // 単語帳一覧画面に遷移
-  window.location.href = '../flashcard/flashcards.html';
-});
+if (flashcard) {
+  flashcard.addEventListener('click', function (e) {
+    if (!isClick) {
+      flipFlashcard();
+    }
+  });
+  flashcard.addEventListener('touchstart', handleTouchStart, { passive: false });
+  flashcard.addEventListener('touchmove', handleTouchMove, { passive: false });
+  flashcard.addEventListener('touchend', handleTouchEnd, { passive: false });
+  flashcard.addEventListener('mousedown', function (e) {
+    e.preventDefault();
+    startX = e.clientX;
+    startY = e.clientY;
+    isMouseDown = true;
+    isClick = true; // スワイプ開始時はクリックを無効にする
+  });
+  flashcard.addEventListener('mousemove', function (e) {
+    if (!isMouseDown) return;
+    e.preventDefault();
+  });
+  flashcard.addEventListener('mouseup', function (e) {
+    if (!isMouseDown) return;
+
+    endX = e.clientX;
+    endY = e.clientY;
+    isMouseDown = false;
+
+    const diffX = startX - endX;
+    const diffY = startY - endY;
+
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > minSwipeDistance) {
+      if (diffX < 0) {
+        // 右スワイプ - 次のカード
+        nextFlashcard();
+      } else {
+        // 左スワイプ - 前のカード
+        prevFlashcard();
+      }
+    } else {
+      // スワイプでない場合は裏返す
+      flipFlashcard();
+    }
+
+    // 少し遅延してからクリックを有効にする
+    setTimeout(() => {
+      isClick = false;
+    }, 100);
+  });
+}
+if (flipCardBtn) {
+  flipCardBtn.addEventListener('click', flipFlashcard);
+}
+if (nextCardBtn) {
+  nextCardBtn.addEventListener('click', nextFlashcard);
+}
+if (prevCardBtn) {
+  prevCardBtn.addEventListener('click', prevFlashcard);
+}
+if (backToMapBtn) {
+  backToMapBtn.addEventListener('click', function () {
+    // 単語帳一覧画面に遷移
+    window.location.href = '../flashcard/flashcard_menu.html';
+  });
+}
 
 
 
@@ -754,11 +808,13 @@ function showTestView() {
   if (cornerBtnGroup) {
     cornerBtnGroup.classList.remove('visible');
   }
+  update3dBtnVisibility();
 }
 
 function hideTestView() {
   // 直接単語帳一覧画面に遷移（一瞬の画面切り替えを避ける）
-  window.location.href = '../flashcard/flashcards.html';
+  window.location.href = '../flashcard/flashcard_menu.html';
+  update3dBtnVisibility();
 }
 
 function renderTestQuestion() {
@@ -841,8 +897,14 @@ function showTestResults() {
       <p>正解: ${correctCount} / ${totalCount}</p>
       <p>正答率: ${percentage}%</p>
       <div class="result-buttons">
-        <button id="retry-test" class="result-btn retry-btn">🔄 再テスト</button>
-        <button id="back-to-cards" class="result-btn back-btn">← 単語帳一覧に戻る</button>
+        <button id="retry-test" class="result-btn retry-btn">
+          <svg width='28' height='28' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' style='vertical-align:middle;margin-right:0.5em;'><path d='M17 1l4 4-4 4' stroke='#fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><path d='M3 11V9a4 4 0 014-4h14' stroke='#fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><path d='M7 23l-4-4 4-4' stroke='#fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/><path d='M21 13v2a4 4 0 01-4 4H3' stroke='#fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>
+          再テスト
+        </button>
+        <button id="back-to-cards" class="result-btn back-btn">
+          <svg width='28' height='28' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' style='vertical-align:middle;margin-right:0.5em;'><path d='M15 18L9 12L15 6' stroke='#22252a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>
+          単語帳一覧に戻る
+        </button>
       </div>
     </div>
   `;
@@ -861,58 +923,66 @@ function showTestResults() {
 
 
 // テストコントロール
-testNextBtn.addEventListener('click', nextTestQuestion);
-backFromTestBtn.addEventListener('click', hideTestView);
+if (testNextBtn) {
+  testNextBtn.addEventListener('click', nextTestQuestion);
+}
+if (backFromTestBtn) {
+  backFromTestBtn.addEventListener('click', hideTestView);
+}
 
 // スワイプイベントリスナー
-flashcard.addEventListener('touchstart', handleTouchStart, { passive: false });
-flashcard.addEventListener('touchmove', handleTouchMove, { passive: false });
-flashcard.addEventListener('touchend', handleTouchEnd, { passive: false });
+if (flashcard) {
+  flashcard.addEventListener('touchstart', handleTouchStart, { passive: false });
+  flashcard.addEventListener('touchmove', handleTouchMove, { passive: false });
+  flashcard.addEventListener('touchend', handleTouchEnd, { passive: false });
+}
 
 // マウスイベントも追加（デスクトップ対応）
 let isMouseDown = false;
 
-flashcard.addEventListener('mousedown', function (e) {
-  e.preventDefault();
-  startX = e.clientX;
-  startY = e.clientY;
-  isMouseDown = true;
-  isClick = true; // スワイプ開始時はクリックを無効にする
-});
+if (flashcard) {
+  flashcard.addEventListener('mousedown', function (e) {
+    e.preventDefault();
+    startX = e.clientX;
+    startY = e.clientY;
+    isMouseDown = true;
+    isClick = true; // スワイプ開始時はクリックを無効にする
+  });
 
-flashcard.addEventListener('mousemove', function (e) {
-  if (!isMouseDown) return;
-  e.preventDefault();
-});
+  flashcard.addEventListener('mousemove', function (e) {
+    if (!isMouseDown) return;
+    e.preventDefault();
+  });
 
-flashcard.addEventListener('mouseup', function (e) {
-  if (!isMouseDown) return;
+  flashcard.addEventListener('mouseup', function (e) {
+    if (!isMouseDown) return;
 
-  endX = e.clientX;
-  endY = e.clientY;
-  isMouseDown = false;
+    endX = e.clientX;
+    endY = e.clientY;
+    isMouseDown = false;
 
-  const diffX = startX - endX;
-  const diffY = startY - endY;
+    const diffX = startX - endX;
+    const diffY = startY - endY;
 
-  if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > minSwipeDistance) {
-    if (diffX < 0) {
-      // 右スワイプ - 次のカード
-      nextFlashcard();
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > minSwipeDistance) {
+      if (diffX < 0) {
+        // 右スワイプ - 次のカード
+        nextFlashcard();
+      } else {
+        // 左スワイプ - 前のカード
+        prevFlashcard();
+      }
     } else {
-      // 左スワイプ - 前のカード
-      prevFlashcard();
+      // スワイプでない場合は裏返す
+      flipFlashcard();
     }
-  } else {
-    // スワイプでない場合は裏返す
-    flipFlashcard();
-  }
 
-  // 少し遅延してからクリックを有効にする
-  setTimeout(() => {
-    isClick = false;
-  }, 100);
-});
+    // 少し遅延してからクリックを有効にする
+    setTimeout(() => {
+      isClick = false;
+    }, 100);
+  });
+}
 
 // マウスがカードの外に出た場合の処理
 document.addEventListener('mouseup', function () {
@@ -973,52 +1043,56 @@ function exitFlashcardSelectMode() {
 }
 
 // Createでサーバー保存し、元の画面に戻る
-createSelectBtn.addEventListener('click', async function () {
-  if (selectedNodeIds.length < 2) {
-    alert('2つ以上の単語を選択してください');
-    return;
-  }
-
-  const nameInput = document.getElementById('flashcard-name');
-  const name = nameInput.value.trim() || '新しい単語帳';
-
-  // 単語のidリストの作成
-  const ids = selectedNodeIds.map(id => Number(id));
-
-  if (window.isEditingFlashcard) {
-    // 編集モードの場合、PUTリクエストで更新
-    const res = await fetch(`/api/flashcards/${window.editingFlashcardId}/content`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids, name })
-    });
-    if (res.ok) {
-      // 単語帳一覧画面に遷移
-      window.location.href = '../flashcard/flashcards.html';
-    } else {
-      alert('単語帳の更新に失敗しました');
-      exitFlashcardSelectMode();
+if (createSelectBtn) {
+  createSelectBtn.addEventListener('click', async function () {
+    if (selectedNodeIds.length < 2) {
+      alert('2つ以上の単語を選択してください');
+      return;
     }
-  } else {
-    // 新規作成の場合、POSTリクエスト
-    const res = await fetch('/api/flashcards', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids, name })
-    });
-    if (res.ok) {
-      // 単語帳一覧画面に遷移
-      window.location.href = '../flashcard/flashcards.html';
+
+    const nameInput = document.getElementById('flashcard-name');
+    const name = nameInput.value.trim() || '新しい単語帳';
+
+    // 単語のidリストの作成
+    const ids = selectedNodeIds.map(id => Number(id));
+
+    if (window.isEditingFlashcard) {
+      // 編集モードの場合、PUTリクエストで更新
+      const res = await fetch(`/api/flashcards/${window.editingFlashcardId}/content`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, name })
+      });
+      if (res.ok) {
+        // 単語帳一覧画面に遷移
+        window.location.href = '../flashcard/flashcard_menu.html';
+      } else {
+        alert('単語帳の更新に失敗しました');
+        exitFlashcardSelectMode();
+      }
     } else {
-      alert('単語帳の保存に失敗しました');
-      exitFlashcardSelectMode();
+      // 新規作成の場合、POSTリクエスト
+      const res = await fetch('/api/flashcards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, name })
+      });
+      if (res.ok) {
+        // 単語帳一覧画面に遷移
+        window.location.href = '../flashcard/flashcard_menu.html';
+      } else {
+        alert('単語帳の保存に失敗しました');
+        exitFlashcardSelectMode();
+      }
     }
-  }
-});
+  });
+}
 // Cancelで選択解除
-cancelSelectBtn.addEventListener('click', function () {
-  exitFlashcardSelectMode();
-});
+if (cancelSelectBtn) {
+  cancelSelectBtn.addEventListener('click', function () {
+    exitFlashcardSelectMode();
+  });
+}
 
 // 検索機能
 function searchNodes(query) {
@@ -1252,6 +1326,21 @@ if (addWordInput) {
   });
 }
 
+// 3D表示ボタンの表示制御
+const view3dBtn = document.getElementById('view-3d');
+
+function update3dBtnVisibility() {
+  const flashcardView = document.getElementById('flashcard-view');
+  const testView = document.getElementById('test-view');
+  const view3dBtn = document.getElementById('view-3d');
+  let networkVisible = true;
+  if (flashcardView && !flashcardView.classList.contains('hidden')) networkVisible = false;
+  if (testView && !testView.classList.contains('hidden')) networkVisible = false;
+  if (view3dBtn) {
+    view3dBtn.style.display = networkVisible ? '' : 'none';
+  }
+}
+
 // --- 初期化 ---
 (async function init() {
 
@@ -1332,9 +1421,11 @@ if (addWordInput) {
   }
 
   // テスト画面の「パス」ボタンのイベントリスナー
-  testPassBtn.addEventListener('click', function () {
-    nextTestQuestion();
-  });
+  if (testPassBtn) {
+    testPassBtn.addEventListener('click', function () {
+      nextTestQuestion();
+    });
+  }
 
   // --- 単語帳モードまたはテストモードまたは選択モードでない場合はコーナーボタンを表示する ---
   const flashcardViewElem = document.getElementById('flashcard-view');
@@ -1360,6 +1451,8 @@ if (addWordInput) {
       loadingOverlay.classList.add('hidden');
     }, 100);
   }
+
+  update3dBtnVisibility();
 
 
 })(); 
