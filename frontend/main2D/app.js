@@ -128,7 +128,7 @@ function renderNetwork() {
   const visEdges = new vis.DataSet(edges.map(e => ({
     from: e.from,
     to: e.to,
-    length: e.length || 100 // データのlength値を使用、デフォルトは100
+    length: (e.length || 100) * 3 // データのlength値を2倍に
   })));
 
   // Vis.jsネットワークのオプション
@@ -200,7 +200,7 @@ function renderNetwork() {
       (e.from === params.edge.to && e.to === params.edge.from)
     );
     if (edge && edge.length) {
-      showEdgeTooltip(params.event.center.x, params.event.center.y, edge.length);
+      showEdgeTooltip(params.event.center.x, params.event.center.y, edge.length); 
     }
   });
 
@@ -250,10 +250,78 @@ function renderExternalLabels(visNodes) {
       const nodeData = nodes.find(n => n.id === node.id);
       // importance値から色を取得（なければ白）
       ctx.fillStyle = nodeData && typeof nodeData.importance !== 'undefined' ? getColorFromImportance(nodeData.importance) : '#fff';
-      ctx.fillText(nodeData ? nodeData.label : '', pos.x, pos.y + 16);
+      const label = nodeData ? nodeData.label : '';
+      const lines = splitLabelByParentheses(label);
+      lines.forEach((line, i) => {
+        ctx.fillText(line, pos.x, pos.y + 16 + i * 18);
+      });
     }
   });
   ctx.restore();
+}
+
+// ()があれば2行に分割、なければ1行
+function splitLabelByParentheses(label) {
+  // Try standard ()
+  let openIdx = label.indexOf('(');
+  let closeIdx = label.indexOf(')', openIdx);
+  if (openIdx !== -1 && closeIdx !== -1 && closeIdx > openIdx) {
+    const first = label.slice(0, openIdx).trim();
+    const second = label.slice(openIdx, closeIdx + 1).trim();
+    return [first, second];
+  }
+  // Try full-width （）
+  openIdx = label.indexOf('（');
+  closeIdx = label.indexOf('）', openIdx);
+  if (openIdx !== -1 && closeIdx !== -1 && closeIdx > openIdx) {
+    const first = label.slice(0, openIdx).trim();
+    const second = label.slice(openIdx, closeIdx + 1).trim();
+    return [first, second];
+  }
+  // Otherwise, single line
+  return [label];
+}
+
+// 日本語・CJK文字を含むか判定
+function containsCJK(text) {
+  return /[\u3040-\u30FF\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF\uFF66-\uFF9F]/.test(text);
+}
+
+// 単語単位で折り返し（英語など）
+function wrapTextByWord(ctx, text, maxWidth) {
+  const words = text.split(/\s+/);
+  const lines = [];
+  let currentLine = '';
+  for (let i = 0; i < words.length; i++) {
+    const testLine = currentLine ? currentLine + ' ' + words[i] : words[i];
+    const metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth && currentLine) {
+      lines.push(currentLine);
+      currentLine = words[i];
+    } else {
+      currentLine = testLine;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+  return lines;
+}
+
+// 文字単位で折り返し（日本語・CJKなど）
+function wrapTextByChar(ctx, text, maxWidth) {
+  const lines = [];
+  let currentLine = '';
+  for (let i = 0; i < text.length; i++) {
+    const testLine = currentLine + text[i];
+    const metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth && currentLine) {
+      lines.push(currentLine);
+      currentLine = text[i];
+    } else {
+      currentLine = testLine;
+    }
+  }
+  if (currentLine) lines.push(currentLine);
+  return lines;
 }
 
 // エッジツールチップを表示
