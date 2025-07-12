@@ -1150,49 +1150,7 @@
    padding: 2rem;
  }
 
- /* BGMコントロールのスタイル */
- .bgm-control {
-   position: fixed;
-   top: 2rem;
-   right: 2rem;
-   z-index: 50;
-   background: rgba(34, 37, 42, 0.95);
-   border-radius: 12px;
-   padding: 1rem;
-   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-   backdrop-filter: blur(10px);
-   border: 1px solid rgba(247, 200, 115, 0.2);
-   display: flex;
-   align-items: center;
-   gap: 0.5rem;
- }
 
- .bgm-btn {
-   background: rgba(247, 200, 115, 0.2);
-   color: #f7c873;
-   border: none;
-   border-radius: 50%;
-   width: 40px;
-   height: 40px;
-   font-size: 18px;
-   cursor: pointer;
-   transition: all 0.2s;
-   display: flex;
-   align-items: center;
-   justify-content: center;
- }
-
- .bgm-btn:hover {
-   background: rgba(247, 200, 115, 0.3);
-   transform: scale(1.1);
- }
-
- .bgm-status {
-   color: #f7c873;
-   font-size: 14px;
-   font-weight: bold;
-   min-width: 60px;
- }
 
 
 
