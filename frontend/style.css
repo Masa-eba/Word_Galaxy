@@ -3,7 +3,40 @@ html, body {
   font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Arial, Helvetica, sans-serif;
 }
 
-/* メインネットワークコンテナはビューポート全体を埋める */
+/* ローディング画面 */
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #1a1d23 0%, #2d313a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.3s ease;
+}
+
+#loading-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(247, 200, 115, 0.3);
+  border-top: 3px solid #f7c873;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Search bar styles */
 #search-container {
   position: fixed;
@@ -157,7 +190,6 @@ html, body {
   line-height: 1.4;
 }
 
-/* メインネットワークコンテナがビューポート全体を埋める */
 #network {
   width: 100vw;
   height: 100vh;
@@ -167,7 +199,6 @@ html, body {
   background: #181a1b;
 }
 
-/* 詳細オーバーレイのスタイル */
 #details-overlay {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -244,7 +275,6 @@ html, body {
   text-align: center;
 }
 
-/* 単語帳ビューのスタイル */
 #flashcard-view {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -261,25 +291,30 @@ html, body {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 500px;
+  max-width: 600px;
+  margin: 0 auto;
   height: 100vh;
   padding: 2rem;
   box-sizing: border-box;
+  position: relative;
 }
 
-/* 単語帳ヘッダー */
 .flashcard-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+  max-width: 400px;
+  margin: 0 auto 2rem auto;
   width: 100%;
-  margin-bottom: 2rem;
+  position: relative;
 }
 
 .card-counter {
   color: #f7c873;
   font-size: 1.1rem;
   font-weight: bold;
+  text-align: center;
+  width: 100%;
 }
 
 .close-btn {
@@ -292,30 +327,40 @@ html, body {
   font-size: 1.5rem;
   cursor: pointer;
   transition: background 0.2s;
+  position: fixed;
+  top: 32px;
+  right: 32px;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .close-btn:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
-/* カードラッパー */
 .cards-wrapper {
-  flex: 1;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   width: 100%;
+  height: 100%;
+  margin: 0;
   position: relative;
 }
 
 .card {
-  width: 100%;
+  width: min(90vw, 400px);
   max-width: 400px;
   height: 280px;
   perspective: 1500px;
   position: relative;
   cursor: pointer;
   transition: transform 0.3s ease;
+  align-self: center;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .card:hover {
@@ -359,7 +404,6 @@ html, body {
   transform: rotateY(0deg);
 }
 
-/* カード内容 */
 .card-content {
   width: 100%;
   height: 100%;
@@ -400,13 +444,14 @@ html, body {
   color: #ccc;
 }
 
-/* 単語帳コントロール */
 .flashcard-controls {
   display: flex;
   gap: 1.5rem;
   justify-content: center;
   align-items: center;
-  margin: 2rem 0;
+  max-width: 400px;
+  margin: 2rem auto 0 auto;
+  width: 100%;
 }
 
 .control-btn {
@@ -414,8 +459,8 @@ html, body {
   color: #fff;
   border: none;
   border-radius: 50%;
-  width: 50px;
-  height: 50px;
+  width: 72px;
+  height: 72px;
   font-size: 1.2rem;
   cursor: pointer;
   transition: all 0.2s;
@@ -440,7 +485,6 @@ html, body {
 
 
 
-/* テストモードスタイル */
 #test-view {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
@@ -465,16 +509,19 @@ html, body {
 
 .test-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   width: 100%;
   margin-bottom: 2rem;
+  position: relative;
 }
 
 .test-counter {
   color: #f7c873;
   font-size: 1.1rem;
   font-weight: bold;
+  text-align: center;
+  width: 100%;
 }
 
 .test-question {
@@ -541,6 +588,7 @@ html, body {
   display: flex;
   justify-content: center;
   margin: 2rem 0;
+  gap: 2rem;
 }
 
 .test-progress-bar {
@@ -635,6 +683,7 @@ html, body {
 }
 
 /* 単語帳作成ボタン */
+/* 他のボタンとCSSを揃えるために無効化:
 #create-flashcards {
   position: fixed;
   right: 2rem;
@@ -653,6 +702,7 @@ html, body {
 #create-flashcards:disabled {
   cursor: not-allowed;
 }
+*/
 
 /* 単語帳表示ボタン */
 #view-flashcards {
@@ -845,7 +895,7 @@ html, body {
   justify-content: flex-end;
 }
 
-.edit-btn {
+/* .edit-btn {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 6px;
@@ -872,7 +922,7 @@ html, body {
 
 .edit-btn:last-child:hover {
   background: rgba(255, 255, 255, 0.2);
-}
+} */
 
 .no-selection {
   color: #888;
@@ -886,13 +936,20 @@ html, body {
 /* ボタンを垂直に並べる */
 .corner-btn-group {
   position: fixed;
-  right: 2rem;
+  left: 2rem;
+  right: auto;
   bottom: 2rem;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 1.5rem;
   z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.corner-btn-group.visible {
+  opacity: 1;
 }
 
 .corner-btn {
@@ -924,7 +981,6 @@ html, body {
   background: #3a3f4b;
 }
 
-/* スタック表示のため、個別のbottom位置指定を削除 */
 #zoom-out-btn.corner-btn,
 #view-flashcards.corner-btn,
 #create-flashcards.corner-btn {
@@ -1088,22 +1144,28 @@ html, body {
   margin-top: 1rem;
 }
 .edit-btn {
-  background: linear-gradient(135deg, #23244a 0%, #2b2e4a 100%);
-  color: #f7c873;
-  border: none;
+  background: #2d313a;
+  color: #fff;
   border-radius: 50px;
   padding: 0.8rem 2rem;
   font-size: 1.1rem;
-  font-weight: bold;
+  font-weight: 400;
   cursor: pointer;
   box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-  opacity: 0.9;
+  opacity: 0.85;
+  border: none;
   transition: opacity 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .edit-btn:hover {
-  background: #f7c873;
-  color: #22252a;
   opacity: 1;
+  background: #3a3f4b;
 }
 
 .empty-selected-words {
