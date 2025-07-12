@@ -47,9 +47,16 @@ const testTotalQuestions = document.getElementById('test-total-questions');
 const testProgressFill = document.querySelector('.test-progress-fill');
 const testPassBtn = document.getElementById('test-pass-btn');
 
+// BGM制御用変数
+const toggleBGMBtn = document.getElementById('toggle-bgm-btn');
+const bgm = document.getElementById('bgm');
+const playBgmBtn = document.getElementById('play-bgm-btn');
+const bgmStatus = document.getElementById('bgm-status');
+let isBGMPlaying = false;
+
 // zoomOutBtnの動的生成を削除し、DOMから取得するだけにする
 const zoomOutBtn = document.getElementById('zoom-out-btn');
-zoomOutBtn.addEventListener('click', function() {
+zoomOutBtn.addEventListener('click', function () {
   if (network) {
     network.fit({ animation: true, scale: 1 });
   }
@@ -113,7 +120,7 @@ function renderNetwork() {
     id: n.id,
     // ノードには小さなドットを使用
     shape: 'dot',
-    size: 14, 
+    size: 14,
     color: getColorFromImportance(n.importance), // ここをimportanceベースに
     borderWidth: 0,
     // ドット内にラベルは表示しない
@@ -129,26 +136,26 @@ function renderNetwork() {
 
   // Vis.jsネットワークのオプション
   const options = {
-          physics: {
-        stabilization: {
-          enabled: true,
-          iterations: 10, // グラフのサイズに応じて調整可能
-          updateInterval: 25
-        },
-        barnesHut: {
-          gravitationalConstant: -2000,
-          centralGravity: 0.3,
-          springLength: function(edge) {
-            // length値に基づいてスプリング長を調整
-            const length = edge.length || 100;
-            // length値をスプリング長に変換 (50-200 → 50-200)
-            return Math.max(50, Math.min(200, length));
-          },
-          springConstant: 0.04,
-          damping: 0.09,
-          avoidOverlap: 0.1
-        }
+    physics: {
+      stabilization: {
+        enabled: true,
+        iterations: 10, // グラフのサイズに応じて調整可能
+        updateInterval: 25
       },
+      barnesHut: {
+        gravitationalConstant: -2000,
+        centralGravity: 0.3,
+        springLength: function (edge) {
+          // length値に基づいてスプリング長を調整
+          const length = edge.length || 100;
+          // length値をスプリング長に変換 (50-200 → 50-200)
+          return Math.max(50, Math.min(200, length));
+        },
+        springConstant: 0.04,
+        damping: 0.09,
+        avoidOverlap: 0.1
+      }
+    },
     nodes: {
       borderWidthSelected: 6,
       color: {
@@ -185,13 +192,13 @@ function renderNetwork() {
 
 
 
-  network.on('afterDrawing', function() {
+  network.on('afterDrawing', function () {
     renderExternalLabels(visNodes);
   });
 
   // エッジホバー時のツールチップ表示
-  network.on('hoverEdge', function(params) {
-    const edge = edges.find(e => 
+  network.on('hoverEdge', function (params) {
+    const edge = edges.find(e =>
       (e.from === params.edge.from && e.to === params.edge.to) ||
       (e.from === params.edge.to && e.to === params.edge.from)
     );
@@ -200,12 +207,12 @@ function renderNetwork() {
     }
   });
 
-  network.on('blurEdge', function(params) {
+  network.on('blurEdge', function (params) {
     hideEdgeTooltip();
   });
 
   // ノードクリック: 詳細を表示または選択トグル
-  network.on('click', function(params) {
+  network.on('click', function (params) {
     if (params.nodes.length === 1) {
       const nodeId = params.nodes[0];
       if (isSelectingFlashcards) {
@@ -239,7 +246,7 @@ function renderExternalLabels(visNodes) {
   ctx.font = '16px sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  visNodes.forEach(function(node) {
+  visNodes.forEach(function (node) {
     const pos = network.getPositions([node.id])[node.id];
     if (pos) {
       // ノード情報を取得
@@ -256,7 +263,7 @@ function renderExternalLabels(visNodes) {
 function showEdgeTooltip(x, y, length) {
   // 既存のツールチップを削除
   hideEdgeTooltip();
-  
+
   const tooltip = document.createElement('div');
   tooltip.id = 'edge-tooltip';
   tooltip.style.position = 'absolute';
@@ -270,7 +277,7 @@ function showEdgeTooltip(x, y, length) {
   tooltip.style.pointerEvents = 'none';
   tooltip.style.zIndex = '1000';
   tooltip.textContent = `関係強度: ${length}`;
-  
+
   document.body.appendChild(tooltip);
 }
 
@@ -286,20 +293,20 @@ function hideEdgeTooltip() {
 function showNodeDetails(nodeId) {
   const node = nodes.find(n => n.id === nodeId);
   if (!node) return;
-  
+
   // 接続されているノードを取得
   connectedNodesArray = getConnectedNodes(nodeId);
   currentConnectedIndex = -1;
-  
+
   detailsTitle.textContent = node.label;
   detailsText.textContent = node.details;
-  
+
   // 既存のナビゲーション要素を削除
   const existingNavigation = detailsOverlay.querySelector('.details-navigation');
   if (existingNavigation) {
     existingNavigation.remove();
   }
-  
+
   // 接続ノードがある場合はナビゲーションボタンを追加
   if (connectedNodesArray.length > 0) {
     const navigationHtml = `
@@ -310,11 +317,11 @@ function showNodeDetails(nodeId) {
       </div>
     `;
     detailsText.insertAdjacentHTML('afterend', navigationHtml);
-    
+
     // ナビゲーションボタンのイベントリスナーを設定
     const prevBtn = document.getElementById('details-prev-btn');
     const nextBtn = document.getElementById('details-next-btn');
-    
+
     prevBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -325,18 +332,18 @@ function showNodeDetails(nodeId) {
       e.stopPropagation();
       navigateConnectedNodes('next');
     });
-    
+
     // ナビゲーション状態を初期化
     updateConnectedNavigation();
   }
-  
+
   detailsOverlay.classList.remove('hidden');
 }
 
 // 接続されているノードを取得
 function getConnectedNodes(nodeId) {
   const connectedIds = [];
-  
+
   // エッジから接続されているノードIDを取得
   edges.forEach(edge => {
     if (edge.from === nodeId) {
@@ -345,7 +352,7 @@ function getConnectedNodes(nodeId) {
       connectedIds.push(edge.from);
     }
   });
-  
+
   // ノード情報を取得
   return nodes.filter(node => connectedIds.includes(node.id));
 }
@@ -353,7 +360,7 @@ function getConnectedNodes(nodeId) {
 // 接続ノード間をナビゲーション
 function navigateConnectedNodes(direction) {
   if (connectedNodesArray.length === 0) return;
-  
+
   if (direction === 'prev') {
     if (currentConnectedIndex > 0) {
       currentConnectedIndex--;
@@ -367,16 +374,16 @@ function navigateConnectedNodes(direction) {
       currentConnectedIndex = 0; // 最初にループ
     }
   }
-  
+
   // 選択されたノードにフォーカス
   const selectedNode = connectedNodesArray[currentConnectedIndex];
   if (selectedNode) {
     focusOnNode(selectedNode.id, false);
-    
+
     // 詳細オーバーレイの内容を更新
     detailsTitle.textContent = selectedNode.label;
     detailsText.textContent = selectedNode.details;
-    
+
     // ナビゲーション状態を更新
     updateConnectedNavigation();
   }
@@ -387,20 +394,20 @@ function updateConnectedNavigation() {
   const prevBtn = document.getElementById('details-prev-btn');
   const nextBtn = document.getElementById('details-next-btn');
   const counter = document.getElementById('details-counter');
-  
+
   if (!prevBtn || !nextBtn || !counter) return;
-  
+
   if (connectedNodesArray.length === 0) {
     prevBtn.disabled = true;
     nextBtn.disabled = true;
     counter.textContent = '接続ノード: 0 / 0';
     return;
   }
-  
+
   // ボタンの有効/無効を設定
   prevBtn.disabled = false;
   nextBtn.disabled = false;
-  
+
   // カウンターを更新
   const current = currentConnectedIndex >= 0 ? currentConnectedIndex + 1 : 0;
   counter.textContent = `接続ノード: ${current} / ${connectedNodesArray.length}`;
@@ -425,14 +432,14 @@ function updateSelectedWordsList() {
   if (!selectedWordsList) {
     return;
   }
-  
+
   selectedWordsList.innerHTML = '';
-  
+
   if (selectedNodeIds.length === 0) {
     selectedWordsList.innerHTML = '<p class="no-selection">単語を選択してください</p>';
     return;
   }
-  
+
   selectedNodeIds.forEach(nodeId => {
     const node = nodes.find(n => n.id === nodeId);
     if (node) {
@@ -509,16 +516,16 @@ function hideFlashcardView() {
 // 現在の単語帳を描画
 function renderFlashcard() {
   if (!flashcards.length) return;
-  
+
   const card = flashcards[currentCardIndex];
   cardTitle.textContent = card.front;
   cardDescription.textContent = card.back;
   flashcard.classList.remove('flipped');
-  
+
   // カウンターを更新
   currentCardNumber.textContent = currentCardIndex + 1;
   totalCards.textContent = flashcards.length;
-  
+
   // 進捗バーを更新
   const progress = ((currentCardIndex + 1) / flashcards.length) * 100;
   progressFill.style.width = progress + '%';
@@ -543,10 +550,10 @@ function handleTouchMove(e) {
 function handleTouchEnd(e) {
   endX = e.changedTouches[0].clientX;
   endY = e.changedTouches[0].clientY;
-  
+
   const diffX = startX - endX;
   const diffY = startY - endY;
-  
+
   if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > minSwipeDistance) {
     if (diffX < 0) {
       // 右スワイプ - 次のカード
@@ -559,7 +566,7 @@ function handleTouchEnd(e) {
     // スワイプでない場合は裏返す
     flipFlashcard();
   }
-  
+
   // 少し遅延してからクリックを有効にする
   setTimeout(() => {
     isClick = false;
@@ -587,7 +594,7 @@ function prevFlashcard() {
 // 詳細オーバーレイを閉じる
 closeDetailsBtn.addEventListener('click', hideNodeDetails);
 // 詳細オーバーレイを外部クリックで閉じる
-window.addEventListener('click', function(e) {
+window.addEventListener('click', function (e) {
   if (e.target === detailsOverlay) {
     // ナビゲーションボタンがクリックされた場合は閉じない
     if (e.target.closest('.details-nav-btn')) {
@@ -598,7 +605,7 @@ window.addEventListener('click', function(e) {
 });
 
 // キーボードショートカット
-window.addEventListener('keydown', function(e) {
+window.addEventListener('keydown', function (e) {
   // 詳細オーバーレイが表示されている場合
   if (!detailsOverlay.classList.contains('hidden')) {
     if (e.key === 'ArrowLeft' && connectedNodesArray.length > 0) {
@@ -614,14 +621,14 @@ window.addEventListener('keydown', function(e) {
 });
 
 // 選択したノードから単語帳を生成
-createFlashcardsBtn.addEventListener('click', function() {
+createFlashcardsBtn.addEventListener('click', function () {
   enterFlashcardSelectMode();
 });
 
 // 単語帳コントロール
 let isClick = false; // クリックとスワイプを区別するためのフラグ
 
-flashcard.addEventListener('click', function(e) {
+flashcard.addEventListener('click', function (e) {
   if (!isClick) {
     flipFlashcard();
   }
@@ -629,7 +636,7 @@ flashcard.addEventListener('click', function(e) {
 flipCardBtn.addEventListener('click', flipFlashcard);
 nextCardBtn.addEventListener('click', nextFlashcard);
 prevCardBtn.addEventListener('click', prevFlashcard);
-backToMapBtn.addEventListener('click', function() {
+backToMapBtn.addEventListener('click', function () {
   // 単語帳一覧画面に遷移
   window.location.href = '/flashcards.html';
 });
@@ -640,21 +647,21 @@ backToMapBtn.addEventListener('click', function() {
 function generateTestQuestions() {
   testQuestions = [];
   const shuffledCards = [...flashcards].sort(() => Math.random() - 0.5);
-  
+
   shuffledCards.forEach((card, index) => {
     // 正解の選択肢
     const correctAnswer = card.back;
-    
+
     // data.jsonから正解以外の単語をランダムに選んで偽回答を作成
     const allNodes = nodes.filter(node => node.details !== correctAnswer);
     const wrongAnswers = allNodes
       .sort(() => Math.random() - 0.5)
       .slice(0, 3)
       .map(node => node.details);
-    
+
     // 選択肢をシャッフル
     const options = [correctAnswer, ...wrongAnswers].sort(() => Math.random() - 0.5);
-    
+
     testQuestions.push({
       question: card.front,
       correctAnswer: correctAnswer,
@@ -692,24 +699,24 @@ function renderTestQuestion() {
     showTestResults();
     return;
   }
-  
+
   const question = testQuestions[currentTestIndex];
   testQuestionText.textContent = question.question;
-  
+
   testOptions.innerHTML = question.options.map((option, index) => `
     <div class="test-option" data-index="${index}">
       ${option}
     </div>
   `).join('');
-  
+
   // 選択肢のクリックイベント
   testOptions.querySelectorAll('.test-option').forEach(option => {
-    option.addEventListener('click', function() {
+    option.addEventListener('click', function () {
       const selectedIndex = parseInt(this.getAttribute('data-index'));
       selectTestOption(selectedIndex);
     });
   });
-  
+
   // カウンターとプログレスバーを更新
   testCurrentNumber.textContent = currentTestIndex + 1;
   testTotalQuestions.textContent = testQuestions.length;
@@ -720,15 +727,15 @@ function renderTestQuestion() {
 function selectTestOption(selectedIndex) {
   const question = testQuestions[currentTestIndex];
   const selectedAnswer = question.options[selectedIndex];
-  
+
   question.userAnswer = selectedAnswer;
   question.isCorrect = selectedAnswer === question.correctAnswer;
-  
+
   // 選択肢のスタイルを更新
   testOptions.querySelectorAll('.test-option').forEach((option, index) => {
     const answer = question.options[index];
     option.classList.remove('selected', 'correct', 'incorrect');
-    
+
     if (index === selectedIndex) {
       option.classList.add('selected');
       if (answer === question.correctAnswer) {
@@ -740,7 +747,7 @@ function selectTestOption(selectedIndex) {
       option.classList.add('correct');
     }
   });
-  
+
   // 次の問題ボタンを有効化
   testNextBtn.disabled = false;
 }
@@ -759,7 +766,7 @@ function showTestResults() {
   const correctCount = testQuestions.filter(q => q.isCorrect).length;
   const totalCount = testQuestions.length;
   const percentage = Math.round((correctCount / totalCount) * 100);
-  
+
   testQuestionText.textContent = `テスト完了！`;
   testOptions.innerHTML = `
     <div class="test-results">
@@ -772,14 +779,14 @@ function showTestResults() {
       </div>
     </div>
   `;
-  
-  document.getElementById('retry-test').addEventListener('click', function() {
+
+  document.getElementById('retry-test').addEventListener('click', function () {
     currentTestIndex = 0;
     generateTestQuestions();
     renderTestQuestion();
   });
-  
-  document.getElementById('back-to-cards').addEventListener('click', function() {
+
+  document.getElementById('back-to-cards').addEventListener('click', function () {
     hideTestView();
   });
 }
@@ -798,7 +805,7 @@ flashcard.addEventListener('touchend', handleTouchEnd, { passive: false });
 // マウスイベントも追加（デスクトップ対応）
 let isMouseDown = false;
 
-flashcard.addEventListener('mousedown', function(e) {
+flashcard.addEventListener('mousedown', function (e) {
   e.preventDefault();
   startX = e.clientX;
   startY = e.clientY;
@@ -806,21 +813,21 @@ flashcard.addEventListener('mousedown', function(e) {
   isClick = true; // スワイプ開始時はクリックを無効にする
 });
 
-flashcard.addEventListener('mousemove', function(e) {
+flashcard.addEventListener('mousemove', function (e) {
   if (!isMouseDown) return;
   e.preventDefault();
 });
 
-flashcard.addEventListener('mouseup', function(e) {
+flashcard.addEventListener('mouseup', function (e) {
   if (!isMouseDown) return;
-  
+
   endX = e.clientX;
   endY = e.clientY;
   isMouseDown = false;
-  
+
   const diffX = startX - endX;
   const diffY = startY - endY;
-  
+
   if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > minSwipeDistance) {
     if (diffX < 0) {
       // 右スワイプ - 次のカード
@@ -833,7 +840,7 @@ flashcard.addEventListener('mouseup', function(e) {
     // スワイプでない場合は裏返す
     flipFlashcard();
   }
-  
+
   // 少し遅延してからクリックを有効にする
   setTimeout(() => {
     isClick = false;
@@ -841,7 +848,7 @@ flashcard.addEventListener('mouseup', function(e) {
 });
 
 // マウスがカードの外に出た場合の処理
-document.addEventListener('mouseup', function() {
+document.addEventListener('mouseup', function () {
   if (isMouseDown) {
     isMouseDown = false;
     setTimeout(() => {
@@ -853,21 +860,20 @@ document.addEventListener('mouseup', function() {
 // 選択モードの切り替え
 function enterFlashcardSelectMode() {
   isSelectingFlashcards = true;
-  
+
   if (selectControls) {
     selectControls.classList.remove('hidden');
   }
-  
+
   if (createFlashcardsBtn) {
     createFlashcardsBtn.style.display = 'none';
   }
-  
+
   document.body.classList.add('hide-corner-btns');
   const cornerBtnGroup = document.querySelector('.corner-btn-group');
   if (cornerBtnGroup) {
     cornerBtnGroup.classList.remove('visible');
   }
-  
   // 編集モードでない場合のみリセット
   if (!window.isEditingFlashcard) {
     // 名前入力をリセット
@@ -879,7 +885,7 @@ function enterFlashcardSelectMode() {
     network.unselectAll();
     selectedNodeIds = [];
   }
-  
+
   updateCreateFlashcardsBtn();
 }
 function exitFlashcardSelectMode() {
@@ -900,18 +906,18 @@ function exitFlashcardSelectMode() {
 }
 
 // Createでサーバー保存し、元の画面に戻る
-createSelectBtn.addEventListener('click', async function() {
+createSelectBtn.addEventListener('click', async function () {
   if (selectedNodeIds.length < 2) {
     alert('2つ以上の単語を選択してください');
     return;
   }
-  
+
   const nameInput = document.getElementById('flashcard-name');
   const name = nameInput.value.trim() || '新しい単語帳';
-  
+
   // 単語のidリストの作成
   const ids = selectedNodeIds.map(id => Number(id));
-  
+
   if (window.isEditingFlashcard) {
     // 編集モードの場合、PUTリクエストで更新
     const res = await fetch(`/api/flashcards/${window.editingFlashcardId}/content`, {
@@ -943,7 +949,7 @@ createSelectBtn.addEventListener('click', async function() {
   }
 });
 // Cancelで選択解除
-cancelSelectBtn.addEventListener('click', function() {
+cancelSelectBtn.addEventListener('click', function () {
   exitFlashcardSelectMode();
 });
 
@@ -954,13 +960,13 @@ function searchNodes(query) {
     hideSearchResults();
     return;
   }
-  
+
   const searchTerm = query.toLowerCase();
-  searchResultsArray = nodes.filter(node => 
+  searchResultsArray = nodes.filter(node =>
     node.label.toLowerCase().includes(searchTerm) ||
     node.details.toLowerCase().includes(searchTerm)
   );
-  
+
   showSearchResults();
 }
 
@@ -969,9 +975,9 @@ function showSearchResults() {
     hideSearchResults();
     return;
   }
-  
+
   searchResultsElement.innerHTML = '';
-  
+
   // ナビゲーションボタンを追加
   const navigationContainer = document.createElement('div');
   navigationContainer.className = 'search-navigation';
@@ -981,7 +987,7 @@ function showSearchResults() {
     <button id="search-next-btn" class="search-nav-btn" disabled>→</button>
   `;
   searchResultsElement.appendChild(navigationContainer);
-  
+
   // 検索結果を表示
   searchResultsArray.forEach((node, index) => {
     const resultItem = document.createElement('div');
@@ -995,26 +1001,26 @@ function showSearchResults() {
     });
     searchResultsElement.appendChild(resultItem);
   });
-  
+
   // ナビゲーションボタンのイベントリスナーを設定
   const prevBtn = document.getElementById('search-prev-btn');
   const nextBtn = document.getElementById('search-next-btn');
   const counter = document.getElementById('search-counter');
-  
+
   prevBtn.addEventListener('click', () => navigateSearchResults('prev'));
   nextBtn.addEventListener('click', () => navigateSearchResults('next'));
-  
+
   // 初期状態を設定
   currentSearchIndex = -1;
   updateSearchNavigation();
-  
+
   searchResultsElement.classList.remove('hidden');
   clearSearchBtn.classList.remove('hidden');
 }
 
 function navigateSearchResults(direction) {
   if (searchResultsArray.length === 0) return;
-  
+
   if (direction === 'prev') {
     if (currentSearchIndex > 0) {
       currentSearchIndex--;
@@ -1028,7 +1034,7 @@ function navigateSearchResults(direction) {
       currentSearchIndex = 0; // 最初にループ
     }
   }
-  
+
   // 選択されたノードにフォーカス
   const selectedNode = searchResultsArray[currentSearchIndex];
   if (selectedNode) {
@@ -1041,22 +1047,22 @@ function updateSearchNavigation() {
   const prevBtn = document.getElementById('search-prev-btn');
   const nextBtn = document.getElementById('search-next-btn');
   const counter = document.getElementById('search-counter');
-  
+
   if (searchResultsArray.length === 0) {
     prevBtn.disabled = true;
     nextBtn.disabled = true;
     counter.textContent = '0 / 0';
     return;
   }
-  
+
   // ボタンの有効/無効を設定
   prevBtn.disabled = false;
   nextBtn.disabled = false;
-  
+
   // カウンターを更新
   const current = currentSearchIndex >= 0 ? currentSearchIndex + 1 : 0;
   counter.textContent = `${current} / ${searchResultsArray.length}`;
-  
+
   // 検索結果アイテムのハイライトを更新
   const resultItems = searchResultsElement.querySelectorAll('.search-result-item');
   resultItems.forEach((item, index) => {
@@ -1095,11 +1101,11 @@ function focusOnNode(nodeId, hideAfterZoom = false) {
 }
 
 // Search event listeners
-searchInput.addEventListener('input', function() {
+searchInput.addEventListener('input', function () {
   searchNodes(this.value);
 });
 
-searchInput.addEventListener('keydown', function(e) {
+searchInput.addEventListener('keydown', function (e) {
   if (e.key === 'Enter') {
     if (searchResultsArray.length > 0) {
       // 最初の結果にフォーカス
@@ -1116,7 +1122,7 @@ searchInput.addEventListener('keydown', function(e) {
   }
 });
 
-searchBtn.addEventListener('click', function() {
+searchBtn.addEventListener('click', function () {
   if (searchResultsArray.length > 0) {
     currentSearchIndex = 0;
     focusOnNode(searchResultsArray[0].id, true);
@@ -1124,7 +1130,7 @@ searchBtn.addEventListener('click', function() {
   }
 });
 
-clearSearchBtn.addEventListener('click', function() {
+clearSearchBtn.addEventListener('click', function () {
   searchInput.value = '';
   // 選択を解除
   network.unselectAll();
@@ -1136,18 +1142,18 @@ const addWordInput = document.getElementById('add-word-input');
 const addWordSuggestions = document.getElementById('add-word-suggestions');
 
 if (addWordInput) {
-  addWordInput.addEventListener('input', function() {
+  addWordInput.addEventListener('input', function () {
     const query = this.value.trim();
     if (!query) {
       addWordSuggestions.classList.add('hidden');
       return;
     }
-    
-    const suggestions = nodes.filter(node => 
+
+    const suggestions = nodes.filter(node =>
       node.label.toLowerCase().includes(query.toLowerCase()) &&
       !selectedNodeIds.includes(node.id)
     ).slice(0, 5);
-    
+
     if (suggestions.length > 0) {
       addWordSuggestions.innerHTML = '';
       suggestions.forEach(node => {
@@ -1170,9 +1176,9 @@ if (addWordInput) {
       addWordSuggestions.classList.add('hidden');
     }
   });
-  
+
   // フォーカスアウト時に候補を非表示
-  addWordInput.addEventListener('blur', function() {
+  addWordInput.addEventListener('blur', function () {
     setTimeout(() => {
       addWordSuggestions.classList.add('hidden');
     }, 200);
@@ -1181,13 +1187,38 @@ if (addWordInput) {
 
 // --- 初期化 ---
 (async function init() {
-  
+
+  // BGM制御機能を追加
+  if (bgm) {
+    // 音量を小さく設定（0.0-1.0の範囲、0.1は10%の音量）
+    bgm.volume = 0.1;
+
+    // ページ読み込み後に自動再生を試行
+    document.addEventListener('DOMContentLoaded', function () {
+      // ユーザーインタラクション後に再生を試行
+      const startBGM = function () {
+        bgm.play().catch(function (error) {
+          console.log('BGM再生に失敗しました:', error);
+        });
+        // 一度実行したらイベントリスナーを削除
+        document.removeEventListener('click', startBGM);
+        document.removeEventListener('keydown', startBGM);
+        document.removeEventListener('touchstart', startBGM);
+      };
+
+      // ユーザーインタラクションを待ってから再生
+      document.addEventListener('click', startBGM);
+      document.addEventListener('keydown', startBGM);
+      document.addEventListener('touchstart', startBGM);
+    });
+  }
+
   await loadData();
   renderNetwork();
-  
+
   // Get the loading overlay
   const loadingOverlay = document.getElementById('loading-overlay');
-  
+
   // localStorageにstudyFlashcardがあれば自動で単語帳UIを表示
   const study = localStorage.getItem('studyFlashcard');
   if (study) {
@@ -1198,7 +1229,7 @@ if (addWordInput) {
         currentCardIndex = 0;
         showFlashcardView();
       }
-    } catch(e) {}
+    } catch (e) { }
     localStorage.removeItem('studyFlashcard');
   }
 
@@ -1213,7 +1244,7 @@ if (addWordInput) {
         generateTestQuestions();
         showTestView();
       }
-    } catch(e) {}
+    } catch (e) { }
     localStorage.removeItem('testFlashcard');
   }
 
@@ -1222,17 +1253,17 @@ if (addWordInput) {
   if (edit) {
     try {
       const editData = JSON.parse(edit);
-      
+
       if (editData.words && Array.isArray(editData.words) && editData.words.length > 0) {
-        
+
         // 編集フラグをenterFlashcardSelectMode前にセット
         window.isEditingFlashcard = true;
         window.editingFlashcardId = editData.id;
-        
+
         // 既存の単語を選択状態にする
         const wordIds = editData.words.map(word => word.id);
         selectedNodeIds = wordIds;
-        
+
         // 選択モードに入る
         enterFlashcardSelectMode();
         // 名前を設定
@@ -1240,10 +1271,10 @@ if (addWordInput) {
         if (nameInput) {
           nameInput.value = editData.name || '編集中の単語帳';
         }
-        
+
         // 選択された単語リストを更新
         updateSelectedWordsList();
-        
+
         // 選択されたノードを視覚的にハイライト
         setTimeout(() => {
           if (network) {
@@ -1251,13 +1282,13 @@ if (addWordInput) {
           }
         }, 1000);
       }
-    } catch(e) {
+    } catch (e) {
     }
     localStorage.removeItem('editFlashcard');
   }
 
   // テスト画面の「パス」ボタンのイベントリスナー
-  testPassBtn.addEventListener('click', function() {
+  testPassBtn.addEventListener('click', function () {
     nextTestQuestion();
   });
 
@@ -1266,7 +1297,7 @@ if (addWordInput) {
   const testViewElem = document.getElementById('test-view');
   const selectControlsElem = document.getElementById('flashcard-select-controls');
   const cornerBtnGroup = document.querySelector('.corner-btn-group');
-  
+
   if (
     (!flashcardViewElem || flashcardViewElem.classList.contains('hidden')) &&
     (!testViewElem || testViewElem.classList.contains('hidden')) &&
@@ -1277,7 +1308,7 @@ if (addWordInput) {
       cornerBtnGroup.classList.add('visible');
     }
   }
-  
+
   // Hide the loading overlay after everything is set up
   if (loadingOverlay) {
     // Small delay to ensure smooth transition
@@ -1285,68 +1316,56 @@ if (addWordInput) {
       loadingOverlay.classList.add('hidden');
     }, 100);
   }
+
+  // BGMボタンの初期状態を設定
+  if (toggleBGMBtn) {
+    toggleBGMBtn.textContent = '🔇'; // 初期状態は停止
+  }
+
+  // 新しいBGM再生ボタンのイベントリスナー
+  if (playBgmBtn && bgm) {
+    playBgmBtn.addEventListener('click', function () {
+      if (isBGMPlaying) {
+        // BGMを一時停止
+        bgm.pause();
+        isBGMPlaying = false;
+        playBgmBtn.textContent = '▶️';
+        if (bgmStatus) bgmStatus.textContent = '停止中';
+      } else {
+        // BGMを再生
+        bgm.play().then(() => {
+          isBGMPlaying = true;
+          playBgmBtn.textContent = '⏸️';
+          if (bgmStatus) bgmStatus.textContent = '再生中';
+        }).catch(function (error) {
+          console.log('BGM再生に失敗しました:', error);
+        });
+      }
+    });
+  }
+
+  // BGMの再生状態を監視（新しい再生ボタン用）
+  if (bgm) {
+    bgm.addEventListener('play', function () {
+      isBGMPlaying = true;
+      if (toggleBGMBtn) toggleBGMBtn.textContent = '🔊';
+      if (playBgmBtn) playBgmBtn.textContent = '⏸️';
+      if (bgmStatus) bgmStatus.textContent = '再生中';
+    });
+
+    bgm.addEventListener('pause', function () {
+      isBGMPlaying = false;
+      if (toggleBGMBtn) toggleBGMBtn.textContent = '🔇';
+      if (playBgmBtn) playBgmBtn.textContent = '▶️';
+      if (bgmStatus) bgmStatus.textContent = '停止中';
+    });
+
+    bgm.addEventListener('ended', function () {
+      // ループ再生なので、endedイベントは通常発生しませんが、念のため
+      isBGMPlaying = false;
+      if (toggleBGMBtn) toggleBGMBtn.textContent = '🔇';
+      if (playBgmBtn) playBgmBtn.textContent = '▶️';
+      if (bgmStatus) bgmStatus.textContent = '停止中';
+    });
+  }
 })(); 
-
-// --- 回転アニメーション機能 ---
-let isRotating = false;
-let rotateInterval = null;
-
-const toggleRotateBtn = document.getElementById('toggle-rotate-btn');
-
-if (toggleRotateBtn) {
-  toggleRotateBtn.addEventListener('click', function() {
-    if (isRotating) {
-      stopRotation();
-    } else {
-      startRotation();
-    }
-  });
-}
-
-function startRotation() {
-  if (isRotating) return;
-  isRotating = true;
-  if (toggleRotateBtn) toggleRotateBtn.textContent = '回転OFF';
-  rotateInterval = setInterval(() => {
-    rotateNetwork(-Math.PI / 720); // 1度で約0.25度、ゆっくり
-  }, 30);
-}
-
-function stopRotation() {
-  isRotating = false;
-  if (toggleRotateBtn) toggleRotateBtn.textContent = '回転ON';
-  if (rotateInterval) clearInterval(rotateInterval);
-}
-
-function rotateNetwork(angle) {
-  // ノードの現在座標を取得
-  const positions = network.getPositions();
-  const nodeIds = Object.keys(positions);
-  if (nodeIds.length === 0) return;
-
-  // 画面中心を取得
-  const container = document.getElementById('network');
-  const rect = container.getBoundingClientRect();
-  const centerX = (rect.right - rect.left) / 2;
-  const centerY = (rect.bottom - rect.top) / 2;
-
-  // vis-networkの座標系で中心を計算
-  // まず全ノードの重心を使う
-  let sumX = 0, sumY = 0;
-  nodeIds.forEach(id => {
-    sumX += positions[id].x;
-    sumY += positions[id].y;
-  });
-  const cx = sumX / nodeIds.length;
-  const cy = sumY / nodeIds.length;
-
-  // 各ノードを中心(cx, cy)を軸に回転
-  nodeIds.forEach(id => {
-    const pos = positions[id];
-    const dx = pos.x - cx;
-    const dy = pos.y - cy;
-    const newX = Math.cos(angle) * dx - Math.sin(angle) * dy + cx;
-    const newY = Math.sin(angle) * dx + Math.cos(angle) * dy + cy;
-    network.moveNode(Number(id), newX, newY);
-  });
-} 
