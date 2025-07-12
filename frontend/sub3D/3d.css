@@ -5,11 +5,892 @@ html, body {
   padding: 0; 
   overflow: hidden; 
   background: #181a1b; 
+  font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Arial, Helvetica, sans-serif;
 }
 
 #3d-graph { 
   width: 100vw; 
   height: 100vh; 
+}
+
+/* ローディング画面 */
+#loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #1a1d23 0%, #2d313a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.3s ease;
+}
+
+#loading-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(247, 200, 115, 0.3);
+  border-top: 3px solid #f7c873;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Search bar styles */
+#search-container {
+  position: fixed;
+  top: 2rem;
+  left: 2rem;
+  right: auto;
+  z-index: 40;
+  background: #22252a;
+  border-radius: 8px;
+  padding: 0.5rem 0.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: auto;
+  max-width: 400px;
+}
+
+#search-container.hidden {
+  display: none !important;
+}
+
+#search-box {
+  display: flex;
+  align-items: center;
+  background: rgba(34, 37, 42, 0.95);
+  border-radius: 25px;
+  padding: 8px 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(247, 200, 115, 0.2);
+}
+
+#search-input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  padding: 8px 12px;
+  outline: none;
+}
+
+#search-input::placeholder {
+  color: #888;
+}
+
+#search-btn, #clear-search-btn {
+  background: none;
+  border: none;
+  color: #f7c873;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+#search-btn:hover, #clear-search-btn:hover {
+  background: rgba(247, 200, 115, 0.1);
+}
+
+#search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(34, 37, 42, 0.95);
+  border-radius: 12px;
+  margin-top: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(247, 200, 115, 0.2);
+}
+
+.search-result-item {
+  padding: 12px 16px;
+  color: #fff;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background 0.2s;
+}
+
+.search-result-item:hover {
+  background: rgba(247, 200, 115, 0.1);
+}
+
+.search-result-item:last-child {
+  border-bottom: none;
+}
+
+.search-result-item.selected {
+  background: rgba(247, 200, 115, 0.2);
+  border-left: 3px solid #f7c873;
+}
+
+.search-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(34, 37, 42, 0.98);
+}
+
+.search-nav-btn {
+  background: rgba(247, 200, 115, 0.2);
+  color: #f7c873;
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-nav-btn:hover:not(:disabled) {
+  background: rgba(247, 200, 115, 0.3);
+}
+
+.search-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.search-counter {
+  color: #f7c873;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.search-result-term {
+  font-weight: bold;
+  color: #f7c873;
+}
+
+.search-result-details {
+  font-size: 14px;
+  color: #ccc;
+  margin-top: 4px;
+}
+
+/* 詳細オーバーレイ */
+#details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+#details-overlay.hidden { display: none; }
+
+#details-box {
+  background: #2d313a;
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(247, 200, 115, 0.2);
+}
+
+#close-details {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  color: #f7c873;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.details-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.details-nav-btn {
+  background: rgba(247, 200, 115, 0.2);
+  color: #f7c873;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.details-nav-btn:hover:not(:disabled) {
+  background: rgba(247, 200, 115, 0.3);
+}
+
+.details-nav-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.details-counter {
+  color: #f7c873;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* 単語帳ビュー */
+#flashcard-view {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #1a1d23 0%, #2d313a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+#flashcard-view.hidden { display: none; }
+
+#flashcard-container {
+  background: #2d313a;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(247, 200, 115, 0.2);
+}
+
+.flashcard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.card-counter {
+  color: #f7c873;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #f7c873;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background 0.2s;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: rgba(247, 200, 115, 0.1);
+}
+
+.cards-wrapper {
+  position: relative;
+  height: 300px;
+  margin-bottom: 2rem;
+  perspective: 1000px;
+}
+
+.card {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+  cursor: pointer;
+}
+
+.card:hover {
+  transform: scale(1.02);
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.card-front { 
+  background: linear-gradient(135deg, #f7c873 0%, #f0b040 100%);
+  color: #2d313a;
+}
+
+.card-back {
+  background: linear-gradient(135deg, #2d313a 0%, #1a1d23 100%);
+  color: #f7c873;
+  transform: rotateY(180deg);
+}
+
+.card.flipped .card-front {
+  transform: rotateY(180deg);
+}
+
+.card.flipped .card-back {
+  transform: rotateY(0deg);
+}
+
+.card-content {
+  text-align: center;
+  width: 100%;
+}
+
+.card-title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  word-break: break-word;
+}
+
+.card-hint {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.card-subtitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.card-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+.flashcard-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.control-btn {
+  background: rgba(247, 200, 115, 0.2);
+  color: #f7c873;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.control-btn:hover {
+  background: rgba(247, 200, 115, 0.3);
+}
+
+.flip-btn {
+  background: rgba(247, 200, 115, 0.3);
+}
+
+.flip-btn:hover {
+  background: rgba(247, 200, 115, 0.4);
+}
+
+/* テストモードビュー */
+#test-view {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #1a1d23 0%, #2d313a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+#test-view.hidden { display: none; }
+
+#test-container {
+  background: #2d313a;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(247, 200, 115, 0.2);
+}
+
+.test-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.test-counter {
+  color: #f7c873;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.test-question {
+  margin-bottom: 2rem;
+}
+
+#test-question-text {
+  font-size: 1.5rem;
+  color: #f7c873;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.test-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.test-option {
+  background: rgba(247, 200, 115, 0.1);
+  color: #fff;
+  border: 2px solid rgba(247, 200, 115, 0.3);
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+}
+
+.test-option:hover {
+  background: rgba(247, 200, 115, 0.2);
+  border-color: rgba(247, 200, 115, 0.5);
+}
+
+.test-option.selected {
+  background: rgba(247, 200, 115, 0.3);
+  border-color: #f7c873;
+}
+
+.test-option.correct {
+  background: rgba(76, 175, 80, 0.3);
+  border-color: #4caf50;
+}
+
+.test-option.incorrect {
+  background: rgba(244, 67, 54, 0.3);
+  border-color: #f44336;
+}
+
+.test-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.test-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.test-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f7c873 0%, #f0b040 100%);
+  transition: width 0.3s ease;
+}
+
+.test-results {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.test-results h3 {
+  color: #f7c873;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.test-results p {
+  color: #fff;
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.result-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.result-btn {
+  background: rgba(247, 200, 115, 0.2);
+  color: #f7c873;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.result-btn:hover {
+  background: rgba(247, 200, 115, 0.3);
+}
+
+.retry-btn {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.retry-btn:hover {
+  background: rgba(76, 175, 80, 0.3);
+}
+
+.back-btn {
+  background: rgba(158, 158, 158, 0.2);
+  color: #9e9e9e;
+}
+
+.back-btn:hover {
+  background: rgba(158, 158, 158, 0.3);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f7c873 0%, #f0b040 100%);
+  transition: width 0.3s ease;
+}
+
+/* 単語帳作成ボタン */
+#create-flashcards {
+  background: rgba(247, 200, 115, 0.2);
+  color: #f7c873;
+  border: 2px solid rgba(247, 200, 115, 0.3);
+  border-radius: 12px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+#create-flashcards:enabled {
+  background: rgba(247, 200, 115, 0.2);
+}
+
+#create-flashcards:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#view-flashcards {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+  border: 2px solid rgba(76, 175, 80, 0.3);
+  border-radius: 12px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+#view-flashcards:hover {
+  background: rgba(76, 175, 80, 0.3);
+}
+
+.vis-selected {
+  box-shadow: 0 0 20px rgba(247, 200, 115, 0.8) !important;
+}
+
+/* 単語帳選択用の作成/キャンセル */
+#flashcard-select-controls {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #2d313a;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(247, 200, 115, 0.2);
+  z-index: 1000;
+}
+
+#flashcard-select-controls.hidden {
+  display: none;
+}
+
+.edit-panel-header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.edit-panel-header h3 {
+  color: #f7c873;
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.selected-words-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.selected-words-section h4,
+.add-word-section h4 {
+  color: #f7c873;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+#selected-words-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-height: 60px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 2px dashed rgba(247, 200, 115, 0.3);
+}
+
+.selected-word-item {
+  background: rgba(247, 200, 115, 0.2);
+  color: #f7c873;
+  padding: 8px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.word-label {
+  font-weight: 500;
+}
+
+.remove-word-btn {
+  background: none;
+  border: none;
+  color: #f7c873;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.remove-word-btn:hover {
+  background: rgba(247, 200, 115, 0.2);
+}
+
+.add-word-section {
+  margin-top: 1rem;
+}
+
+#add-word-input,
+#flashcard-name {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(247, 200, 115, 0.3);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+#add-word-input:focus,
+#flashcard-name:focus {
+  border-color: #f7c873;
+}
+
+#add-word-input::placeholder,
+#flashcard-name::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+#add-word-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(34, 37, 42, 0.95);
+  border-radius: 12px;
+  margin-top: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(247, 200, 115, 0.2);
+  z-index: 1001;
+}
+
+#add-word-suggestions.hidden {
+  display: none;
+}
+
+.suggestion-item {
+  padding: 12px 16px;
+  color: #fff;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background 0.2s;
+}
+
+.suggestion-item:hover {
+  background: rgba(247, 200, 115, 0.1);
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.edit-panel-name-input {
+  margin-top: 1rem;
+}
+
+.edit-panel-name-input label {
+  display: block;
+  color: #f7c873;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.edit-panel-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  justify-content: center;
+}
+
+.edit-btn {
+  background: rgba(247, 200, 115, 0.2);
+  color: #f7c873;
+  border: 2px solid rgba(247, 200, 115, 0.3);
+  border-radius: 12px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+  font-weight: 500;
+  min-width: 120px;
+}
+
+.edit-btn:first-child {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+  border-color: rgba(76, 175, 80, 0.3);
+}
+
+.edit-btn:first-child:hover {
+  background: rgba(76, 175, 80, 0.3);
+}
+
+.edit-btn:last-child {
+  background: rgba(158, 158, 158, 0.2);
+  color: #9e9e9e;
+  border-color: rgba(158, 158, 158, 0.3);
+}
+
+.edit-btn:last-child:hover {
+  background: rgba(158, 158, 158, 0.3);
+}
+
+.no-selection {
+  color: rgba(255, 255, 255, 0.5);
+  font-style: italic;
+  text-align: center;
+  padding: 2rem;
 }
 
 /* ボタンを垂直に並べる */
@@ -61,6 +942,22 @@ html, body {
   background: #3a3f4b;
 }
 
+#zoom-out-btn.corner-btn,
+#view-flashcards.corner-btn,
+#create-flashcards.corner-btn {
+  background: rgba(247, 200, 115, 0.2);
+  color: #f7c873;
+  border: 2px solid rgba(247, 200, 115, 0.3);
+}
+
+.hide-corner-btns .corner-btn-group {
+  opacity: 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
 .page-title {
   position: fixed;
   bottom: 2rem;
@@ -72,10 +969,10 @@ html, body {
   text-shadow: 0 0 10px rgba(247, 200, 115, 0.5);
 }
 
-/* 2D表示ボタン（ページタイトルの上に配置） */
+/* 2D表示ボタン */
 #view-2d {
   position: fixed !important;
-  bottom: 5rem !important;
+  bottom: 2rem !important;
   right: 2rem !important;
   left: auto !important;
   margin: 0 !important;

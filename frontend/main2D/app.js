@@ -47,10 +47,7 @@ const testTotalQuestions = document.getElementById('test-total-questions');
 const testProgressFill = document.querySelector('.test-progress-fill');
 const testPassBtn = document.getElementById('test-pass-btn');
 
-// BGM制御用変数
-const toggleBGMBtn = document.getElementById('toggle-bgm-btn');
-const bgm = document.getElementById('bgm');
-let isBGMPlaying = false;
+
 
 // zoomOutBtnの動的生成を削除し、DOMから取得するだけにする
 const zoomOutBtn = document.getElementById('zoom-out-btn');
@@ -60,74 +57,7 @@ zoomOutBtn.addEventListener('click', function () {
   }
 });
 
-// --- 回転アニメーション機能 ---
-let isRotating = false;
-let rotateInterval = null;
 
-const toggleRotateBtn = document.getElementById('toggle-rotate-btn');
-
-if (toggleRotateBtn) {
-  toggleRotateBtn.addEventListener('click', function() {
-    console.log('回転ボタンがクリックされました');
-    if (isRotating) {
-      stopRotation();
-    } else {
-      startRotation();
-    }
-  });
-}
-
-function startRotation() {
-  if (isRotating) return;
-  console.log('回転を開始します');
-  isRotating = true;
-  if (toggleRotateBtn) toggleRotateBtn.textContent = '回転OFF';
-  rotateInterval = setInterval(() => {
-    rotateNetwork(-Math.PI / 720); // 1度で約0.25度、ゆっくり
-  }, 30);
-}
-
-function stopRotation() {
-  console.log('回転を停止します');
-  isRotating = false;
-  if (toggleRotateBtn) toggleRotateBtn.textContent = '回転ON';
-  if (rotateInterval) clearInterval(rotateInterval);
-}
-
-function rotateNetwork(angle) {
-  if (!network) return;
-  
-  // ノードの現在座標を取得
-  const positions = network.getPositions();
-  const nodeIds = Object.keys(positions);
-  if (nodeIds.length === 0) return;
-
-  // 画面中心を取得
-  const container = document.getElementById('network');
-  const rect = container.getBoundingClientRect();
-  const centerX = (rect.right - rect.left) / 2;
-  const centerY = (rect.bottom - rect.top) / 2;
-
-  // vis-networkの座標系で中心を計算
-  // まず全ノードの重心を使う
-  let sumX = 0, sumY = 0;
-  nodeIds.forEach(id => {
-    sumX += positions[id].x;
-    sumY += positions[id].y;
-  });
-  const cx = sumX / nodeIds.length;
-  const cy = sumY / nodeIds.length;
-
-  // 各ノードを中心(cx, cy)を軸に回転
-  nodeIds.forEach(id => {
-    const pos = positions[id];
-    const dx = pos.x - cx;
-    const dy = pos.y - cy;
-    const newX = Math.cos(angle) * dx - Math.sin(angle) * dy + cx;
-    const newY = Math.sin(angle) * dx + Math.cos(angle) * dy + cy;
-    network.moveNode(Number(id), newX, newY);
-  });
-}
 
 // 検索バーを左上に移動
 const searchContainer = document.getElementById('search-container');
@@ -1255,30 +1185,7 @@ if (addWordInput) {
 // --- 初期化 ---
 (async function init() {
 
-  // BGM制御機能を追加
-  if (bgm) {
-    // 音量を設定（0.0-1.0の範囲、0.5は50%の音量）
-    bgm.volume = 0.5;
 
-    // ページ読み込み後に自動再生を試行
-    document.addEventListener('DOMContentLoaded', function () {
-      // ユーザーインタラクション後に再生を試行
-      const startBGM = function () {
-        bgm.play().catch(function (error) {
-          console.log('BGM再生に失敗しました:', error);
-        });
-        // 一度実行したらイベントリスナーを削除
-        document.removeEventListener('click', startBGM);
-        document.removeEventListener('keydown', startBGM);
-        document.removeEventListener('touchstart', startBGM);
-      };
-
-      // ユーザーインタラクションを待ってから再生
-      document.addEventListener('click', startBGM);
-      document.addEventListener('keydown', startBGM);
-      document.addEventListener('touchstart', startBGM);
-    });
-  }
 
   await loadData();
   renderNetwork();
@@ -1384,54 +1291,5 @@ if (addWordInput) {
     }, 100);
   }
 
-  // BGMボタンの初期状態を設定
-  if (toggleBGMBtn) {
-    toggleBGMBtn.textContent = '▶'; // 初期状態は停止
-  }
 
-  // 統合されたBGMボタンのイベントリスナー
-  if (toggleBGMBtn && bgm) {
-    toggleBGMBtn.addEventListener('click', function () {
-      console.log('BGMボタンがクリックされました');
-      console.log('現在の再生状態:', isBGMPlaying);
-      console.log('BGM要素:', bgm);
-      
-      if (isBGMPlaying) {
-        // BGMを一時停止
-        console.log('BGMを一時停止します');
-        bgm.pause();
-        isBGMPlaying = false;
-        toggleBGMBtn.textContent = '▶';
-      } else {
-        // BGMを再生
-        console.log('BGMを再生します');
-        bgm.play().then(() => {
-          console.log('BGM再生成功');
-          isBGMPlaying = true;
-          toggleBGMBtn.textContent = '⏸';
-        }).catch(function (error) {
-          console.log('BGM再生に失敗しました:', error);
-        });
-      }
-    });
-  }
-
-  // BGMの再生状態を監視
-  if (bgm) {
-    bgm.addEventListener('play', function () {
-      isBGMPlaying = true;
-      if (toggleBGMBtn) toggleBGMBtn.textContent = '⏸';
-    });
-
-    bgm.addEventListener('pause', function () {
-      isBGMPlaying = false;
-      if (toggleBGMBtn) toggleBGMBtn.textContent = '▶';
-    });
-
-    bgm.addEventListener('ended', function () {
-      // ループ再生なので、endedイベントは通常発生しませんが、念のため
-      isBGMPlaying = false;
-      if (toggleBGMBtn) toggleBGMBtn.textContent = '▶';
-    });
-  }
 })(); 
