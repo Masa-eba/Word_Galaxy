@@ -13,7 +13,7 @@
 <body>
   <!-- BGM用のaudio要素 -->
   <audio id="bgm" loop>
-    <source src="/music/word-gragh.mp3" type="audio/mpeg">
+    <source src="music/word-gragh.mp3" type="audio/mpeg">
     お使いのブラウザは音声再生をサポートしていません。
   </audio>
 
@@ -23,6 +23,9 @@
   </div>
 
   <!-- マインドマップのメインコンテナ -->
+  <!-- ページタイトル -->
+  <div class="page-title">2Dマインドマップ</div>
+  
   <!-- Search bar -->
   <div id="search-container" class="">
     <div id="search-box">
@@ -84,6 +87,9 @@
     <button id="toggle-rotate-btn" class="corner-btn">回転ON</button>
     <button id="toggle-bgm-btn" class="corner-btn">停止中</button>
   </div>
+
+  <!-- 3D表示ボタン（ページタイトルの上に独立配置） -->
+  <button id="view-3d" onclick="window.location.href='/3d.html'">3D表示</button>
 
 
 
