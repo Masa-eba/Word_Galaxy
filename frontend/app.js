@@ -130,8 +130,8 @@ function renderNetwork() {
   })));
   const visEdges = new vis.DataSet(edges.map(e => ({
     from: e.from,
-    to: e.to
-    // エッジにはラベルなし
+    to: e.to,
+    length: e.length || 100 // データのlength値を使用、デフォルトは100
   })));
 
   // Vis.jsネットワークのオプション
@@ -141,6 +141,19 @@ function renderNetwork() {
         enabled: true,
         iterations: 10, // グラフのサイズに応じて調整可能
         updateInterval: 25
+      },
+      barnesHut: {
+        gravitationalConstant: -2000,
+        centralGravity: 0.3,
+        springLength: function (edge) {
+          // length値に基づいてスプリング長を調整
+          const length = edge.length || 100;
+          // length値をスプリング長に変換 (50-200 → 50-200)
+          return Math.max(50, Math.min(200, length));
+        },
+        springConstant: 0.04,
+        damping: 0.09,
+        avoidOverlap: 0.1
       }
     },
     nodes: {
@@ -181,6 +194,21 @@ function renderNetwork() {
 
   network.on('afterDrawing', function () {
     renderExternalLabels(visNodes);
+  });
+
+  // エッジホバー時のツールチップ表示
+  network.on('hoverEdge', function (params) {
+    const edge = edges.find(e =>
+      (e.from === params.edge.from && e.to === params.edge.to) ||
+      (e.from === params.edge.to && e.to === params.edge.from)
+    );
+    if (edge && edge.length) {
+      showEdgeTooltip(params.event.center.x, params.event.center.y, edge.length);
+    }
+  });
+
+  network.on('blurEdge', function (params) {
+    hideEdgeTooltip();
   });
 
   // ノードクリック: 詳細を表示または選択トグル
@@ -229,6 +257,36 @@ function renderExternalLabels(visNodes) {
     }
   });
   ctx.restore();
+}
+
+// エッジツールチップを表示
+function showEdgeTooltip(x, y, length) {
+  // 既存のツールチップを削除
+  hideEdgeTooltip();
+
+  const tooltip = document.createElement('div');
+  tooltip.id = 'edge-tooltip';
+  tooltip.style.position = 'absolute';
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = (y - 30) + 'px';
+  tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+  tooltip.style.color = 'white';
+  tooltip.style.padding = '5px 10px';
+  tooltip.style.borderRadius = '4px';
+  tooltip.style.fontSize = '12px';
+  tooltip.style.pointerEvents = 'none';
+  tooltip.style.zIndex = '1000';
+  tooltip.textContent = `関係強度: ${length}`;
+
+  document.body.appendChild(tooltip);
+}
+
+// エッジツールチップを非表示
+function hideEdgeTooltip() {
+  const tooltip = document.getElementById('edge-tooltip');
+  if (tooltip) {
+    tooltip.remove();
+  }
 }
 
 // ノード詳細オーバーレイを表示
@@ -400,10 +458,14 @@ function removeSelectedWord(nodeId) {
   const index = selectedNodeIds.indexOf(nodeId);
   if (index > -1) {
     selectedNodeIds.splice(index, 1);
-    network.unselectNodes([nodeId]);
+    // 選択状態を手動で再設定
+    network.selectNodes(selectedNodeIds);
     updateCreateFlashcardsBtn();
   }
 }
+
+// グローバルスコープで関数を定義
+window.removeSelectedWord = removeSelectedWord;
 
 // 選択したノードから単語帳を生成
 function createFlashcards() {
@@ -425,6 +487,10 @@ function showFlashcardView() {
   document.getElementById('search-container').classList.add('hidden');
   // 単語帳ビュー表示時にボタンを非表示
   document.body.classList.add('hide-corner-btns');
+  const cornerBtnGroup = document.querySelector('.corner-btn-group');
+  if (cornerBtnGroup) {
+    cornerBtnGroup.classList.remove('visible');
+  }
 }
 
 // 単語帳ビューを非表示
@@ -441,6 +507,10 @@ function hideFlashcardView() {
   }
   // 単語帳ビュー非表示時にボタンを再表示
   document.body.classList.remove('hide-corner-btns');
+  const cornerBtnGroup = document.querySelector('.corner-btn-group');
+  if (cornerBtnGroup) {
+    cornerBtnGroup.classList.add('visible');
+  }
 }
 
 // 現在の単語帳を描画
@@ -566,7 +636,10 @@ flashcard.addEventListener('click', function (e) {
 flipCardBtn.addEventListener('click', flipFlashcard);
 nextCardBtn.addEventListener('click', nextFlashcard);
 prevCardBtn.addEventListener('click', prevFlashcard);
-backToMapBtn.addEventListener('click', hideFlashcardView);
+backToMapBtn.addEventListener('click', function () {
+  // 単語帳一覧画面に遷移
+  window.location.href = '/flashcards.html';
+});
 
 
 
@@ -610,22 +683,15 @@ function showTestView() {
   document.getElementById('search-container').classList.add('hidden');
   // テストモード表示時にボタンを非表示
   document.body.classList.add('hide-corner-btns');
+  const cornerBtnGroup = document.querySelector('.corner-btn-group');
+  if (cornerBtnGroup) {
+    cornerBtnGroup.classList.remove('visible');
+  }
 }
 
 function hideTestView() {
-  testView.classList.add('hidden');
-  flashcardView.classList.remove('hidden');
-  document.getElementById('network').style.display = '';
-  createFlashcardsBtn.style.display = 'none';
-  renderFlashcard();
-  // 検索欄を再表示
-  if (flashcardView.classList.contains('hidden')) {
-    document.getElementById('search-container').classList.remove('hidden');
-  }
-  // テストモード非表示時にボタンを再表示（ただしフラッシュカードビューが非表示の場合のみ）
-  if (flashcardView.classList.contains('hidden')) {
-    document.body.classList.remove('hide-corner-btns');
-  }
+  // 直接単語帳一覧画面に遷移（一瞬の画面切り替えを避ける）
+  window.location.href = '/flashcards.html';
 }
 
 function renderTestQuestion() {
@@ -709,7 +775,7 @@ function showTestResults() {
       <p>正答率: ${percentage}%</p>
       <div class="result-buttons">
         <button id="retry-test" class="result-btn retry-btn">🔄 再テスト</button>
-        <button id="back-to-cards" class="result-btn back-btn">← カードに戻る</button>
+        <button id="back-to-cards" class="result-btn back-btn">← 単語帳一覧に戻る</button>
       </div>
     </div>
   `;
@@ -804,7 +870,10 @@ function enterFlashcardSelectMode() {
   }
 
   document.body.classList.add('hide-corner-btns');
-
+  const cornerBtnGroup = document.querySelector('.corner-btn-group');
+  if (cornerBtnGroup) {
+    cornerBtnGroup.classList.remove('visible');
+  }
   // 編集モードでない場合のみリセット
   if (!window.isEditingFlashcard) {
     // 名前入力をリセット
@@ -827,6 +896,10 @@ function exitFlashcardSelectMode() {
   selectedNodeIds = [];
   updateCreateFlashcardsBtn();
   document.body.classList.remove('hide-corner-btns');
+  const cornerBtnGroup = document.querySelector('.corner-btn-group');
+  if (cornerBtnGroup) {
+    cornerBtnGroup.classList.add('visible');
+  }
   // 編集フラグをリセット
   window.isEditingFlashcard = false;
   window.editingFlashcardId = null;
@@ -853,14 +926,8 @@ createSelectBtn.addEventListener('click', async function () {
       body: JSON.stringify({ ids, name })
     });
     if (res.ok) {
-      const data = await res.json();
-      // 更新した単語帳のwordsで学習UIを表示
-      flashcards = data.words.map(word => ({ front: word.label, back: word.details }));
-      currentCardIndex = 0;
-      exitFlashcardSelectMode();
-      // 編集フラグをリセット
-      window.isEditingFlashcard = false;
-      window.editingFlashcardId = null;
+      // 単語帳一覧画面に遷移
+      window.location.href = '/flashcards.html';
     } else {
       alert('単語帳の更新に失敗しました');
       exitFlashcardSelectMode();
@@ -873,11 +940,8 @@ createSelectBtn.addEventListener('click', async function () {
       body: JSON.stringify({ ids, name })
     });
     if (res.ok) {
-      const data = await res.json();
-      // 保存した単語帳のwordsで学習UIを表示
-      flashcards = data.words.map(word => ({ front: word.label, back: word.details }));
-      currentCardIndex = 0;
-      exitFlashcardSelectMode();
+      // 単語帳一覧画面に遷移
+      window.location.href = '/flashcards.html';
     } else {
       alert('単語帳の保存に失敗しました');
       exitFlashcardSelectMode();
@@ -1151,6 +1215,10 @@ if (addWordInput) {
 
   await loadData();
   renderNetwork();
+
+  // Get the loading overlay
+  const loadingOverlay = document.getElementById('loading-overlay');
+
   // localStorageにstudyFlashcardがあれば自動で単語帳UIを表示
   const study = localStorage.getItem('studyFlashcard');
   if (study) {
@@ -1198,7 +1266,6 @@ if (addWordInput) {
 
         // 選択モードに入る
         enterFlashcardSelectMode();
-
         // 名前を設定
         const nameInput = document.getElementById('flashcard-name');
         if (nameInput) {
@@ -1225,14 +1292,29 @@ if (addWordInput) {
     nextTestQuestion();
   });
 
-  // --- 単語帳モードまたはテストモードでない場合はコーナーボタンを表示する ---
+  // --- 単語帳モードまたはテストモードまたは選択モードでない場合はコーナーボタンを表示する ---
   const flashcardViewElem = document.getElementById('flashcard-view');
   const testViewElem = document.getElementById('test-view');
+  const selectControlsElem = document.getElementById('flashcard-select-controls');
+  const cornerBtnGroup = document.querySelector('.corner-btn-group');
+
   if (
     (!flashcardViewElem || flashcardViewElem.classList.contains('hidden')) &&
-    (!testViewElem || testViewElem.classList.contains('hidden'))
+    (!testViewElem || testViewElem.classList.contains('hidden')) &&
+    (selectControlsElem && selectControlsElem.classList.contains('hidden'))
   ) {
     document.body.classList.remove('hide-corner-btns');
+    if (cornerBtnGroup) {
+      cornerBtnGroup.classList.add('visible');
+    }
+  }
+
+  // Hide the loading overlay after everything is set up
+  if (loadingOverlay) {
+    // Small delay to ensure smooth transition
+    setTimeout(() => {
+      loadingOverlay.classList.add('hidden');
+    }, 100);
   }
 
   // BGMボタンの初期状態を設定
