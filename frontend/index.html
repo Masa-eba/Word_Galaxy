@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,25 @@
   <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+  <!-- BGM用のaudio要素 -->
+  <audio id="bgm" loop>
+    <source src="music/word-gragh.mp3" type="audio/mpeg">
+    お使いのブラウザは音声再生をサポートしていません。
+  </audio>
+
+  <!-- BGM再生ボタン -->
+  <div id="bgm-control" class="bgm-control">
+    <button id="play-bgm-btn" class="bgm-btn">▶️</button>
+    <span id="bgm-status" class="bgm-status">停止中</span>
+  </div>
+
+  <!-- ローディング画面 -->
+  <div id="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+
   <!-- マインドマップのメインコンテナ -->
   <!-- Search bar -->
   <div id="search-container" class="">
@@ -69,7 +88,10 @@
     <button id="view-flashcards" class="corner-btn" onclick="window.location.href='/flashcards.html'">単語帳一覧</button>
     <button id="create-flashcards" class="corner-btn">単語帳作成</button>
     <button id="toggle-rotate-btn" class="corner-btn">回転ON</button>
+    <button id="toggle-bgm-btn" class="corner-btn">🔊</button>
   </div>
+
+
 
   <!-- 単語帳ビュー（デフォルトは非表示） -->
   <div id="flashcard-view" class="hidden">
@@ -80,7 +102,7 @@
         </div>
         <button id="back-to-map" class="close-btn">&times;</button>
       </div>
-      
+
       <div class="cards-wrapper">
         <div id="flashcard" class="card">
           <div class="card-face card-front">
@@ -97,7 +119,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="flashcard-controls">
         <button id="prev-card" class="control-btn">
           <span>←</span>
@@ -109,9 +131,9 @@
           <span>→</span>
         </button>
       </div>
-      
 
-      
+
+
       <div class="progress-bar">
         <div class="progress-fill"></div>
       </div>
@@ -127,14 +149,14 @@
         </div>
         <button id="back-from-test" class="close-btn">&times;</button>
       </div>
-      
+
       <div class="test-question">
         <h2 id="test-question-text"></h2>
         <div id="test-options" class="test-options">
           <!-- 選択肢がここに表示されます -->
         </div>
       </div>
-      
+
       <div class="test-controls">
         <button id="test-pass-btn" class="control-btn">
           <span>pass</span>
@@ -143,7 +165,7 @@
           <span>next</span>
         </button>
       </div>
-      
+
       <div class="test-progress-bar">
         <div class="test-progress-fill"></div>
       </div>
@@ -153,6 +175,7 @@
 
 
   <script src="app.js"></script>
-  
+
 </body>
-</html> 
+
+</html>
