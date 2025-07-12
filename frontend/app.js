@@ -451,10 +451,14 @@ function removeSelectedWord(nodeId) {
   const index = selectedNodeIds.indexOf(nodeId);
   if (index > -1) {
     selectedNodeIds.splice(index, 1);
-    network.unselectNodes([nodeId]);
+    // 選択状態を手動で再設定
+    network.selectNodes(selectedNodeIds);
     updateCreateFlashcardsBtn();
   }
 }
+
+// グローバルスコープで関数を定義
+window.removeSelectedWord = removeSelectedWord;
 
 // 選択したノードから単語帳を生成
 function createFlashcards() {
