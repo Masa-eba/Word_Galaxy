@@ -11,11 +11,7 @@
 </head>
 
 <body>
-  <!-- BGM用のaudio要素 -->
-  <audio id="bgm" loop>
-    <source src="/music/word-gragh.mp3" type="audio/mpeg">
-    お使いのブラウザは音声再生をサポートしていません。
-  </audio>
+
 
   <!-- ローディング画面 -->
   <div id="loading-overlay">
@@ -23,8 +19,7 @@
   </div>
 
   <!-- マインドマップのメインコンテナ -->
-  <!-- ページタイトル -->
-  <div class="page-title">2Dマインドマップ</div>
+
   
   <!-- Search bar -->
   <div id="search-container" class="">
@@ -84,12 +79,12 @@
     <button id="zoom-out-btn" class="corner-btn">全体表示</button>
     <button id="view-flashcards" class="corner-btn" onclick="window.location.href='../flashcard/flashcards.html'">単語帳一覧</button>
     <button id="create-flashcards" class="corner-btn">単語帳作成</button>
-    <button id="toggle-rotate-btn" class="corner-btn">回転ON</button>
-    <button id="toggle-bgm-btn" class="corner-btn">停止中</button>
+
+
   </div>
 
-  <!-- 3D表示ボタン（ページタイトルの上に独立配置） -->
-      <button id="view-3d" onclick="window.location.href='../sub3D/3d.html'">3D表示</button>
+    <!-- 3D表示ボタン -->
+  <button id="view-3d" onclick="window.location.href='../sub3D/3d.html'">3D表示</button>
 
 
 

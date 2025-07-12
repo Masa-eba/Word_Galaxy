@@ -15,10 +15,10 @@ html, body {
   text-shadow: 0 0 10px rgba(247, 200, 115, 0.5);
 }
 
-/* 3D表示ボタン（ページタイトルの上に配置） */
+/* 3D表示ボタン */
 #view-3d {
   position: fixed !important;
-  bottom: 5rem !important;
+  bottom: 2rem !important;
   right: 2rem !important;
   left: auto !important;
   margin: 0 !important;
