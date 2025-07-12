@@ -571,7 +571,10 @@ flashcard.addEventListener('click', function(e) {
 flipCardBtn.addEventListener('click', flipFlashcard);
 nextCardBtn.addEventListener('click', nextFlashcard);
 prevCardBtn.addEventListener('click', prevFlashcard);
-backToMapBtn.addEventListener('click', hideFlashcardView);
+backToMapBtn.addEventListener('click', function() {
+  // 単語帳一覧画面に遷移
+  window.location.href = '/flashcards.html';
+});
 
 
 
@@ -622,18 +625,8 @@ function showTestView() {
 }
 
 function hideTestView() {
-  testView.classList.add('hidden');
-  flashcardView.classList.add('hidden'); 
-  document.getElementById('network').style.display = '';
-  createFlashcardsBtn.style.display = '';
-  // 検索欄を再表示
-  document.getElementById('search-container').classList.remove('hidden');
-  // コーナーボタンを再表示
-  document.body.classList.remove('hide-corner-btns');
-  const cornerBtnGroup = document.querySelector('.corner-btn-group');
-  if (cornerBtnGroup) {
-    cornerBtnGroup.classList.add('visible');
-  }
+  // 直接単語帳一覧画面に遷移（一瞬の画面切り替えを避ける）
+  window.location.href = '/flashcards.html';
 }
 
 function renderTestQuestion() {
@@ -717,7 +710,7 @@ function showTestResults() {
       <p>正答率: ${percentage}%</p>
       <div class="result-buttons">
         <button id="retry-test" class="result-btn retry-btn">🔄 再テスト</button>
-        <button id="back-to-cards" class="result-btn back-btn">← カードに戻る</button>
+        <button id="back-to-cards" class="result-btn back-btn">← 単語帳一覧に戻る</button>
       </div>
     </div>
   `;
@@ -869,14 +862,8 @@ createSelectBtn.addEventListener('click', async function() {
       body: JSON.stringify({ ids, name })
     });
     if (res.ok) {
-      const data = await res.json();
-      // 更新した単語帳のwordsで学習UIを表示
-      flashcards = data.words.map(word => ({ front: word.label, back: word.details }));
-      currentCardIndex = 0;
-      exitFlashcardSelectMode();
-      // 編集フラグをリセット
-      window.isEditingFlashcard = false;
-      window.editingFlashcardId = null;
+      // 単語帳一覧画面に遷移
+      window.location.href = '/flashcards.html';
     } else {
       alert('単語帳の更新に失敗しました');
       exitFlashcardSelectMode();
@@ -889,11 +876,8 @@ createSelectBtn.addEventListener('click', async function() {
       body: JSON.stringify({ ids, name })
     });
     if (res.ok) {
-      const data = await res.json();
-      // 保存した単語帳のwordsで学習UIを表示
-      flashcards = data.words.map(word => ({ front: word.label, back: word.details }));
-      currentCardIndex = 0;
-      exitFlashcardSelectMode();
+      // 単語帳一覧画面に遷移
+      window.location.href = '/flashcards.html';
     } else {
       alert('単語帳の保存に失敗しました');
       exitFlashcardSelectMode();
