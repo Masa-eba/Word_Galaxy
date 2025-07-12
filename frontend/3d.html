@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>3Dネットワークグラフ</title>
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: #181a1b; }
+    #3d-graph { width: 100vw; height: 100vh; }
+    .corner-btn {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 10;
+      background: #22252a;
+      color: #f7c873;
+      border: none;
+      border-radius: 8px;
+      padding: 0.7rem 1.5rem;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    }
+    .corner-btn:hover { background: #33374a; }
+  </style>
+</head>
+<body>
+  <button class="corner-btn" onclick="window.location.href='index.html'">← 戻る</button>
+  <button class="corner-btn" id="toggle-orbit-btn" style="top: 4.5rem;">公転ON</button>
+  <div id="3d-graph"></div>
+  <script src="https://unpkg.com/3d-force-graph"></script>
+  <script src="https://unpkg.com/three@0.150.1/build/three.min.js"></script>
+  <script>
+    let graphInstance = null;
+    let isOrbiting = false;
+    let orbitInterval = null;
+    let originalPositions = null;
+    let theta = 0;
+
+    // data.jsonを取得
+    fetch('../backend/data.json')
+      .then(res => res.json())
+      .then(data => {
+        // 3d-force-graph用に変換
+        const graphData = {
+          nodes: data.nodes.map(n => ({
+            id: n.id,
+            name: n.label,
+            val: n.importance || 1,
+            category: n.category || '',
+            color: n.category === '基礎理論' ? '#fffbe6' : n.category === 'ネットワーク技術' ? '#7ecfff' : '#ffd6e6'
+          })),
+          links: data.edges.map(e => ({ source: e.from, target: e.to }))
+        };
+
+        // カラーパレット
+        const starColors = ['#fffbe6', '#ffeedd', '#b5e3ff', '#7ecfff', '#fff', '#ffd6e6', '#ffe4b5', '#c7eaff'];
+
+        // 3Dグラフ描画
+        graphInstance = ForceGraph3D()(document.getElementById('3d-graph'))
+          .graphData(graphData)
+          .nodeLabel('name')
+          .nodeThreeObject(node => {
+            // 星っぽい球体＋発光エフェクト
+            const group = new THREE.Group();
+            const color = node.color || starColors[Math.floor(Math.random() * starColors.length)];
+            const radius = Math.min(1.5 + (node.val || 1) * 0.7, 6); // サイズ制限
+            // 球体
+            const geometry = new THREE.SphereGeometry(radius, 24, 24);
+            const material = new THREE.MeshBasicMaterial({ color });
+            const sphere = new THREE.Mesh(geometry, material);
+            group.add(sphere);
+            // 発光（glow）
+            const glowMaterial = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.18 });
+            const glow = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.7, 24, 24), glowMaterial);
+            group.add(glow);
+            return group;
+          })
+          .nodeThreeObjectExtend(true)
+          .nodeColor(node => node.color)
+          .linkOpacity(0.35)
+          .linkColor(() => '#b5e3ff')
+          .linkDirectionalParticles(2)
+          .linkDirectionalParticleWidth(2)
+          .linkDirectionalParticleColor(() => '#fff')
+          .backgroundColor('#0a1020');
+
+        // カメラを原点に固定し、常に原点を注視
+        graphInstance.cameraPosition({ x: 0, y: 0, z: 200 }, { x: 0, y: 0, z: 0 }, 0);
+        graphInstance.controls().target.set(0, 0, 0);
+        graphInstance.controls().update();
+
+        // 背景に星を追加（canvasにランダムな点を描画）
+        setTimeout(() => {
+          const canvas = document.querySelector('canvas');
+          if (canvas) {
+            const ctx = canvas.getContext('2d');
+            for (let i = 0; i < 200; i++) {
+              const x = Math.random() * canvas.width;
+              const y = Math.random() * canvas.height;
+              const r = Math.random() * 0.7 + 0.3;
+              ctx.save();
+              ctx.globalAlpha = Math.random() * 0.5 + 0.3;
+              ctx.beginPath();
+              ctx.arc(x, y, r, 0, 2 * Math.PI);
+              ctx.fillStyle = starColors[Math.floor(Math.random() * starColors.length)];
+              ctx.shadowColor = '#fff';
+              ctx.shadowBlur = 4;
+              ctx.fill();
+              ctx.restore();
+            }
+          }
+        }, 1000);
+      });
+
+    // 公転ON/OFFボタン
+    document.getElementById('toggle-orbit-btn').addEventListener('click', function() {
+      if (isOrbiting) {
+        stopOrbit();
+      } else {
+        startOrbit();
+      }
+    });
+
+    function startOrbit() {
+      if (!graphInstance || isOrbiting) return;
+      isOrbiting = true;
+      document.getElementById('toggle-orbit-btn').textContent = '公転OFF';
+      // 初期座標を保存
+      const nodes = graphInstance.graphData().nodes;
+      if (!originalPositions) {
+        originalPositions = nodes.map(n => ({ id: n.id, x: n.x || 0, y: n.y || 0, z: n.z || 0 }));
+      }
+      theta = 0;
+      orbitInterval = setInterval(() => {
+        theta += 0.01;
+        // 中心を原点とする
+        nodes.forEach((n, i) => {
+          const orig = originalPositions[i];
+          // 半径は元の距離を維持
+          const r = Math.sqrt(orig.x * orig.x + orig.y * orig.y);
+          const phi = Math.atan2(orig.y, orig.x) + theta;
+          // z座標も少し揺らす
+          const z = orig.z * Math.cos(theta * 0.5 + i);
+          n.x = r * Math.cos(phi);
+          n.y = r * Math.sin(phi);
+          n.z = z;
+        });
+        graphInstance.refresh();
+      }, 30);
+    }
+
+    function stopOrbit() {
+      isOrbiting = false;
+      document.getElementById('toggle-orbit-btn').textContent = '公転ON';
+      if (orbitInterval) clearInterval(orbitInterval);
+      // 元の位置に戻す
+      if (graphInstance && originalPositions) {
+        const nodes = graphInstance.graphData().nodes;
+        nodes.forEach((n, i) => {
+          const orig = originalPositions[i];
+          n.x = orig.x;
+          n.y = orig.y;
+          n.z = orig.z;
+        });
+        graphInstance.refresh();
+      }
+    }
+  </script>
+</body>
+</html> 
