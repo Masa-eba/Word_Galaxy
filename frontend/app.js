@@ -123,19 +123,32 @@ function renderNetwork() {
   })));
   const visEdges = new vis.DataSet(edges.map(e => ({
     from: e.from,
-    to: e.to
-    // エッジにはラベルなし
+    to: e.to,
+    length: e.length || 100 // データのlength値を使用、デフォルトは100
   })));
 
   // Vis.jsネットワークのオプション
   const options = {
-    physics: {
-      stabilization: {
-        enabled: true,
-        iterations: 10, // グラフのサイズに応じて調整可能
-        updateInterval: 25
-      }
-    },
+          physics: {
+        stabilization: {
+          enabled: true,
+          iterations: 10, // グラフのサイズに応じて調整可能
+          updateInterval: 25
+        },
+        barnesHut: {
+          gravitationalConstant: -2000,
+          centralGravity: 0.3,
+          springLength: function(edge) {
+            // length値に基づいてスプリング長を調整
+            const length = edge.length || 100;
+            // length値をスプリング長に変換 (50-200 → 50-200)
+            return Math.max(50, Math.min(200, length));
+          },
+          springConstant: 0.04,
+          damping: 0.09,
+          avoidOverlap: 0.1
+        }
+      },
     nodes: {
       borderWidthSelected: 6,
       color: {
@@ -174,6 +187,21 @@ function renderNetwork() {
 
   network.on('afterDrawing', function() {
     renderExternalLabels(visNodes);
+  });
+
+  // エッジホバー時のツールチップ表示
+  network.on('hoverEdge', function(params) {
+    const edge = edges.find(e => 
+      (e.from === params.edge.from && e.to === params.edge.to) ||
+      (e.from === params.edge.to && e.to === params.edge.from)
+    );
+    if (edge && edge.length) {
+      showEdgeTooltip(params.event.center.x, params.event.center.y, edge.length);
+    }
+  });
+
+  network.on('blurEdge', function(params) {
+    hideEdgeTooltip();
   });
 
   // ノードクリック: 詳細を表示または選択トグル
@@ -222,6 +250,36 @@ function renderExternalLabels(visNodes) {
     }
   });
   ctx.restore();
+}
+
+// エッジツールチップを表示
+function showEdgeTooltip(x, y, length) {
+  // 既存のツールチップを削除
+  hideEdgeTooltip();
+  
+  const tooltip = document.createElement('div');
+  tooltip.id = 'edge-tooltip';
+  tooltip.style.position = 'absolute';
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = (y - 30) + 'px';
+  tooltip.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+  tooltip.style.color = 'white';
+  tooltip.style.padding = '5px 10px';
+  tooltip.style.borderRadius = '4px';
+  tooltip.style.fontSize = '12px';
+  tooltip.style.pointerEvents = 'none';
+  tooltip.style.zIndex = '1000';
+  tooltip.textContent = `関係強度: ${length}`;
+  
+  document.body.appendChild(tooltip);
+}
+
+// エッジツールチップを非表示
+function hideEdgeTooltip() {
+  const tooltip = document.getElementById('edge-tooltip');
+  if (tooltip) {
+    tooltip.remove();
+  }
 }
 
 // ノード詳細オーバーレイを表示
