@@ -705,7 +705,7 @@ nextCardBtn.addEventListener('click', nextFlashcard);
 prevCardBtn.addEventListener('click', prevFlashcard);
 backToMapBtn.addEventListener('click', function () {
   // 単語帳一覧画面に遷移
-  window.location.href = '/flashcards.html';
+  window.location.href = '../flashcard/flashcards.html';
 });
 
 
@@ -758,7 +758,7 @@ function showTestView() {
 
 function hideTestView() {
   // 直接単語帳一覧画面に遷移（一瞬の画面切り替えを避ける）
-  window.location.href = '/flashcards.html';
+  window.location.href = '../flashcard/flashcards.html';
 }
 
 function renderTestQuestion() {
@@ -994,7 +994,7 @@ createSelectBtn.addEventListener('click', async function () {
     });
     if (res.ok) {
       // 単語帳一覧画面に遷移
-      window.location.href = '/flashcards.html';
+      window.location.href = '../flashcard/flashcards.html';
     } else {
       alert('単語帳の更新に失敗しました');
       exitFlashcardSelectMode();
@@ -1008,7 +1008,7 @@ createSelectBtn.addEventListener('click', async function () {
     });
     if (res.ok) {
       // 単語帳一覧画面に遷移
-      window.location.href = '/flashcards.html';
+      window.location.href = '../flashcard/flashcards.html';
     } else {
       alert('単語帳の保存に失敗しました');
       exitFlashcardSelectMode();
