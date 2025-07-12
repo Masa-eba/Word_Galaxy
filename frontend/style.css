@@ -1,4 +1,4 @@
-/* 全体のフォントをサンセリフに統一 */
+ /* 全体のフォントをサンセリフに統一 */
 html, body {
   font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Arial, Helvetica, sans-serif;
 }
@@ -13,6 +13,42 @@ html, body {
   font-weight: bold;
   z-index: 10;
   text-shadow: 0 0 10px rgba(247, 200, 115, 0.5);
+}
+
+/* 3D表示ボタン（ページタイトルの上に配置） */
+#view-3d {
+  position: fixed !important;
+  bottom: 5rem !important;
+  right: 2rem !important;
+  left: auto !important;
+  margin: 0 !important;
+  width: 200px;
+  height: 56px;
+  border-radius: 50px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  padding: 0;
+  font-size: 1.1rem;
+  font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Arial, Helvetica, sans-serif;
+  font-weight: 400;
+  opacity: 0.85;
+  background: #2d313a;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  z-index: 9999;
+}
+
+#view-3d:hover {
+  opacity: 1;
+  background: #3a3f4b;
 }
 
 /* ローディング画面 */
@@ -971,187 +1007,187 @@ html, body {
    display: none;
  }
 
- #flashcard-container {
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   width: 100%;
-   max-width: 500px;
-   height: 100vh;
-   padding: 2rem;
-   box-sizing: border-box;
- }
+#flashcard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 500px;
+  height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+}
 
- /* 単語帳ヘッダー */
- .flashcard-header {
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
-   width: 100%;
-   margin-bottom: 2rem;
- }
+/* 単語帳ヘッダー */
+.flashcard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 2rem;
+}
 
- .card-counter {
-   color: #f7c873;
-   font-size: 1.1rem;
-   font-weight: bold;
- }
+.card-counter {
+  color: #f7c873;
+  font-size: 1.1rem;
+  font-weight: bold;
+}
 
- .close-btn {
-   background: rgba(255, 255, 255, 0.1);
-   color: #fff;
-   border: none;
-   border-radius: 50%;
-   width: 40px;
-   height: 40px;
-   font-size: 1.5rem;
-   cursor: pointer;
-   transition: background 0.2s;
- }
+.close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
 
- .close-btn:hover {
-   background: rgba(255, 255, 255, 0.2);
- }
+.close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
 
- /* カードラッパー */
- .cards-wrapper {
-   flex: 1;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   width: 100%;
-   position: relative;
- }
+/* カードラッパー */
+.cards-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+}
 
- .card {
-   width: 100%;
-   max-width: 400px;
-   height: 280px;
-   perspective: 1500px;
-   position: relative;
-   cursor: pointer;
-   transition: transform 0.3s ease;
- }
+.card {
+  width: 100%;
+  max-width: 400px;
+  height: 280px;
+  perspective: 1500px;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
 
- .card:hover {
-   transform: scale(1.02);
- }
+.card:hover {
+  transform: scale(1.02);
+}
 
- .card-face {
-   width: 100%;
-   height: 100%;
-   border-radius: 20px;
-   background: linear-gradient(145deg, #2d313a 0%, #23272e 100%);
-   color: #fff;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   position: absolute;
-   backface-visibility: hidden;
+.card-face {
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #2d313a 0%, #23272e 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  backface-visibility: hidden;
    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-   padding: 2rem;
-   text-align: center;
-   border: 2px solid rgba(247, 200, 115, 0.1);
-   transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
- }
+  padding: 2rem;
+  text-align: center;
+  border: 2px solid rgba(247, 200, 115, 0.1);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
- .card-front {
-   z-index: 2;
-   background: linear-gradient(145deg, #3a3f4b 0%, #2d313a 100%);
- }
+.card-front { 
+  z-index: 2;
+  background: linear-gradient(145deg, #3a3f4b 0%, #2d313a 100%);
+}
 
- .card-back {
-   transform: rotateY(180deg);
-   z-index: 1;
-   background: linear-gradient(145deg, #23272e 0%, #1a1d23 100%);
- }
+.card-back {
+  transform: rotateY(180deg);
+  z-index: 1;
+  background: linear-gradient(145deg, #23272e 0%, #1a1d23 100%);
+}
 
- .card.flipped .card-front {
-   transform: rotateY(180deg);
- }
+.card.flipped .card-front {
+  transform: rotateY(180deg);
+}
 
- .card.flipped .card-back {
-   transform: rotateY(0deg);
- }
+.card.flipped .card-back {
+  transform: rotateY(0deg);
+}
 
- /* カード内容 */
- .card-content {
-   width: 100%;
-   height: 100%;
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   justify-content: center;
-   gap: 1rem;
- }
+/* カード内容 */
+.card-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
 
- .card-title {
-   font-size: 2rem;
-   font-weight: bold;
-   color: #f7c873;
-   margin: 0;
-   text-align: center;
-   line-height: 1.2;
- }
+.card-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #f7c873;
+  margin: 0;
+  text-align: center;
+  line-height: 1.2;
+}
 
- .card-hint {
-   font-size: 0.9rem;
-   color: #888;
-   margin: 0;
-   text-align: center;
- }
+.card-hint {
+  font-size: 0.9rem;
+  color: #888;
+  margin: 0;
+  text-align: center;
+}
 
- .card-subtitle {
-   font-size: 1.2rem;
-   color: #f7c873;
-   margin: 0 0 1rem 0;
- }
+.card-subtitle {
+  font-size: 1.2rem;
+  color: #f7c873;
+  margin: 0 0 1rem 0;
+}
 
- .card-description {
-   font-size: 1rem;
-   line-height: 1.6;
-   margin: 0;
-   text-align: center;
-   color: #ccc;
- }
+.card-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+  text-align: center;
+  color: #ccc;
+}
 
- /* 単語帳コントロール */
- .flashcard-controls {
-   display: flex;
-   gap: 1.5rem;
-   justify-content: center;
-   align-items: center;
-   margin: 2rem 0;
- }
+/* 単語帳コントロール */
+.flashcard-controls {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem 0;
+}
 
- .control-btn {
-   background: rgba(255, 255, 255, 0.1);
-   color: #fff;
-   border: none;
-   border-radius: 50%;
-   width: 50px;
-   height: 50px;
-   font-size: 1.2rem;
-   cursor: pointer;
-   transition: all 0.2s;
-   display: flex;
-   align-items: center;
-   justify-content: center;
- }
+.control-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
- .control-btn:hover {
-   background: rgba(255, 255, 255, 0.2);
-   transform: scale(1.1);
- }
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
 
- .flip-btn {
-   background: rgba(247, 200, 115, 0.2);
-   color: #f7c873;
- }
+.flip-btn {
+  background: rgba(247, 200, 115, 0.2);
+  color: #f7c873;
+}
 
- .flip-btn:hover {
-   background: rgba(247, 200, 115, 0.3);
- }
+.flip-btn:hover {
+  background: rgba(247, 200, 115, 0.3);
+}
 
 
 
@@ -1163,9 +1199,9 @@ html, body {
    right: 0;
    bottom: 0;
    background: linear-gradient(135deg, #1a1d23 0%, #2d313a 100%);
-   display: flex;
+  display: flex;
    align-items: center;
-   justify-content: center;
+  justify-content: center;
    z-index: 20;
  }
 
@@ -1224,7 +1260,7 @@ html, body {
  }
 
  .test-option {
-   background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.1);
    color: #fff;
    border: 2px solid transparent;
    border-radius: 12px;
@@ -1305,8 +1341,8 @@ html, body {
 
  .result-btn {
    background: linear-gradient(135deg, #3a3f4b 0%, #2d313a 100%);
-   color: #fff;
-   border: none;
+  color: #fff;
+  border: none;
    border-radius: 12px;
    padding: 1.2rem 2rem;
    font-size: 1.3rem;
@@ -1444,7 +1480,7 @@ html, body {
  .add-word-section h4 {
    margin: 0 0 0.5rem 0;
    color: #f7c873;
-   font-size: 1rem;
+  font-size: 1rem;
  }
 
  #selected-words-list {
@@ -1479,9 +1515,9 @@ html, body {
    border-radius: 50%;
    width: 24px;
    height: 24px;
-   cursor: pointer;
+  cursor: pointer;
    font-size: 14px;
-   transition: all 0.2s;
+  transition: all 0.2s;
  }
 
  .remove-word-btn:hover {
@@ -1715,9 +1751,9 @@ html, body {
    border-radius: 8px;
    padding: 0.4rem 1rem;
    font-size: 0.95rem;
-   display: flex;
-   align-items: center;
-   gap: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
  }
 
@@ -2017,7 +2053,7 @@ html, body {
  }
 
  .search-nav-btn:hover:not(:disabled) {
-   background: rgba(247, 200, 115, 0.3);
+  background: rgba(247, 200, 115, 0.3);
    transform: scale(1.1);
  }
 
@@ -2027,7 +2063,7 @@ html, body {
  }
 
  .search-counter {
-   color: #f7c873;
+  color: #f7c873;
    font-size: 14px;
    font-weight: bold;
    min-width: 60px;
@@ -2357,210 +2393,210 @@ html, body {
 
 
 
- #test-view {
-   position: fixed;
+#test-view {
+  position: fixed;
    top: 0;
    left: 0;
    right: 0;
    bottom: 0;
-   background: linear-gradient(135deg, #1a1d23 0%, #2d313a 100%);
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   z-index: 20;
- }
+  background: linear-gradient(135deg, #1a1d23 0%, #2d313a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
 
  #test-view.hidden {
    display: none;
  }
 
- #test-container {
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   width: 100%;
-   max-width: 600px;
-   height: 100vh;
-   padding: 2rem;
-   box-sizing: border-box;
- }
+#test-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+}
 
- .test-header {
-   display: flex;
+.test-header {
+  display: flex;
    justify-content: center;
-   align-items: center;
-   width: 100%;
-   margin-bottom: 2rem;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 2rem;
    position: relative;
- }
+}
 
- .test-counter {
-   color: #f7c873;
-   font-size: 1.1rem;
-   font-weight: bold;
+.test-counter {
+  color: #f7c873;
+  font-size: 1.1rem;
+  font-weight: bold;
    text-align: center;
    width: 100%;
- }
+}
 
- .test-question {
-   flex: 1;
-   display: flex;
-   flex-direction: column;
-   align-items: center;
-   justify-content: center;
-   width: 100%;
-   text-align: center;
- }
+.test-question {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+}
 
- #test-question-text {
-   font-size: 1.8rem;
-   color: #fff;
-   margin-bottom: 2rem;
-   line-height: 1.4;
- }
+#test-question-text {
+  font-size: 1.8rem;
+  color: #fff;
+  margin-bottom: 2rem;
+  line-height: 1.4;
+}
 
- .test-options {
-   display: flex;
-   flex-direction: column;
-   gap: 1rem;
-   width: 100%;
-   max-width: 400px;
- }
+.test-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+}
 
- .test-option {
-   background: rgba(255, 255, 255, 0.1);
-   color: #fff;
-   border: 2px solid transparent;
-   border-radius: 12px;
-   padding: 1rem 1.5rem;
-   font-size: 1.1rem;
-   cursor: pointer;
-   transition: all 0.3s ease;
-   text-align: left;
- }
+.test-option {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+}
 
- .test-option:hover {
-   background: rgba(255, 255, 255, 0.2);
-   border-color: #f7c873;
- }
+.test-option:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #f7c873;
+}
 
- .test-option.selected {
-   background: rgba(247, 200, 115, 0.3);
-   border-color: #f7c873;
-   color: #f7c873;
- }
+.test-option.selected {
+  background: rgba(247, 200, 115, 0.3);
+  border-color: #f7c873;
+  color: #f7c873;
+}
 
- .test-option.correct {
-   background: rgba(76, 175, 80, 0.3);
-   border-color: #4caf50;
-   color: #4caf50;
- }
+.test-option.correct {
+  background: rgba(76, 175, 80, 0.3);
+  border-color: #4caf50;
+  color: #4caf50;
+}
 
- .test-option.incorrect {
-   background: rgba(244, 67, 54, 0.3);
-   border-color: #f44336;
-   color: #f44336;
- }
+.test-option.incorrect {
+  background: rgba(244, 67, 54, 0.3);
+  border-color: #f44336;
+  color: #f44336;
+}
 
- .test-controls {
-   display: flex;
-   justify-content: center;
-   margin: 2rem 0;
+.test-controls {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
    gap: 2rem;
- }
+}
 
- .test-progress-bar {
-   width: 100%;
-   height: 4px;
-   background: rgba(255, 255, 255, 0.1);
-   border-radius: 2px;
-   overflow: hidden;
-   margin-top: 1rem;
- }
+.test-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 1rem;
+}
 
- .test-progress-fill {
-   height: 100%;
-   background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
-   border-radius: 2px;
-   transition: width 0.3s ease;
- }
+.test-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
 
- .test-results {
-   text-align: center;
-   color: #fff;
- }
+.test-results {
+  text-align: center;
+  color: #fff;
+}
 
- .test-results h3 {
-   color: #f7c873;
-   font-size: 1.5rem;
-   margin-bottom: 1rem;
- }
+.test-results h3 {
+  color: #f7c873;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
 
- .test-results p {
-   font-size: 1.2rem;
-   margin-bottom: 0.5rem;
- }
+.test-results p {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
 
- .result-buttons {
-   display: flex;
-   flex-direction: column;
-   gap: 1rem;
-   margin-top: 2rem;
- }
+.result-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+}
 
- .result-btn {
-   background: linear-gradient(135deg, #3a3f4b 0%, #2d313a 100%);
-   color: #fff;
-   border: none;
-   border-radius: 12px;
-   padding: 1.2rem 2rem;
-   font-size: 1.3rem;
-   font-weight: bold;
-   cursor: pointer;
-   transition: all 0.3s ease;
+.result-btn {
+  background: linear-gradient(135deg, #3a3f4b 0%, #2d313a 100%);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 1.2rem 2rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
- }
+}
 
- .result-btn:hover {
-   transform: translateY(-2px);
+.result-btn:hover {
+  transform: translateY(-2px);
    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
- }
+}
 
- .retry-btn {
-   background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
- }
+.retry-btn {
+  background: linear-gradient(135deg, #4caf50 0%, #8bc34a 100%);
+}
 
- .retry-btn:hover {
-   background: linear-gradient(135deg, #8bc34a 0%, #4caf50 100%);
- }
+.retry-btn:hover {
+  background: linear-gradient(135deg, #8bc34a 0%, #4caf50 100%);
+}
 
- .back-btn {
-   background: linear-gradient(135deg, #f7c873 0%, #ffd700 100%);
-   color: #1a1d23;
- }
+.back-btn {
+  background: linear-gradient(135deg, #f7c873 0%, #ffd700 100%);
+  color: #1a1d23;
+}
 
- .back-btn:hover {
-   background: linear-gradient(135deg, #ffd700 0%, #f7c873 100%);
- }
+.back-btn:hover {
+  background: linear-gradient(135deg, #ffd700 0%, #f7c873 100%);
+}
 
- /* 進捗バー */
- .progress-bar {
+/* 進捗バー */
+.progress-bar {
    width: 100%;
    height: 4px;
    background: rgba(255, 255, 255, 0.1);
    border-radius: 2px;
    overflow: hidden;
    margin-top: 1rem;
- }
+}
 
- .progress-fill {
-   height: 100%;
-   background: linear-gradient(90deg, #f7c873 0%, #ffd700 100%);
-   border-radius: 2px;
-   transition: width 0.3s ease;
- }
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f7c873 0%, #ffd700 100%);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
 
- /* 単語帳作成ボタン */
+/* 単語帳作成ボタン */
  /* 他のボタンとCSSを揃えるために無効化:
 >>>>>>> origin/main
 #create-flashcards {
@@ -2583,38 +2619,38 @@ html, body {
 }
 */
 
- /* 単語帳表示ボタン */
- #view-flashcards {
-   position: fixed;
-   right: 2rem;
-   left: auto;
-   border-radius: 50px;
+/* 単語帳表示ボタン */
+#view-flashcards {
+  position: fixed;
+  right: 2rem;
+  left: auto;
+  border-radius: 50px;
    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-   padding: 0.8rem 2rem;
-   font-size: 1.1rem;
-   opacity: 0.85;
-   z-index: 30;
-   bottom: 6rem;
- }
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  opacity: 0.85;
+  z-index: 30;
+  bottom: 6rem;
+}
 
- #view-flashcards:hover {
-   opacity: 1;
-   background: #3a3f4b;
- }
+#view-flashcards:hover {
+  opacity: 1;
+  background: #3a3f4b;
+}
 
- /* ノード選択ハイライト（Vis.jsオーバーライド） */
- .vis-selected {
-   box-shadow: 0 0 0 4px #f7c873, 0 0 16px #f7c873;
-   border-color: #f7c873 !important;
- }
+/* ノード選択ハイライト（Vis.jsオーバーライド） */
+.vis-selected {
+  box-shadow: 0 0 0 4px #f7c873, 0 0 16px #f7c873;
+  border-color: #f7c873 !important;
+}
 
- #flashcard-select-controls {
-   position: fixed;
+#flashcard-select-controls {
+  position: fixed;
    top: 2rem;
-   right: 2rem;
+  right: 2rem;
    background: #22252a;
    color: #fff;
-   border-radius: 12px;
+  border-radius: 12px;
    padding: 2rem;
    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.3);
    z-index: 1000;
@@ -2624,9 +2660,9 @@ html, body {
    overflow-y: auto;
  }
 
- #flashcard-select-controls.hidden {
-   display: none;
- }
+#flashcard-select-controls.hidden {
+  display: none;
+}
 
  .edit-panel-header {
    margin-bottom: 1.5rem;
@@ -2641,15 +2677,15 @@ html, body {
  }
 
  .selected-words-container {
-   display: flex;
-   flex-direction: column;
+  display: flex;
+  flex-direction: column;
    gap: 1.5rem;
- }
+}
 
  .selected-words-section h4,
  .add-word-section h4 {
    margin: 0 0 0.5rem 0;
-   color: #f7c873;
+  color: #f7c873;
    font-size: 1rem;
  }
 
@@ -2674,7 +2710,7 @@ html, body {
  }
 
  .word-label {
-   color: #fff;
+  color: #fff;
    font-weight: 500;
  }
 
@@ -2707,17 +2743,17 @@ html, body {
    padding: 0.75rem;
    background: rgba(0, 0, 0, 0.3);
    border: 1px solid rgba(255, 255, 255, 0.2);
-   border-radius: 6px;
+  border-radius: 6px;
    color: #fff;
    font-size: 14px;
-   outline: none;
-   transition: border-color 0.2s;
- }
+  outline: none;
+  transition: border-color 0.2s;
+}
 
  #add-word-input:focus,
  .edit-panel-name-input input:focus {
-   border-color: #f7c873;
- }
+  border-color: #f7c873;
+}
 
  #add-word-input::placeholder,
  .edit-panel-name-input input::placeholder {
@@ -2745,7 +2781,7 @@ html, body {
 
  .suggestion-item {
    padding: 0.75rem;
-   color: #fff;
+  color: #fff;
    cursor: pointer;
    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
    transition: background 0.2s;
@@ -2815,237 +2851,237 @@ html, body {
 
 
 
- /* ボタンを垂直に並べる */
- .corner-btn-group {
-   position: fixed;
+/* ボタンを垂直に並べる */
+.corner-btn-group {
+  position: fixed;
    left: 2rem;
    right: auto;
-   bottom: 2rem;
-   display: flex;
-   flex-direction: column;
+  bottom: 2rem;
+  display: flex;
+  flex-direction: column;
    align-items: flex-start;
-   gap: 1.5rem;
-   z-index: 9999;
+  gap: 1.5rem;
+  z-index: 9999;
    opacity: 0;
    transition: opacity 0.3s ease;
  }
 
  .corner-btn-group.visible {
    opacity: 1;
- }
+}
 
- .corner-btn {
-   width: 200px;
-   height: 56px;
-   border-radius: 50px;
+.corner-btn {
+  width: 200px;
+  height: 56px;
+  border-radius: 50px;
    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-   padding: 0;
-   margin: 0;
-   font-size: 1.1rem;
-   font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Arial, Helvetica, sans-serif;
-   font-weight: 400;
-   opacity: 0.85;
-   background: #2d313a;
-   color: #fff;
-   border: none;
-   cursor: pointer;
-   transition: opacity 0.2s, background 0.2s;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   box-sizing: border-box;
-   overflow: hidden;
-   text-overflow: ellipsis;
-   white-space: nowrap;
- }
+  padding: 0;
+  margin: 0; 
+  font-size: 1.1rem;
+  font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Arial, Helvetica, sans-serif;
+  font-weight: 400;
+  opacity: 0.85;
+  background: #2d313a;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
- .corner-btn:hover {
-   opacity: 1;
-   background: #3a3f4b;
- }
+.corner-btn:hover {
+  opacity: 1;
+  background: #3a3f4b;
+}
 
- #zoom-out-btn.corner-btn,
- #view-flashcards.corner-btn,
- #create-flashcards.corner-btn {
-   position: static !important;
-   margin: 0 !important;
- }
+#zoom-out-btn.corner-btn,
+#view-flashcards.corner-btn,
+#create-flashcards.corner-btn {
+  position: static !important;
+  margin: 0 !important;
+}
 
- .hide-corner-btns .corner-btn-group {
-   display: none !important;
- }
+.hide-corner-btns .corner-btn-group {
+  display: none !important;
+}
 
- .hidden {
-   display: none !important;
- }
+.hidden {
+  display: none !important;
+} 
 
- #edit-selected-words-panel {
-   position: fixed;
-   top: 2rem;
-   right: 2rem;
-   width: 350px;
-   max-width: 90vw;
-   background: rgba(45, 49, 58, 0.95);
-   border-radius: 12px;
-   padding: 1.5rem;
+#edit-selected-words-panel {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  width: 350px;
+  max-width: 90vw;
+  background: rgba(45, 49, 58, 0.95);
+  border-radius: 12px;
+  padding: 1.5rem;
    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-   z-index: 1000;
-   max-height: 80vh;
-   overflow-y: auto;
-   color: #fff;
-   font-family: inherit;
- }
+  z-index: 1000;
+  max-height: 80vh;
+  overflow-y: auto;
+  color: #fff;
+  font-family: inherit;
+}
 
- .edit-panel-header h3 {
-   color: #f7c873;
-   font-size: 1.2rem;
-   margin: 0 0 1rem 0;
- }
+.edit-panel-header h3 {
+  color: #f7c873;
+  font-size: 1.2rem;
+  margin: 0 0 1rem 0;
+}
 
- .selected-words-section h4,
- .add-word-section h4,
- .edit-panel-name-input label {
-   color: #f7c873;
-   font-size: 0.95rem;
-   font-weight: bold;
-   margin-bottom: 0.5rem;
- }
+.selected-words-section h4,
+.add-word-section h4,
+.edit-panel-name-input label {
+  color: #f7c873;
+  font-size: 0.95rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
 
- #selected-words-list {
-   display: flex;
-   flex-wrap: wrap;
-   gap: 0.7rem;
-   min-height: 2.5rem;
+#selected-words-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  min-height: 2.5rem;
    background: rgba(0, 0, 0, 0.08);
-   border-radius: 8px;
-   padding: 0.7rem 0.5rem;
- }
+  border-radius: 8px;
+  padding: 0.7rem 0.5rem;
+}
 
- .selected-word-item {
-   background: linear-gradient(135deg, #2b2e4a 0%, #23244a 100%);
-   color: #f7c873;
-   border: 1px solid rgba(247, 200, 115, 0.3);
-   border-radius: 8px;
-   padding: 0.4rem 1rem;
-   font-size: 0.95rem;
-   display: flex;
-   align-items: center;
-   gap: 0.5rem;
+.selected-word-item {
+  background: linear-gradient(135deg, #2b2e4a 0%, #23244a 100%);
+  color: #f7c873;
+  border: 1px solid rgba(247, 200, 115, 0.3);
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
- }
+}
 
- .remove-word-btn {
-   background: none;
-   border: none;
-   color: #ff6b6b;
-   font-size: 1.1rem;
-   cursor: pointer;
-   padding: 0.2rem;
-   border-radius: 50%;
-   transition: all 0.2s;
-   width: 20px;
-   height: 20px;
- }
+.remove-word-btn {
+  background: none;
+  border: none;
+  color: #ff6b6b;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.2rem;
+  border-radius: 50%;
+  transition: all 0.2s;
+  width: 20px;
+  height: 20px;
+}
 
- .remove-word-btn:hover {
-   background: rgba(255, 107, 107, 0.2);
-   transform: scale(1.1);
- }
+.remove-word-btn:hover {
+  background: rgba(255, 107, 107, 0.2);
+  transform: scale(1.1);
+}
 
- .add-word-section {
-   position: relative;
- }
+.add-word-section {
+  position: relative;
+}
 
- #add-word-input,
- .edit-panel-name-input input {
-   width: 100%;
-   background: #23272e;
-   color: #fff;
-   border: 1px solid #3a3f4b;
-   border-radius: 6px;
-   padding: 0.8rem 1rem;
-   font-size: 1rem;
-   outline: none;
-   transition: border-color 0.2s;
-   margin-bottom: 0.5rem;
- }
+#add-word-input,
+.edit-panel-name-input input {
+  width: 100%;
+  background: #23272e;
+  color: #fff;
+  border: 1px solid #3a3f4b;
+  border-radius: 6px;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+  margin-bottom: 0.5rem;
+}
 
- #add-word-input:focus,
- .edit-panel-name-input input:focus {
-   border-color: #f7c873;
- }
+#add-word-input:focus,
+.edit-panel-name-input input:focus {
+  border-color: #f7c873;
+}
 
- #add-word-input::placeholder,
- .edit-panel-name-input input::placeholder {
-   color: #888;
- }
+#add-word-input::placeholder,
+.edit-panel-name-input input::placeholder {
+  color: #888;
+}
 
- #add-word-suggestions {
-   position: absolute;
-   top: 100%;
-   left: 0;
-   right: 0;
-   background: rgba(45, 49, 58, 0.98);
-   border-radius: 8px;
-   margin-top: 0.5rem;
-   max-height: 200px;
-   overflow-y: auto;
-   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-   border: 1px solid rgba(247, 200, 115, 0.2);
-   z-index: 1001;
- }
+#add-word-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(45, 49, 58, 0.98);
+  border-radius: 8px;
+  margin-top: 0.5rem;
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(247, 200, 115, 0.2);
+  z-index: 1001;
+}
 
- #add-word-suggestions.hidden {
-   display: none;
- }
+#add-word-suggestions.hidden {
+  display: none;
+}
 
- .suggestion-item {
-   padding: 0.8rem 1rem;
-   color: #fff;
-   cursor: pointer;
-   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-   transition: background 0.2s;
-   display: flex;
-   justify-content: space-between;
-   align-items: center;
- }
+.suggestion-item {
+  padding: 0.8rem 1rem;
+  color: #fff;
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: background 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
- .suggestion-item:hover {
-   background: rgba(247, 200, 115, 0.1);
- }
+.suggestion-item:hover {
+  background: rgba(247, 200, 115, 0.1);
+}
 
- .suggestion-label {
-   font-weight: bold;
-   color: #f7c873;
- }
+.suggestion-label {
+  font-weight: bold;
+  color: #f7c873;
+}
 
- .suggestion-details {
-   font-size: 0.85rem;
-   color: #ccc;
-   max-width: 200px;
-   overflow: hidden;
-   text-overflow: ellipsis;
-   white-space: nowrap;
- }
+.suggestion-details {
+  font-size: 0.85rem;
+  color: #ccc;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
- .edit-panel-buttons {
-   display: flex;
-   gap: 0.8rem;
-   margin-top: 1rem;
- }
+.edit-panel-buttons {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
 
- .edit-btn {
+.edit-btn {
    background: #2d313a;
    color: #fff;
-   border-radius: 50px;
-   padding: 0.8rem 2rem;
-   font-size: 1.1rem;
+  border-radius: 50px;
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
    font-weight: 400;
-   cursor: pointer;
+  cursor: pointer;
    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
    opacity: 0.85;
    border: none;
-   transition: opacity 0.2s, background 0.2s;
+  transition: opacity 0.2s, background 0.2s;
    display: flex;
    align-items: center;
    justify-content: center;
@@ -3055,14 +3091,14 @@ html, body {
    white-space: nowrap;
  }
 
- .edit-btn:hover {
-   opacity: 1;
+.edit-btn:hover {
+  opacity: 1;
    background: #3a3f4b;
- }
+}
 
- .empty-selected-words {
-   color: #888;
-   text-align: center;
-   padding: 2rem;
-   font-style: italic;
- }
+.empty-selected-words {
+  color: #888;
+  text-align: center;
+  padding: 2rem;
+  font-style: italic;
+} 

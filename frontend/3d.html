@@ -6,21 +6,54 @@
   <style>
     html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; background: #181a1b; }
     #3d-graph { width: 100vw; height: 100vh; }
-    .corner-btn {
+    /* ボタンを垂直に並べる */
+    .corner-btn-group {
       position: fixed;
-      top: 1rem;
-      right: 1rem;
-      z-index: 10;
-      background: #22252a;
-      color: #f7c873;
-      border: none;
-      border-radius: 8px;
-      padding: 0.7rem 1.5rem;
-      font-size: 1.1rem;
-      cursor: pointer;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+      left: 2rem;
+      right: auto;
+      bottom: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1.5rem;
+      z-index: 9999;
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
-    .corner-btn:hover { background: #33374a; }
+
+    .corner-btn-group.visible {
+      opacity: 1;
+    }
+
+    .corner-btn {
+      width: 200px;
+      height: 56px;
+      border-radius: 50px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+      padding: 0;
+      margin: 0;
+      font-size: 1.1rem;
+      font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Arial, Helvetica, sans-serif;
+      font-weight: 400;
+      opacity: 0.85;
+      background: #2d313a;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s, background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .corner-btn:hover {
+      opacity: 1;
+      background: #3a3f4b;
+    }
     .page-title {
       position: fixed;
       bottom: 2rem;
@@ -31,12 +64,63 @@
       z-index: 10;
       text-shadow: 0 0 10px rgba(247, 200, 115, 0.5);
     }
+    
+    /* 2D表示ボタン（ページタイトルの上に配置） */
+    #view-2d {
+      position: fixed !important;
+      bottom: 5rem !important;
+      right: 2rem !important;
+      left: auto !important;
+      margin: 0 !important;
+      width: 200px;
+      height: 56px;
+      border-radius: 50px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+      padding: 0;
+      font-size: 1.1rem;
+      font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Arial, Helvetica, sans-serif;
+      font-weight: 400;
+      opacity: 0.85;
+      background: #2d313a;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s, background 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      z-index: 9999;
+    }
+
+    #view-2d:hover {
+      opacity: 1;
+      background: #3a3f4b;
+    }
   </style>
 </head>
 <body>
+  <!-- BGM用のaudio要素 -->
+  <audio id="bgm" loop>
+    <source src="music/word-gragh.mp3" type="audio/mpeg">
+    お使いのブラウザは音声再生をサポートしていません。
+  </audio>
+
   <div class="page-title">3D ネットワークビュー</div>
-  <button class="corner-btn" onclick="window.location.href='index.html'">← 2D表示</button>
-  <button class="corner-btn" id="toggle-orbit-btn" style="top: 4.5rem;">公転ON</button>
+  
+  <!-- 2D表示ボタン（ページタイトルの上に独立配置） -->
+  <button id="view-2d" onclick="window.location.href='index.html'">2D表示</button>
+  
+  <!-- 左下のボタングループ -->
+  <div class="corner-btn-group">
+    <button class="corner-btn" id="toggle-orbit-btn">公転ON</button>
+    <button class="corner-btn" id="center-view-btn">中心表示</button>
+    <button class="corner-btn" id="toggle-bgm-btn">停止中</button>
+  </div>
+  
   <div id="3d-graph"></div>
   <script src="https://unpkg.com/3d-force-graph"></script>
   <script src="https://unpkg.com/three@0.150.1/build/three.min.js"></script>
@@ -90,6 +174,25 @@
             const glowMaterial = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.18 });
             const glow = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.7, 24, 24), glowMaterial);
             group.add(glow);
+            
+            // テキストラベルを追加
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 64;
+            
+            context.font = 'bold 24px Arial';
+            context.fillStyle = '#ffffff';
+            context.textAlign = 'center';
+            context.fillText(node.name || node.id, 128, 32);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            sprite.scale.set(20, 5, 1);
+            sprite.position.set(0, radius + 8, 0);
+            group.add(sprite);
+            
             return group;
           })
           .nodeThreeObjectExtend(true)
@@ -150,6 +253,36 @@
       }
     });
 
+    // 中心表示ボタン
+    document.getElementById('center-view-btn').addEventListener('click', function() {
+      centerView();
+    });
+
+    // ボタングループを表示
+    document.querySelector('.corner-btn-group').classList.add('visible');
+
+    // 音楽再生機能
+    const bgm = document.getElementById('bgm');
+    const toggleBgmBtn = document.getElementById('toggle-bgm-btn');
+    let isPlaying = false;
+
+    toggleBgmBtn.addEventListener('click', function() {
+      if (isPlaying) {
+        bgm.pause();
+        isPlaying = false;
+        toggleBgmBtn.textContent = '停止中';
+        console.log('音楽を停止しました');
+      } else {
+        bgm.play().then(() => {
+          isPlaying = true;
+          toggleBgmBtn.textContent = '再生中';
+          console.log('音楽を再生しました');
+        }).catch(error => {
+          console.error('音楽再生エラー:', error);
+        });
+      }
+    });
+
     function startOrbit() {
       if (!graphInstance || isOrbiting) return;
       isOrbiting = true;
@@ -193,6 +326,17 @@
         });
         graphInstance.refresh();
       }
+    }
+
+    function centerView() {
+      if (!graphInstance) return;
+      
+      // カメラを原点に移動し、全ノードが見えるようにズームアウト
+      graphInstance.cameraPosition({ x: 0, y: 0, z: 200 }, { x: 0, y: 0, z: 0 }, 1000);
+      graphInstance.controls().target.set(0, 0, 0);
+      graphInstance.controls().update();
+      
+      console.log('3Dビューを中心に移動しました');
     }
   </script>
 </body>

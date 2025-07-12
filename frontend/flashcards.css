@@ -177,6 +177,35 @@ body {
   color: #fff;
 }
 
+/* 新しいナビゲーションボタン（右上に配置） */
+.nav-buttons {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  display: flex;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.nav-buttons .nav-btn {
+  position: static;
+  background: rgba(30,32,50,0.8);
+  color: #ffd700;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.nav-buttons .nav-btn:hover {
+  background: #ffd70033;
+  color: #fff;
+}
+
 .page-header {
   text-align: center;
   margin: 2rem 0 1rem 0;
