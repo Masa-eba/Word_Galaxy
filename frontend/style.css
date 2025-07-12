@@ -823,6 +823,7 @@ html, body {
 
 #add-word-input,
 .edit-panel-name-input input {
+  box-sizing: border-box;
   width: 100%;
   padding: 0.75rem;
   background: rgba(0, 0, 0, 0.3);
