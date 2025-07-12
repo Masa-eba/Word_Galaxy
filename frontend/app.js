@@ -418,6 +418,10 @@ function showFlashcardView() {
   document.getElementById('search-container').classList.add('hidden');
   // 単語帳ビュー表示時にボタンを非表示
   document.body.classList.add('hide-corner-btns');
+  const cornerBtnGroup = document.querySelector('.corner-btn-group');
+  if (cornerBtnGroup) {
+    cornerBtnGroup.classList.remove('visible');
+  }
 }
 
 // 単語帳ビューを非表示
@@ -434,6 +438,10 @@ function hideFlashcardView() {
   }
   // 単語帳ビュー非表示時にボタンを再表示
   document.body.classList.remove('hide-corner-btns');
+  const cornerBtnGroup = document.querySelector('.corner-btn-group');
+  if (cornerBtnGroup) {
+    cornerBtnGroup.classList.add('visible');
+  }
 }
 
 // 現在の単語帳を描画
@@ -603,21 +611,24 @@ function showTestView() {
   document.getElementById('search-container').classList.add('hidden');
   // テストモード表示時にボタンを非表示
   document.body.classList.add('hide-corner-btns');
+  const cornerBtnGroup = document.querySelector('.corner-btn-group');
+  if (cornerBtnGroup) {
+    cornerBtnGroup.classList.remove('visible');
+  }
 }
 
 function hideTestView() {
   testView.classList.add('hidden');
-  flashcardView.classList.remove('hidden');
+  flashcardView.classList.add('hidden'); 
   document.getElementById('network').style.display = '';
-  createFlashcardsBtn.style.display = 'none';
-  renderFlashcard();
+  createFlashcardsBtn.style.display = '';
   // 検索欄を再表示
-  if (flashcardView.classList.contains('hidden')) {
-    document.getElementById('search-container').classList.remove('hidden');
-  }
-  // テストモード非表示時にボタンを再表示（ただしフラッシュカードビューが非表示の場合のみ）
-  if (flashcardView.classList.contains('hidden')) {
-    document.body.classList.remove('hide-corner-btns');
+  document.getElementById('search-container').classList.remove('hidden');
+  // コーナーボタンを再表示
+  document.body.classList.remove('hide-corner-btns');
+  const cornerBtnGroup = document.querySelector('.corner-btn-group');
+  if (cornerBtnGroup) {
+    cornerBtnGroup.classList.add('visible');
   }
 }
 
@@ -797,6 +808,10 @@ function enterFlashcardSelectMode() {
   }
   
   document.body.classList.add('hide-corner-btns');
+  const cornerBtnGroup = document.querySelector('.corner-btn-group');
+  if (cornerBtnGroup) {
+    cornerBtnGroup.classList.remove('visible');
+  }
   
   // 編集モードでない場合のみリセット
   if (!window.isEditingFlashcard) {
@@ -820,6 +835,10 @@ function exitFlashcardSelectMode() {
   selectedNodeIds = [];
   updateCreateFlashcardsBtn();
   document.body.classList.remove('hide-corner-btns');
+  const cornerBtnGroup = document.querySelector('.corner-btn-group');
+  if (cornerBtnGroup) {
+    cornerBtnGroup.classList.add('visible');
+  }
   // 編集フラグをリセット
   window.isEditingFlashcard = false;
   window.editingFlashcardId = null;
@@ -1119,6 +1138,10 @@ if (addWordInput) {
   
   await loadData();
   renderNetwork();
+  
+  // Get the loading overlay
+  const loadingOverlay = document.getElementById('loading-overlay');
+  
   // localStorageにstudyFlashcardがあれば自動で単語帳UIを表示
   const study = localStorage.getItem('studyFlashcard');
   if (study) {
@@ -1166,7 +1189,6 @@ if (addWordInput) {
         
         // 選択モードに入る
         enterFlashcardSelectMode();
-        
         // 名前を設定
         const nameInput = document.getElementById('flashcard-name');
         if (nameInput) {
@@ -1193,14 +1215,29 @@ if (addWordInput) {
     nextTestQuestion();
   });
 
-  // --- 単語帳モードまたはテストモードでない場合はコーナーボタンを表示する ---
+  // --- 単語帳モードまたはテストモードまたは選択モードでない場合はコーナーボタンを表示する ---
   const flashcardViewElem = document.getElementById('flashcard-view');
   const testViewElem = document.getElementById('test-view');
+  const selectControlsElem = document.getElementById('flashcard-select-controls');
+  const cornerBtnGroup = document.querySelector('.corner-btn-group');
+  
   if (
     (!flashcardViewElem || flashcardViewElem.classList.contains('hidden')) &&
-    (!testViewElem || testViewElem.classList.contains('hidden'))
+    (!testViewElem || testViewElem.classList.contains('hidden')) &&
+    (selectControlsElem && selectControlsElem.classList.contains('hidden'))
   ) {
     document.body.classList.remove('hide-corner-btns');
+    if (cornerBtnGroup) {
+      cornerBtnGroup.classList.add('visible');
+    }
+  }
+  
+  // Hide the loading overlay after everything is set up
+  if (loadingOverlay) {
+    // Small delay to ensure smooth transition
+    setTimeout(() => {
+      loadingOverlay.classList.add('hidden');
+    }, 100);
   }
 })(); 
 
