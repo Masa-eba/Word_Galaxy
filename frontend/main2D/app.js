@@ -376,9 +376,9 @@ function showNodeDetails(nodeId) {
   if (connectedNodesArray.length > 0) {
     const navigationHtml = `
       <div class="details-navigation">
-        <button id="details-prev-btn" class="details-nav-btn">←</button>
+        <button id="details-prev-btn" class="details-nav-btn">&lt;</button>
         <span id="details-counter" class="details-counter">接続ノード: 0 / ${connectedNodesArray.length}</span>
-        <button id="details-next-btn" class="details-nav-btn">→</button>
+        <button id="details-next-btn" class="details-nav-btn">&gt;</button>
       </div>
     `;
     detailsText.insertAdjacentHTML('afterend', navigationHtml);
@@ -1123,9 +1123,9 @@ function showSearchResults() {
   const navigationContainer = document.createElement('div');
   navigationContainer.className = 'search-navigation';
   navigationContainer.innerHTML = `
-    <button id="search-prev-btn" class="search-nav-btn" disabled>←</button>
+    <button id="search-prev-btn" class="search-nav-btn" disabled>&lt;</button>
     <span id="search-counter" class="search-counter">0 / 0</span>
-    <button id="search-next-btn" class="search-nav-btn" disabled>→</button>
+    <button id="search-next-btn" class="search-nav-btn" disabled>&gt;</button>
   `;
   searchResultsElement.appendChild(navigationContainer);
 

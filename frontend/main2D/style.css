@@ -263,6 +263,8 @@ html, body {
   border-radius: 12px;
   padding: 2rem 2.5rem;
   min-width: 320px;
+  width: 600px;
+  max-width: 90vw;
   box-shadow: 0 4px 32px rgba(0,0,0,0.3);
   position: relative;
   z-index: 1001;
