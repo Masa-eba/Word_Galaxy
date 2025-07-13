@@ -130,7 +130,8 @@
             name: n.label,
             val: n.importance || 1,
             category: n.category || '',
-            color: getColorFromImportance(n.importance || 50) // 2Dと同じ色分けルール
+            color: getColorFromImportance(n.importance || 50), // 2Dと同じ色分けルール
+            details: n.details || '' // ★ 追加: ノード定義を含める
           })),
           links: data.edges.map(e => ({ source: e.from, target: e.to }))
         };
@@ -224,6 +225,7 @@
     let searchResultsArray = [];
     let currentSearchIndex = -1;
     let graphDataCache = null;
+    let overlaySourceNodeId3D = null;
 
     // DOM要素
     const zoomOutBtn = document.getElementById('zoom-out-btn');
@@ -383,13 +385,17 @@
     }
     function focusOnNode3D(nodeId, hideAfterZoom = false) {
       if (!graphInstance) return;
-      // ノード位置を検索
+      // 3Dレイアウト内のノードの位置を見つける
       const nodeObj = graphDataCache.nodes.find(n => n.id === nodeId);
       if (nodeObj) {
-        // カメラをノードにアニメーション
+        // グラフのスケールに基づいて適切なz距離を計算
+        // グラフのバウンディングボックスまたは固定オフセットを使用できます
+        // ここでは固定オフセットを使用しますが、必要に応じてよりスマートにできます
+        const offset = 60; // 60-120を試してください、必要に応じて調整
+        const z = (nodeObj.z || 0) + offset;
         graphInstance.cameraPosition(
-          { x: nodeObj.x || 0, y: nodeObj.y || 0, z: 80 },
-          { x: nodeObj.x || 0, y: nodeObj.y || 0, z: 0 },
+          { x: nodeObj.x || 0, y: nodeObj.y || 0, z: z },
+          { x: nodeObj.x || 0, y: nodeObj.y || 0, z: nodeObj.z || 0 },
           1000
         );
         if (hideAfterZoom) hideSearchResults3D();
@@ -519,14 +525,38 @@
         }, 200);
       });
     }
-    // フラッシュカード作成（フラッシュカードビューにリダイレクト）
+    // フラッシュカード作成（サーバーに保存してフラッシュカードメニューにリダイレクト）
     if (createSelectBtn) {
-      createSelectBtn.addEventListener('click', function () {
-        if (selectedNodeIds.length > 0) {
-          // 選択された単語をlocalStorageに保存してリダイレクト
-          const selectedWords = selectedNodeIds.map(id => nodes.find(n => n.id === id)).filter(Boolean);
-          localStorage.setItem('studyFlashcard', JSON.stringify(selectedWords));
-          window.location.href = '../flashcard/flashcard_view.html';
+      createSelectBtn.addEventListener('click', async function () {
+        if (selectedNodeIds.length < 2) {
+          alert('2つ以上の単語を選択してください');
+          return;
+        }
+
+        const nameInput = document.getElementById('flashcard-name');
+        const name = nameInput.value.trim() || '新しい単語帳';
+
+        // 単語のidリストの作成
+        const ids = selectedNodeIds.map(id => Number(id));
+
+        try {
+          // POSTリクエストで新規作成
+          const res = await fetch('/api/flashcards', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids, name })
+          });
+          if (res.ok) {
+            // 単語帳一覧画面に遷移
+            window.location.href = '../flashcard/flashcard_menu.html';
+          } else {
+            alert('単語帳の保存に失敗しました');
+            exitFlashcardSelectMode3D();
+          }
+        } catch (error) {
+          console.error('Flashcard creation error:', error);
+          alert('単語帳の保存に失敗しました');
+          exitFlashcardSelectMode3D();
         }
       });
     }
@@ -544,21 +574,167 @@
           }
           updateSelectedWordsList3D();
         } else {
-          // 詳細オーバーレイを表示
+          highlightConnectedEdges3D(node.id); // クリック時に即座にハイライト
           showNodeDetails3D(node.id);
         }
       });
+      // 背景クリックでハイライト解除
+      if (graphInstance.onBackgroundClick) {
+        graphInstance.onBackgroundClick(() => {
+          resetEdgeHighlight3D();
+        });
+      }
     }
     // --- 詳細オーバーレイ ---
-    function showNodeDetails3D(nodeId) {
+    let connectedNodesArray3D = [];
+    let currentConnectedIndex3D = -1;
+    let highlightedNodeId3D = null;
+
+    function getConnectedNodes3D(nodeId) {
+      if (!graphDataCache || !graphDataCache.links) return [];
+      const relevantLinks = graphDataCache.links.filter(link =>
+        (link.source.id == nodeId || link.target.id == nodeId)
+      );
+      console.log('nodeId:', nodeId, typeof nodeId);
+      console.log('relevantLinks:', relevantLinks);
+      if (relevantLinks.length === 0) {
+        console.log('No links found for nodeId', nodeId, 'of type', typeof nodeId);
+        console.log('Sample link:', graphDataCache.links[0]);
+      }
+      const connectedIds = relevantLinks.map(link =>
+        link.source.id == nodeId ? link.target.id : link.source.id
+      );
+      console.log('connectedIds:', connectedIds);
+      return nodes.filter(n => connectedIds.includes(n.id));
+    }
+
+    function highlightConnectedEdges3D(nodeId) {
+      if (!graphInstance || !graphDataCache) return;
+      highlightedNodeId3D = nodeId;
+      graphInstance.linkColor(link => {
+        if ((link.source.id || link.source) == nodeId || (link.target.id || link.target) == nodeId) {
+          return '#fff';
+        }
+        return '#444';
+      });
+      graphInstance.linkWidth(link =>
+        ((link.source.id || link.source) == nodeId || (link.target.id || link.target) == nodeId) ? 4 : 2
+      );
+    }
+
+    function resetEdgeHighlight3D() {
+      if (!graphInstance) return;
+      highlightedNodeId3D = null;
+      graphInstance.linkColor(() => '#444');
+      graphInstance.linkWidth(() => 2);
+    }
+
+    function showNodeDetails3D(nodeId, isOverlayNav = false) {
       const node = nodes.find(n => n.id === nodeId);
       if (!node) return;
       document.getElementById('details-title').textContent = node.label || node.name;
       document.getElementById('details-text').textContent = node.details || '';
       document.getElementById('details-overlay').classList.remove('hidden');
+
+      // ナビゲーションしていない場合のみソースノードとナビゲーション状態を設定
+      if (!isOverlayNav) {
+        overlaySourceNodeId3D = nodeId;
+        connectedNodesArray3D = getConnectedNodes3D(overlaySourceNodeId3D);
+        currentConnectedIndex3D = -1;
+      }
+
+      // 既存のナビゲーションを削除
+      const existingNav = document.querySelector('.details-navigation');
+      if (existingNav) existingNav.remove();
+      if (connectedNodesArray3D.length > 0) {
+        const navHtml = `
+          <div class="details-navigation">
+            <button id="details-prev-btn" class="details-nav-btn">&lt;</button>
+            <span id="details-counter" class="details-counter">接続ノード: 0 / ${connectedNodesArray3D.length}</span>
+            <button id="details-next-btn" class="details-nav-btn">&gt;</button>
+          </div>
+        `;
+        document.getElementById('details-text').insertAdjacentHTML('afterend', navHtml);
+        document.getElementById('details-prev-btn').addEventListener('click', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          navigateConnectedNodes3D('prev');
+        });
+        document.getElementById('details-next-btn').addEventListener('click', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          navigateConnectedNodes3D('next');
+        });
+        updateConnectedNavigation3D();
+      }
+      // 常に元のノードのエッジをハイライト
+      highlightConnectedEdges3D(overlaySourceNodeId3D);
     }
+
+    function navigateConnectedNodes3D(direction) {
+      if (connectedNodesArray3D.length === 0) return;
+      if (direction === 'prev') {
+        if (currentConnectedIndex3D > 0) {
+          currentConnectedIndex3D--;
+        } else {
+          currentConnectedIndex3D = connectedNodesArray3D.length - 1;
+        }
+      } else if (direction === 'next') {
+        if (currentConnectedIndex3D < connectedNodesArray3D.length - 1) {
+          currentConnectedIndex3D++;
+        } else {
+          currentConnectedIndex3D = 0;
+        }
+      }
+      const selectedNode = connectedNodesArray3D[currentConnectedIndex3D];
+      if (selectedNode) {
+        focusOnNode3D(selectedNode.id, false);
+        showNodeDetails3D(selectedNode.id, true); // true = オーバーレイナビゲーション
+      }
+    }
+
+    function updateConnectedNavigation3D() {
+      const prevBtn = document.getElementById('details-prev-btn');
+      const nextBtn = document.getElementById('details-next-btn');
+      const counter = document.getElementById('details-counter');
+      if (!prevBtn || !nextBtn || !counter) return;
+      if (connectedNodesArray3D.length === 0) {
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        counter.textContent = '接続ノード: 0 / 0';
+        return;
+      }
+      prevBtn.disabled = false;
+      nextBtn.disabled = false;
+      const current = currentConnectedIndex3D >= 0 ? currentConnectedIndex3D + 1 : 0;
+      counter.textContent = `接続ノード: ${current} / ${connectedNodesArray3D.length}`;
+    }
+
     document.getElementById('close-details').addEventListener('click', function () {
       document.getElementById('details-overlay').classList.add('hidden');
+      connectedNodesArray3D = [];
+      currentConnectedIndex3D = -1;
+      overlaySourceNodeId3D = null;
+      resetEdgeHighlight3D();
+    });
+
+    // オーバーレイのキーボードナビゲーション
+    window.addEventListener('keydown', function (e) {
+      const overlay = document.getElementById('details-overlay');
+      if (!overlay.classList.contains('hidden')) {
+        if (e.key === 'ArrowLeft' && connectedNodesArray3D.length > 0) {
+          e.preventDefault();
+          navigateConnectedNodes3D('prev');
+        } else if (e.key === 'ArrowRight' && connectedNodesArray3D.length > 0) {
+          e.preventDefault();
+          navigateConnectedNodes3D('next');
+        } else if (e.key === 'Escape') {
+          overlay.classList.add('hidden');
+          connectedNodesArray3D = [];
+          currentConnectedIndex3D = -1;
+          resetEdgeHighlight3D();
+        }
+      }
     });
     // --- 読み込み時のデータ同期 ---
     function sync3DDataFromGraph(graphData) {
