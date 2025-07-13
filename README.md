@@ -67,7 +67,7 @@
 #### AI技術による関連度計算
 - **BERT（Bidirectional Encoder Representations from Transformers）**を使用
 - 単語の意味的類似性を高精度で計算
-- 例: 「も言いたい」→「例えば」のような関連性を自動検出
+- 例: 「銀行」→「お金」のような関連性を自動検出
 
 ### 検索機能
 - リアルタイム検索
