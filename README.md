@@ -114,8 +114,8 @@
 
 #### 1. リポジトリのクローン
 ```bash
-git clone https://github.com/your-username/word-graph.git
-cd word-graph
+git clone https://github.com/Masa-eba/Word_Galaxy.git
+cd Word_Galaxy
 ```
 
 #### 2. バックエンド環境のセットアップ
