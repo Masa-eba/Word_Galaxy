@@ -23,6 +23,9 @@
       z-index: 1;
     }
   </style>
+  <script src="//unpkg.com/three@0.128.0/build/three.min.js"></script>
+  <script src="//unpkg.com/three-spritetext@1.6.3"></script>
+  <script src="//unpkg.com/3d-force-graph@1.70.7"></script>
 </head>
 <body>
   <!-- 2D表示ボタン -->
@@ -93,13 +96,7 @@
     <button id="view-flashcards" class="corner-btn" onclick="window.location.href='../flashcard/flashcard_menu.html'">単語帳一覧</button>
     <button id="create-flashcards" class="corner-btn">単語帳作成</button>
   </div>
-  
-  
-    注意: 以下の three.js CDN インポートは r150 以降非推奨となり、r160 で削除予定です。
-    今後のアップデートでは、three.js 公式ドキュメントで推奨されている ES Modules への切り替えを検討してください:
-    https://threejs.org/docs/index.html#manual/ja/introduction/Installation
-  <script src="https://unpkg.com/3d-force-graph"></script>
-  <script src="https://unpkg.com/three@0.150.1/build/three.min.js"></script>
+
   <script>
     let graphInstance = null;
 
@@ -139,19 +136,40 @@
         // カラーパレット
         const starColors = ['#fffbe6', '#ffeedd', '#b5e3ff', '#7ecfff', '#fff', '#ffd6e6', '#ffe4b5', '#c7eaff'];
 
+        // 括弧内のコンテンツを削除するヘルパー関数（()と（）の両方）
+        function stripParenthesisContent(label) {
+          return label
+            .replace(/\s*\([^)]*\)/g, '')
+            .replace(/\s*（[^）]*）/g, '');
+        }
         // 3Dグラフ描画
         graphInstance = ForceGraph3D()(document.getElementById('3d-graph'))
           .graphData(graphData)
           .nodeThreeObject(node => {
-            // 球体のみ（ラベルは表示しない）
+            // 球体を作成
+            const sphere = new THREE.Mesh(
+              new THREE.SphereGeometry(4, 16, 16),
+              new THREE.MeshBasicMaterial({ color: node.color })
+            );
+
+            // three-spritetextを使用してテキストスプライトを作成、括弧内のコンテンツを隠す
+            const label = stripParenthesisContent(node.name);
+            const sprite = new SpriteText(label);
+            sprite.fontWeight = 'bold';
+            sprite.material.depthWrite = false; // テキストが常に表示されるようにする
+            sprite.color = node.color;
+            sprite.textHeight = 3;
+            sprite.position.y = 10; // ラベルを球体の上に配置
+
+            // 球体とスプライトをグループに追加
             const group = new THREE.Group();
-            const sphereGeometry = new THREE.SphereGeometry(4, 16, 16);
-            const sphereMaterial = new THREE.MeshBasicMaterial({ color: node.color });
-            const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
             group.add(sphere);
+            group.add(sprite);
+
             return group;
           })
           .nodeThreeObjectExtend(false)
+          .nodeLabel(() => '')
           .nodeColor(node => node.color)
           .linkOpacity(0.35)
           .linkColor(() => '#444')
@@ -168,7 +186,7 @@
           const canvas = document.querySelector('canvas');
           if (canvas) {
             const ctx = canvas.getContext('2d');
-            if (!ctx) return; // null check for context
+            if (!ctx) return; // コンテキストのnullチェック
             for (let i = 0; i < 200; i++) {
               const x = Math.random() * canvas.width;
               const y = Math.random() * canvas.height;
@@ -270,8 +288,8 @@
           const dy = maxY - minY;
           const dz = maxZ - minZ;
           const maxDim = Math.max(dx, dy, dz, 1);
-          // 全ノードがビューに収まる距離（係数は調整が必要かもしれません）
-          const distance = maxDim * 1.5 + 100;
+          // 全ノードがビューに収まる距離（さらに近く調整）
+          const distance = maxDim * 1.0 + 20;
           graphInstance.cameraPosition(
             { x: center.x, y: center.y, z: distance },
             { x: center.x, y: center.y, z: 0 },

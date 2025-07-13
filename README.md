@@ -23,11 +23,12 @@
 
 ## 🏆 受賞歴
 
+[![賞状](./賞状.png)](./七五三太ファンクラブ.pdf)
+
 本プロジェクト『ことばのほしぞら』は、  
 **技育CAMP ハッカソン Vol.6 にて努力賞（全20チーム中 上位入賞）を受賞**しました。
 
 [公式受賞ポストはこちら](https://x.com/geek_pjt/status/1944327502555725871)
-
 
 「ことばのほしぞら」は、単語間の関連性を可視化することで、より効果的な学習体験を提供するWebアプリケーションです。
 
@@ -122,7 +123,7 @@
 
 #### 1. リポジトリのクローン
 ```bash
-git clone https://github.com/your-username/Word_Galaxy.git
+git clone https://github.com/Masa-eba/Word_Galaxy.git
 cd Word_Galaxy
 ```
 
