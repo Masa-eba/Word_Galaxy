@@ -270,8 +270,8 @@
           const dy = maxY - minY;
           const dz = maxZ - minZ;
           const maxDim = Math.max(dx, dy, dz, 1);
-          // 全ノードがビューに収まる距離（係数は調整が必要かもしれません）
-          const distance = maxDim * 1.0 + 100;
+          // 全ノードがビューに収まる距離（さらに近く調整）
+          const distance = maxDim * 1.0 + 20;
           graphInstance.cameraPosition(
             { x: center.x, y: center.y, z: distance },
             { x: center.x, y: center.y, z: 0 },

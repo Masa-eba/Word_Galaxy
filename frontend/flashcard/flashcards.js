@@ -133,7 +133,7 @@ function setupButtonListeners(flashcards) {
       const card = flashcards.find(f => String(f.id) === String(id));
       if (card) {
         localStorage.setItem('editFlashcard', JSON.stringify(card));
-        window.location.href = 'flashcard_view.html';
+        window.location.href = '../main2D/index.html';
       }
     });
   });
