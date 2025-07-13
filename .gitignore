@@ -208,3 +208,15 @@ backend/flashcards.json
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Video files
+*.mov
+*.mp4
+*.avi
+*.mkv
+*.wmv
+*.flv
+*.webm
+*.m4v
+*.3gp
+*.ogv
