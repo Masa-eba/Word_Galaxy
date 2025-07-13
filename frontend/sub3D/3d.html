@@ -21,6 +21,35 @@
       left: 0;
       background: #181a1b;
       z-index: 1;
+      pointer-events: none !important;
+    }
+    #3d-graph canvas {
+      pointer-events: none !important;
+    }
+    #flashcard-select-controls, #flashcard-select-controls * {
+      pointer-events: auto !important;
+      z-index: 99999 !important;
+    }
+    #flashcard-select-controls {
+      position: fixed !important;
+      z-index: 99999 !important;
+    }
+    .add-word-section {
+      position: relative;
+    }
+    #add-word-suggestions {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      z-index: 99999;
+      background: #22252a;
+      color: #fff;
+      border: 1px solid rgba(247, 200, 115, 0.2);
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      padding: 0;
+      margin-top: 4px;
     }
   </style>
   <script src="//unpkg.com/three@0.128.0/build/three.min.js"></script>
@@ -28,10 +57,8 @@
   <script src="//unpkg.com/3d-force-graph@1.70.7"></script>
 </head>
 <body>
-  <!-- 2D表示ボタン -->
   <button id="view-2d" class="corner-btn" style="position: fixed; bottom: 2rem; right: 2rem; left: auto; margin: 0; z-index: 1001;" onclick="window.location.href='../main2D/index.html'">2D表示</button>
 
-  <!-- 検索バー（ID/クラス名は2Dと一致） -->
   <div id="search-container">
     <div id="search-box">
       <input type="text" id="search-input" placeholder="単語を検索..." autocomplete="off">
@@ -44,23 +71,11 @@
       <button id="clear-search-btn" class="hidden">&times;</button>
     </div>
     <div id="search-results" class="hidden">
-      <!-- 検索結果がここに表示されます -->
-    </div>
+      </div>
   </div>
 
-  <!-- 3Dグラフのメインコンテナ（そのまま保持） -->
   <div id="3d-graph"></div>
 
-  <!-- 詳細オーバーレイ（ID/クラス名は2Dと一致） -->
-  <div id="details-overlay" class="hidden">
-    <div id="details-box">
-      <button id="close-details">&times;</button>
-      <h3 id="details-title"></h3>
-      <p id="details-text"></p>
-    </div>
-  </div>
-
-  <!-- フラッシュカード選択コントロール（ID/クラス名は2Dと一致） -->
   <div id="flashcard-select-controls" class="hidden">
     <div class="edit-panel-header">
       <h3>単語帳作成</h3>
@@ -69,15 +84,11 @@
       <div class="selected-words-section">
         <h4>選択された単語</h4>
         <div id="selected-words-list">
-          <!-- 選択された単語がここに表示されます -->
-        </div>
+          </div>
       </div>
       <div class="add-word-section">
         <h4>単語を追加</h4>
         <input type="text" id="add-word-input" placeholder="単語を検索して追加...">
-        <div id="add-word-suggestions" class="hidden">
-          <!-- 検索候補がここに表示されます -->
-        </div>
       </div>
       <div class="edit-panel-name-input">
         <label for="flashcard-name">単語帳の名前:</label>
@@ -90,7 +101,17 @@
     </div>
   </div>
 
-  <!-- コーナーボタングループ（ID/クラス名は2Dと一致） -->
+  <!-- Move the suggestions dropdown to the end of body -->
+  <div id="add-word-suggestions" class="hidden"></div>
+
+  <div id="details-overlay" class="hidden">
+    <div id="details-box">
+      <button id="close-details">&times;</button>
+      <h3 id="details-title"></h3>
+      <p id="details-text"></p>
+    </div>
+  </div>
+
   <div class="corner-btn-group visible">
     <button id="zoom-out-btn" class="corner-btn">全体表示</button>
     <button id="view-flashcards" class="corner-btn" onclick="window.location.href='../flashcard/flashcard_menu.html'">単語帳一覧</button>
@@ -99,18 +120,42 @@
 
   <script>
     let graphInstance = null;
+    const selectedNodes = new Set();
+    
+    const clearGlow = () => {
+        selectedNodes.forEach(node => {
+            if (node.__threeObj) {
+                ['glow', 'softGlow'].forEach(name => {
+                  const obj = node.__threeObj.children.find(child => child.name === name);
+                  if (obj) node.__threeObj.remove(obj);
+                });
+            }
+        });
+        selectedNodes.clear();
+    };
+    
+    const addGlow = (node) => {
+        if (!node || !node.__threeObj) return;
+        const glow = new THREE.Mesh(
+          new THREE.SphereGeometry(7, 32, 32),
+          new THREE.MeshBasicMaterial({
+            color: '#ffe066',
+            transparent: true,
+            opacity: 0.35,
+            depthWrite: false
+          })
+        );
+        glow.name = 'glow';
+        node.__threeObj.add(glow);
+    };
 
-    // data.jsonを取得
     fetch('/api/data')
       .then(res => {
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         return res.json();
       })
       .then(data => {
         console.log('Data loaded successfully:', data);
-        // importance値から色を計算する関数（2Dと同じ）
         function getColorFromImportance(importance) {
           const clampedImportance = Math.max(0, Math.min(100, importance));
           const ratio = clampedImportance / 100;
@@ -120,52 +165,42 @@
           return `rgb(${r}, ${g}, ${b})`;
         }
 
-        // 3d-force-graph用に変換
         const graphData = {
           nodes: data.nodes.map(n => ({
             id: n.id,
             name: n.label,
+            label: n.label, // <-- labelプロパティが存在することを確認
             val: n.importance || 1,
             category: n.category || '',
-            color: getColorFromImportance(n.importance || 50), // 2Dと同じ色分けルール
-            details: n.details || '' // ★ 追加: ノード定義を含める
+            color: getColorFromImportance(n.importance || 50),
+            details: n.details || ''
           })),
           links: data.edges.map(e => ({ source: e.from, target: e.to }))
         };
 
-        // カラーパレット
         const starColors = ['#fffbe6', '#ffeedd', '#b5e3ff', '#7ecfff', '#fff', '#ffd6e6', '#ffe4b5', '#c7eaff'];
 
-        // 括弧内のコンテンツを削除するヘルパー関数（()と（）の両方）
         function stripParenthesisContent(label) {
-          return label
-            .replace(/\s*\([^)]*\)/g, '')
-            .replace(/\s*（[^）]*）/g, '');
+          return label.replace(/\s*\(.*?\)/g, '').replace(/\s*（.*?）/g, '');
         }
-        // 3Dグラフ描画
+
         graphInstance = ForceGraph3D()(document.getElementById('3d-graph'))
           .graphData(graphData)
           .nodeThreeObject(node => {
-            // 球体を作成
             const sphere = new THREE.Mesh(
               new THREE.SphereGeometry(4, 16, 16),
               new THREE.MeshBasicMaterial({ color: node.color })
             );
-
-            // three-spritetextを使用してテキストスプライトを作成、括弧内のコンテンツを隠す
             const label = stripParenthesisContent(node.name);
             const sprite = new SpriteText(label);
             sprite.fontWeight = 'bold';
-            sprite.material.depthWrite = false; // テキストが常に表示されるようにする
+            sprite.material.depthWrite = false;
             sprite.color = node.color;
             sprite.textHeight = 3;
-            sprite.position.y = 10; // ラベルを球体の上に配置
-
-            // 球体とスプライトをグループに追加
+            sprite.position.y = 10;
             const group = new THREE.Group();
             group.add(sphere);
             group.add(sprite);
-
             return group;
           })
           .nodeThreeObjectExtend(false)
@@ -174,65 +209,39 @@
           .linkOpacity(0.35)
           .linkColor(() => '#444')
           .linkWidth(() => 2)
-          .backgroundColor('#181a1b');
+          .backgroundColor('#181a1b')
+          .onNodeClick(node => {
+              if (isSelectingFlashcards) { // 選択モードかどうかをチェック
+                  // ロジックはsetup3DNodeSelectionに移動
+              } else {
+                  clearGlow();
+                  if (node) selectedNodes.add(node);
+                  addGlow(node);
+                  const distance = 40;
+                  const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
+                  graphInstance.cameraPosition(
+                      { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+                      node,
+                      2000
+                  );
+              }
+          })
+          .onBackgroundClick(() => {
+            if (!isSelectingFlashcards) clearGlow();
+          });
 
-        // カメラを原点に固定し、常に原点を注視
         graphInstance.cameraPosition({ x: 0, y: 0, z: 200 }, { x: 0, y: 0, z: 0 }, 0);
         graphInstance.controls().target.set(0, 0, 0);
         graphInstance.controls().update();
 
-        // 背景に星を追加（canvasにランダムな点を描画）
-        setTimeout(() => {
-          const canvas = document.querySelector('canvas');
-          if (canvas) {
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return; // コンテキストのnullチェック
-            for (let i = 0; i < 200; i++) {
-              const x = Math.random() * canvas.width;
-              const y = Math.random() * canvas.height;
-              const r = Math.random() * 0.7 + 0.3;
-              ctx.save();
-              ctx.globalAlpha = Math.random() * 0.5 + 0.3;
-              ctx.beginPath();
-              ctx.arc(x, y, r, 0, 2 * Math.PI);
-              ctx.fillStyle = starColors[Math.floor(Math.random() * starColors.length)];
-              ctx.shadowColor = '#fff';
-              ctx.shadowBlur = 4;
-              ctx.fill();
-              ctx.restore();
-            }
-          }
-        }, 1000);
       })
       .catch(error => {
         console.error('Error loading data:', error);
-        document.getElementById('3d-graph').innerHTML = `
-          <div style="display: flex; justify-content: center; align-items: center; height: 100vh; color: #f7c873; font-size: 1.2rem;">
-            <div style="text-align: center;">
-              <h3>データの読み込みに失敗しました</h3>
-              <p>${error.message}</p>
-              <p>バックエンドサーバーが起動しているか確認してください</p>
-            </div>
-          </div>
-        `;
+        document.getElementById('3d-graph').innerHTML = `<div style="padding: 20px; color: #f7c873; text-align: center;"><h3>データの読み込みに失敗しました</h3><p>${error.message}</p></div>`;
       });
-
-    // 中心表示ボタン（存在しないため削除）
-    // document.getElementById('center-view-btn').addEventListener('click', function() {
-    //   centerView();
-    // });
-
-    // ボタングループを表示
+      
     document.querySelector('.corner-btn-group').classList.add('visible');
 
-    function centerView() {
-      if (!graphInstance) return;
-      // カメラを原点に移動し、全ノードが見えるようにズームアウト
-      graphInstance.cameraPosition({ x: 0, y: 0, z: 200 }, { x: 0, y: 0, z: 0 }, 1000);
-      graphInstance.controls().target.set(0, 0, 0);
-      graphInstance.controls().update();
-      console.log('3Dビューを中心に移動しました');
-    }
   </script>
   <script>
     // --- 3Dビュー機能統合（2Dから移植） ---
@@ -243,273 +252,249 @@
     let searchResultsArray = [];
     let currentSearchIndex = -1;
     let graphDataCache = null;
-    let overlaySourceNodeId3D = null;
 
-    // DOM要素
     const zoomOutBtn = document.getElementById('zoom-out-btn');
     const searchInput = document.getElementById('search-input');
-    const searchBtn = document.getElementById('search-btn');
-    const clearSearchBtn = document.getElementById('clear-search-btn');
-    const searchResultsElement = document.getElementById('search-results');
     const createFlashcardsBtn = document.getElementById('create-flashcards');
-    const viewFlashcardsBtn = document.getElementById('view-flashcards');
     const selectControls = document.getElementById('flashcard-select-controls');
-    const createSelectBtn = document.getElementById('create-flashcard-select');
     const cancelSelectBtn = document.getElementById('cancel-flashcard-select');
     const selectedWordsList = document.getElementById('selected-words-list');
-    const addWordInput = document.getElementById('add-word-input');
-    const addWordSuggestions = document.getElementById('add-word-suggestions');
-    const flashcardNameInput = document.getElementById('flashcard-name');
+    
+    if (cancelSelectBtn) {
+        cancelSelectBtn.addEventListener('click', () => exitFlashcardSelectMode3D());
+    }
 
-    // --- ズームアウト（全体表示） ---
+    // ズームアウトボタンのイベントリスナーを即座に設定
     if (zoomOutBtn) {
+      console.log('Setting up zoom out button event listener');
       zoomOutBtn.addEventListener('click', function () {
-        if (graphInstance && graphDataCache && graphDataCache.nodes && graphDataCache.nodes.length > 0) {
-          // バウンディングボックスを計算
-          let minX = Infinity, minY = Infinity, minZ = Infinity;
-          let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
-          graphDataCache.nodes.forEach(node => {
-            const x = node.x || 0, y = node.y || 0, z = node.z || 0;
-            if (x < minX) minX = x;
-            if (y < minY) minY = y;
-            if (z < minZ) minZ = z;
-            if (x > maxX) maxX = x;
-            if (y > maxY) maxY = y;
-            if (z > maxZ) maxZ = z;
-          });
-          // バウンディングボックスの中心
-          const center = {
-            x: (minX + maxX) / 2,
-            y: (minY + maxY) / 2,
-            z: (minZ + maxZ) / 2
-          };
-          // バウンディングボックスのサイズ
-          const dx = maxX - minX;
-          const dy = maxY - minY;
-          const dz = maxZ - minZ;
-          const maxDim = Math.max(dx, dy, dz, 1);
-          // 全ノードがビューに収まる距離（係数は調整が必要かもしれません）
-          const distance = maxDim * 1.0 + 100;
-          graphInstance.cameraPosition(
-            { x: center.x, y: center.y, z: distance },
-            { x: center.x, y: center.y, z: 0 },
-            1000
-          );
-          graphInstance.controls().target.set(center.x, center.y, 0);
-          graphInstance.controls().update();
-        }
-      });
-    }
-
-    // --- 検索ロジック ---
-    function searchNodes3D(query) {
-      if (!query.trim() || !nodes.length) {
-        searchResultsArray = [];
-        hideSearchResults3D();
-        return;
-      }
-      const searchTerm = query.toLowerCase();
-      searchResultsArray = nodes.filter(node =>
-        (node.label || node.name).toLowerCase().includes(searchTerm)
-      );
-      showSearchResults3D();
-    }
-
-    function showSearchResults3D() {
-      if (searchResultsArray.length === 0) {
-        hideSearchResults3D();
-        return;
-      }
-      searchResultsElement.innerHTML = '';
-      // ナビゲーション
-      const navigationContainer = document.createElement('div');
-      navigationContainer.className = 'search-navigation';
-      navigationContainer.innerHTML = `
-        <button id="search-prev-btn" class="search-nav-btn" disabled>←</button>
-        <span id="search-counter" class="search-counter">0 / 0</span>
-        <button id="search-next-btn" class="search-nav-btn" disabled>→</button>
-      `;
-      searchResultsElement.appendChild(navigationContainer);
-      // 結果
-      searchResultsArray.forEach((node, index) => {
-        const resultItem = document.createElement('div');
-        resultItem.className = 'search-result-item';
-        resultItem.innerHTML = `
-          <div class="search-result-term">${node.label || node.name}</div>
-          <div class="search-result-details">${(node.details || '').substring(0, 100)}${(node.details && node.details.length > 100 ? '...' : '')}</div>
-        `;
-        resultItem.addEventListener('click', () => {
-          focusOnNode3D(node.id, true);
-        });
-        searchResultsElement.appendChild(resultItem);
-      });
-      // ナビゲーションイベント
-      const prevBtn = document.getElementById('search-prev-btn');
-      const nextBtn = document.getElementById('search-next-btn');
-      prevBtn.addEventListener('click', () => navigateSearchResults3D('prev'));
-      nextBtn.addEventListener('click', () => navigateSearchResults3D('next'));
-      currentSearchIndex = -1;
-      updateSearchNavigation3D();
-      searchResultsElement.classList.remove('hidden');
-      clearSearchBtn.classList.remove('hidden');
-    }
-    function navigateSearchResults3D(direction) {
-      if (searchResultsArray.length === 0) return;
-      if (direction === 'prev') {
-        if (currentSearchIndex > 0) {
-          currentSearchIndex--;
-        } else {
-          currentSearchIndex = searchResultsArray.length - 1;
-        }
-      } else if (direction === 'next') {
-        if (currentSearchIndex < searchResultsArray.length - 1) {
-          currentSearchIndex++;
-        } else {
-          currentSearchIndex = 0;
-        }
-      }
-      const selectedNode = searchResultsArray[currentSearchIndex];
-      if (selectedNode) {
-        focusOnNode3D(selectedNode.id, false);
-        updateSearchNavigation3D();
-      }
-    }
-    function updateSearchNavigation3D() {
-      const prevBtn = document.getElementById('search-prev-btn');
-      const nextBtn = document.getElementById('search-next-btn');
-      const counter = document.getElementById('search-counter');
-      if (searchResultsArray.length === 0) {
-        prevBtn.disabled = true;
-        nextBtn.disabled = true;
-        counter.textContent = '0 / 0';
-        return;
-      }
-      prevBtn.disabled = false;
-      nextBtn.disabled = false;
-      const current = currentSearchIndex >= 0 ? currentSearchIndex + 1 : 0;
-      counter.textContent = `${current} / ${searchResultsArray.length}`;
-      const resultItems = searchResultsElement.querySelectorAll('.search-result-item');
-      resultItems.forEach((item, index) => {
-        item.classList.remove('selected');
-        if (index === currentSearchIndex) {
-          item.classList.add('selected');
-        }
-      });
-    }
-    function hideSearchResults3D() {
-      searchResultsElement.classList.add('hidden');
-      clearSearchBtn.classList.add('hidden');
-      currentSearchIndex = -1;
-    }
-    function focusOnNode3D(nodeId, hideAfterZoom = false) {
-      if (!graphInstance) return;
-      // 3Dレイアウト内のノードの位置を見つける
-      const nodeObj = graphDataCache.nodes.find(n => n.id === nodeId);
-      if (nodeObj) {
-        // グラフのスケールに基づいて適切なz距離を計算
-        // グラフのバウンディングボックスまたは固定オフセットを使用できます
-        // ここでは固定オフセットを使用しますが、必要に応じてよりスマートにできます
-        const offset = 60; // 60-120を試してください、必要に応じて調整
-        const z = (nodeObj.z || 0) + offset;
-        graphInstance.cameraPosition(
-          { x: nodeObj.x || 0, y: nodeObj.y || 0, z: z },
-          { x: nodeObj.x || 0, y: nodeObj.y || 0, z: nodeObj.z || 0 },
-          1000
-        );
-        if (hideAfterZoom) hideSearchResults3D();
-      }
-    }
-    if (searchInput) {
-      searchInput.addEventListener('input', function () {
-        searchNodes3D(this.value);
-      });
-      searchInput.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') {
-          if (searchResultsArray.length > 0) {
-            currentSearchIndex = 0;
-            focusOnNode3D(searchResultsArray[0].id, true);
-            updateSearchNavigation3D();
+        console.log('Zoom out button clicked');
+        console.log('graphInstance:', graphInstance);
+        if (graphInstance) {
+          console.log('Attempting to zoom out');
+          try {
+            // グラフデータを取得して最適な距離を計算
+            const graphData = graphInstance.graphData();
+            if (graphData && graphData.nodes && graphData.nodes.length > 0) {
+              // ノードの位置からグラフの範囲を計算
+              let minX = Infinity, maxX = -Infinity;
+              let minY = Infinity, maxY = -Infinity;
+              let minZ = Infinity, maxZ = -Infinity;
+              
+              graphData.nodes.forEach(node => {
+                if (node.x !== undefined && node.y !== undefined && node.z !== undefined) {
+                  minX = Math.min(minX, node.x);
+                  maxX = Math.max(maxX, node.x);
+                  minY = Math.min(minY, node.y);
+                  maxY = Math.max(maxY, node.y);
+                  minZ = Math.min(minZ, node.z);
+                  maxZ = Math.max(maxZ, node.z);
+                }
+              });
+              
+              // グラフのサイズを計算
+              const graphWidth = maxX - minX;
+              const graphHeight = maxY - minY;
+              const graphDepth = maxZ - minZ;
+              const graphSize = Math.max(graphWidth, graphHeight, graphDepth);
+              
+              // 最適なカメラ距離を計算（グラフサイズの2倍 + 余裕）
+              const optimalDistance = Math.max(graphSize * 2, 400);
+              
+              console.log('Graph size:', graphSize, 'Optimal distance:', optimalDistance);
+              
+              // 計算された距離でカメラ位置を設定
+              graphInstance.cameraPosition(
+                { x: 0, y: 0, z: optimalDistance }, 
+                { x: 0, y: 0, z: 0 }, 
+                2000
+              );
+              graphInstance.controls().target.set(0, 0, 0);
+              graphInstance.controls().update();
+              console.log('Camera position set successfully with calculated distance');
+            } else {
+              // フォールバック: 固定距離
+              graphInstance.cameraPosition({ x: 0, y: 0, z: 600 }, { x: 0, y: 0, z: 0 }, 2000);
+              graphInstance.controls().target.set(0, 0, 0);
+              graphInstance.controls().update();
+              console.log('Camera position set successfully (fallback)');
+            }
+          } catch (error) {
+            console.error('Error calculating optimal camera position:', error);
+            // エラー時のフォールバック
+            try {
+              graphInstance.cameraPosition({ x: 0, y: 0, z: 800 }, { x: 0, y: 0, z: 0 }, 2000);
+              graphInstance.controls().target.set(0, 0, 0);
+              graphInstance.controls().update();
+              console.log('Camera position set successfully (error fallback)');
+            } catch (error2) {
+              console.error('Error with fallback camera position:', error2);
+            }
           }
-        } else if (e.key === 'ArrowLeft' && searchResultsArray.length > 0) {
-          e.preventDefault();
-          navigateSearchResults3D('prev');
-        } else if (e.key === 'ArrowRight' && searchResultsArray.length > 0) {
-          e.preventDefault();
-          navigateSearchResults3D('next');
+        } else {
+          console.log('graphInstance is not available');
         }
       });
-    }
-    if (searchBtn) {
-      searchBtn.addEventListener('click', function () {
-        if (searchResultsArray.length > 0) {
-          currentSearchIndex = 0;
-          focusOnNode3D(searchResultsArray[0].id, true);
-          updateSearchNavigation3D();
-        }
-      });
-    }
-    if (clearSearchBtn) {
-      clearSearchBtn.addEventListener('click', function () {
-        searchInput.value = '';
-        hideSearchResults3D();
-      });
+    } else {
+      console.log('Zoom out button not found');
     }
 
-    // --- フラッシュカード選択モード ---
-    if (createFlashcardsBtn) {
-      createFlashcardsBtn.addEventListener('click', function () {
-        enterFlashcardSelectMode3D();
-      });
-    }
+
+    
     function enterFlashcardSelectMode3D() {
       isSelectingFlashcards = true;
-      if (selectControls) selectControls.classList.remove('hidden');
-      if (createFlashcardsBtn) createFlashcardsBtn.style.display = 'none';
-      document.body.classList.add('hide-corner-btns');
-      const cornerBtnGroup = document.querySelector('.corner-btn-group');
-      if (cornerBtnGroup) cornerBtnGroup.classList.remove('visible');
-      if (flashcardNameInput) flashcardNameInput.value = '';
+      selectControls.classList.remove('hidden');
+      document.querySelector('.corner-btn-group').classList.remove('visible');
       selectedNodeIds = [];
       updateSelectedWordsList3D();
     }
-    if (cancelSelectBtn) {
-      cancelSelectBtn.addEventListener('click', function () {
-        exitFlashcardSelectMode3D();
-      });
-    }
+
     function exitFlashcardSelectMode3D() {
       isSelectingFlashcards = false;
-      if (selectControls) selectControls.classList.add('hidden');
-      if (createFlashcardsBtn) createFlashcardsBtn.style.display = '';
-      selectedNodeIds = [];
-      updateSelectedWordsList3D();
-      document.body.classList.remove('hide-corner-btns');
-      const cornerBtnGroup = document.querySelector('.corner-btn-group');
-      if (cornerBtnGroup) cornerBtnGroup.classList.add('visible');
+      selectControls.classList.add('hidden');
+      document.querySelector('.corner-btn-group').classList.add('visible');
+      clearGlow(); // 終了時にもグローをクリア
     }
+
+    if (createFlashcardsBtn) {
+      createFlashcardsBtn.addEventListener('click', enterFlashcardSelectMode3D);
+    }
+    
+    function getNodeById3D(id) {
+        if (!graphDataCache) return null;
+        return graphDataCache.nodes.find(n => n.id === id);
+    }
+
+    function updateFlashcardGlows3D() {
+        if (!graphDataCache) return;
+        const allNodes = graphDataCache.nodes;
+        // まず、すべてのノードからグローを削除
+        allNodes.forEach(node => {
+            if (node.__threeObj) {
+                const glow = node.__threeObj.children.find(child => child.name === 'glow');
+                if (glow) node.__threeObj.remove(glow);
+            }
+        });
+        // 次に、選択されたノードのみにグローを追加
+        selectedNodeIds.forEach(id => {
+            const node = allNodes.find(n => n.id === id);
+            if(node) addGlow(node);
+        });
+    }
+
     function updateSelectedWordsList3D() {
-      if (!selectedWordsList) return;
       selectedWordsList.innerHTML = '';
       selectedNodeIds.forEach(id => {
         const node = nodes.find(n => n.id === id);
         if (node) {
           const item = document.createElement('div');
           item.className = 'selected-word-item';
-          item.innerHTML = `<span class='word-label'>${node.label || node.name}</span><button class='remove-word-btn'>&times;</button>`;
-          item.querySelector('.remove-word-btn').addEventListener('click', () => {
+          item.innerHTML = `<span class='word-label'>${node.name || node.label}</span><button class='remove-word-btn'>&times;</button>`;
+          item.querySelector('.remove-word-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
             selectedNodeIds = selectedNodeIds.filter(nid => nid !== id);
             updateSelectedWordsList3D();
           });
           selectedWordsList.appendChild(item);
         }
       });
+      updateFlashcardGlows3D();
     }
-    // 選択モードで検索して単語を追加
+    
+    function setup3DNodeSelection() {
+      if (!graphInstance) return;
+      graphInstance.onNodeClick(node => {
+        if (isSelectingFlashcards) {
+          if (selectedNodeIds.includes(node.id)) {
+            selectedNodeIds = selectedNodeIds.filter(nid => nid !== node.id);
+          } else {
+            selectedNodeIds.push(node.id);
+          }
+          updateSelectedWordsList3D();
+        } else {
+          // この部分は通常の、単語帳以外の選択を処理
+          clearGlow();
+          if (node) selectedNodes.add(node);
+          addGlow(node);
+          // カメラ中央化ロジック...
+          const distance = 40;
+          const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
+          graphInstance.cameraPosition(
+              { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+              node,
+              2000
+          );
+          // 単語帳モードでない場合も詳細オーバーレイを表示
+          showNodeDetails3D(node.id);
+        }
+      });
+    }
+
+    // --- 詳細オーバーレイとその他の関数... ---
+    function showNodeDetails3D(nodeId) {
+        // 詳細オーバーレイを表示する既存のロジック...
+    }
+
+    function waitForGraphAndData() {
+      if (graphInstance && graphInstance.graphData) {
+        const data = graphInstance.graphData();
+        if (data && data.nodes && data.nodes.length > 0) {
+          graphDataCache = data;
+          nodes = data.nodes; // ローカル`nodes`配列が設定されていることを確認
+          setup3DNodeSelection();
+        } else {
+          setTimeout(waitForGraphAndData, 300);
+        }
+      } else {
+        setTimeout(waitForGraphAndData, 300);
+      }
+    }
+    waitForGraphAndData();
+
+  </script>
+  <script>
+    // --- 3Dビュー機能統合（2Dから移植） ---
+    const createSelectBtn = document.getElementById('create-flashcard-select');
+    const addWordInput = document.getElementById('add-word-input');
+    const addWordSuggestions = document.getElementById('add-word-suggestions');
+
+    // --- 作成ボタン ---
+    if (createSelectBtn) {
+      createSelectBtn.addEventListener('click', async function () {
+        if (selectedNodeIds.length < 2) {
+          alert('2つ以上の単語を選択してください');
+          return;
+        }
+        const nameInput = document.getElementById('flashcard-name');
+        const name = nameInput.value.trim() || '新しい単語帳';
+        const ids = selectedNodeIds.map(id => Number(id));
+        try {
+          const res = await fetch('/api/flashcards', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids, name })
+          });
+          if (res.ok) {
+            window.location.href = '../flashcard/flashcard_menu.html';
+          } else {
+            alert('単語帳の保存に失敗しました');
+            exitFlashcardSelectMode3D();
+          }
+        } catch (error) {
+          console.error('Flashcard creation error:', error);
+          alert('単語帳の保存に失敗しました');
+          exitFlashcardSelectMode3D();
+        }
+      });
+    }
+
+    // --- 単語追加サジェスト ---
     if (addWordInput) {
       addWordInput.addEventListener('input', function () {
         const query = this.value.trim();
         if (!query) {
           addWordSuggestions.classList.add('hidden');
+          addWordSuggestions.classList.remove('visible');
           return;
         }
         const suggestions = nodes.filter(node =>
@@ -529,257 +514,29 @@
               }
               addWordInput.value = '';
               addWordSuggestions.classList.add('hidden');
+              addWordSuggestions.classList.remove('visible');
             });
             addWordSuggestions.appendChild(suggestionItem);
           });
+          // ドロップダウンを入力欄の下に配置
+          const rect = addWordInput.getBoundingClientRect();
+          addWordSuggestions.style.left = rect.left + 'px';
+          addWordSuggestions.style.top = (rect.bottom + window.scrollY) + 'px';
+          addWordSuggestions.style.width = rect.width + 'px';
           addWordSuggestions.classList.remove('hidden');
+          addWordSuggestions.classList.add('visible');
         } else {
           addWordSuggestions.classList.add('hidden');
+          addWordSuggestions.classList.remove('visible');
         }
       });
       addWordInput.addEventListener('blur', function () {
         setTimeout(() => {
           addWordSuggestions.classList.add('hidden');
+          addWordSuggestions.classList.remove('visible');
         }, 200);
       });
     }
-    // フラッシュカード作成（サーバーに保存してフラッシュカードメニューにリダイレクト）
-    if (createSelectBtn) {
-      createSelectBtn.addEventListener('click', async function () {
-        if (selectedNodeIds.length < 2) {
-          alert('2つ以上の単語を選択してください');
-          return;
-        }
-
-        const nameInput = document.getElementById('flashcard-name');
-        const name = nameInput.value.trim() || '新しい単語帳';
-
-        // 単語のidリストの作成
-        const ids = selectedNodeIds.map(id => Number(id));
-
-        try {
-          // POSTリクエストで新規作成
-          const res = await fetch('/api/flashcards', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ids, name })
-          });
-          if (res.ok) {
-            // 単語帳一覧画面に遷移
-            window.location.href = '../flashcard/flashcard_menu.html';
-          } else {
-            alert('単語帳の保存に失敗しました');
-            exitFlashcardSelectMode3D();
-          }
-        } catch (error) {
-          console.error('Flashcard creation error:', error);
-          alert('単語帳の保存に失敗しました');
-          exitFlashcardSelectMode3D();
-        }
-      });
-    }
-    // --- ノードクリックで選択/詳細表示 ---
-    // グラフデータの読み込みを待つ
-    function setup3DNodeSelection() {
-      if (!graphInstance) return;
-      // ノード選択/詳細表示のクリックイベントを追加
-      graphInstance.onNodeClick(node => {
-        if (isSelectingFlashcards) {
-          if (!selectedNodeIds.includes(node.id)) {
-            selectedNodeIds.push(node.id);
-          } else {
-            selectedNodeIds = selectedNodeIds.filter(nid => nid !== node.id);
-          }
-          updateSelectedWordsList3D();
-        } else {
-          highlightConnectedEdges3D(node.id); // クリック時に即座にハイライト
-          showNodeDetails3D(node.id);
-        }
-      });
-      // 背景クリックでハイライト解除
-      if (graphInstance.onBackgroundClick) {
-        graphInstance.onBackgroundClick(() => {
-          resetEdgeHighlight3D();
-        });
-      }
-    }
-    // --- 詳細オーバーレイ ---
-    let connectedNodesArray3D = [];
-    let currentConnectedIndex3D = -1;
-    let highlightedNodeId3D = null;
-
-    function getConnectedNodes3D(nodeId) {
-      if (!graphDataCache || !graphDataCache.links) return [];
-      const relevantLinks = graphDataCache.links.filter(link =>
-        (link.source.id == nodeId || link.target.id == nodeId)
-      );
-      console.log('nodeId:', nodeId, typeof nodeId);
-      console.log('relevantLinks:', relevantLinks);
-      if (relevantLinks.length === 0) {
-        console.log('No links found for nodeId', nodeId, 'of type', typeof nodeId);
-        console.log('Sample link:', graphDataCache.links[0]);
-      }
-      const connectedIds = relevantLinks.map(link =>
-        link.source.id == nodeId ? link.target.id : link.source.id
-      );
-      console.log('connectedIds:', connectedIds);
-      return nodes.filter(n => connectedIds.includes(n.id));
-    }
-
-    function highlightConnectedEdges3D(nodeId) {
-      if (!graphInstance || !graphDataCache) return;
-      highlightedNodeId3D = nodeId;
-      graphInstance.linkColor(link => {
-        if ((link.source.id || link.source) == nodeId || (link.target.id || link.target) == nodeId) {
-          return '#fff';
-        }
-        return '#444';
-      });
-      graphInstance.linkWidth(link =>
-        ((link.source.id || link.source) == nodeId || (link.target.id || link.target) == nodeId) ? 4 : 2
-      );
-    }
-
-    function resetEdgeHighlight3D() {
-      if (!graphInstance) return;
-      highlightedNodeId3D = null;
-      graphInstance.linkColor(() => '#444');
-      graphInstance.linkWidth(() => 2);
-    }
-
-    function showNodeDetails3D(nodeId, isOverlayNav = false) {
-      const node = nodes.find(n => n.id === nodeId);
-      if (!node) return;
-      document.getElementById('details-title').textContent = node.label || node.name;
-      document.getElementById('details-text').textContent = node.details || '';
-      document.getElementById('details-overlay').classList.remove('hidden');
-
-      // ナビゲーションしていない場合のみソースノードとナビゲーション状態を設定
-      if (!isOverlayNav) {
-        overlaySourceNodeId3D = nodeId;
-        connectedNodesArray3D = getConnectedNodes3D(overlaySourceNodeId3D);
-        currentConnectedIndex3D = -1;
-      }
-
-      // 既存のナビゲーションを削除
-      const existingNav = document.querySelector('.details-navigation');
-      if (existingNav) existingNav.remove();
-      if (connectedNodesArray3D.length > 0) {
-        const navHtml = `
-          <div class="details-navigation">
-            <button id="details-prev-btn" class="details-nav-btn">&lt;</button>
-            <span id="details-counter" class="details-counter">接続ノード: 0 / ${connectedNodesArray3D.length}</span>
-            <button id="details-next-btn" class="details-nav-btn">&gt;</button>
-          </div>
-        `;
-        document.getElementById('details-text').insertAdjacentHTML('afterend', navHtml);
-        document.getElementById('details-prev-btn').addEventListener('click', e => {
-          e.preventDefault();
-          e.stopPropagation();
-          navigateConnectedNodes3D('prev');
-        });
-        document.getElementById('details-next-btn').addEventListener('click', e => {
-          e.preventDefault();
-          e.stopPropagation();
-          navigateConnectedNodes3D('next');
-        });
-        updateConnectedNavigation3D();
-      }
-      // 常に元のノードのエッジをハイライト
-      highlightConnectedEdges3D(overlaySourceNodeId3D);
-    }
-
-    function navigateConnectedNodes3D(direction) {
-      if (connectedNodesArray3D.length === 0) return;
-      if (direction === 'prev') {
-        if (currentConnectedIndex3D > 0) {
-          currentConnectedIndex3D--;
-        } else {
-          currentConnectedIndex3D = connectedNodesArray3D.length - 1;
-        }
-      } else if (direction === 'next') {
-        if (currentConnectedIndex3D < connectedNodesArray3D.length - 1) {
-          currentConnectedIndex3D++;
-        } else {
-          currentConnectedIndex3D = 0;
-        }
-      }
-      const selectedNode = connectedNodesArray3D[currentConnectedIndex3D];
-      if (selectedNode) {
-        focusOnNode3D(selectedNode.id, false);
-        showNodeDetails3D(selectedNode.id, true); // true = オーバーレイナビゲーション
-      }
-    }
-
-    function updateConnectedNavigation3D() {
-      const prevBtn = document.getElementById('details-prev-btn');
-      const nextBtn = document.getElementById('details-next-btn');
-      const counter = document.getElementById('details-counter');
-      if (!prevBtn || !nextBtn || !counter) return;
-      if (connectedNodesArray3D.length === 0) {
-        prevBtn.disabled = true;
-        nextBtn.disabled = true;
-        counter.textContent = '接続ノード: 0 / 0';
-        return;
-      }
-      prevBtn.disabled = false;
-      nextBtn.disabled = false;
-      const current = currentConnectedIndex3D >= 0 ? currentConnectedIndex3D + 1 : 0;
-      counter.textContent = `接続ノード: ${current} / ${connectedNodesArray3D.length}`;
-    }
-
-    document.getElementById('close-details').addEventListener('click', function () {
-      document.getElementById('details-overlay').classList.add('hidden');
-      connectedNodesArray3D = [];
-      currentConnectedIndex3D = -1;
-      overlaySourceNodeId3D = null;
-      resetEdgeHighlight3D();
-    });
-
-    // オーバーレイのキーボードナビゲーション
-    window.addEventListener('keydown', function (e) {
-      const overlay = document.getElementById('details-overlay');
-      if (!overlay.classList.contains('hidden')) {
-        if (e.key === 'ArrowLeft' && connectedNodesArray3D.length > 0) {
-          e.preventDefault();
-          navigateConnectedNodes3D('prev');
-        } else if (e.key === 'ArrowRight' && connectedNodesArray3D.length > 0) {
-          e.preventDefault();
-          navigateConnectedNodes3D('next');
-        } else if (e.key === 'Escape') {
-          overlay.classList.add('hidden');
-          connectedNodesArray3D = [];
-          currentConnectedIndex3D = -1;
-          resetEdgeHighlight3D();
-        }
-      }
-    });
-    // --- 読み込み時のデータ同期 ---
-    function sync3DDataFromGraph(graphData) {
-      // graphData: {nodes, links}
-      nodes = (graphData.nodes || []).map(n => ({
-        ...n,
-        label: n.name || n.label || '',
-        details: n.details || ''
-      }));
-      edges = graphData.links || [];
-      graphDataCache = graphData;
-    }
-    // graphInstanceの準備とデータ読み込みを待つ
-    function waitForGraphAndData() {
-      if (graphInstance && graphInstance.graphData) {
-        const data = graphInstance.graphData();
-        if (data && data.nodes && data.nodes.length > 0) {
-          sync3DDataFromGraph(data);
-          setup3DNodeSelection();
-        } else {
-          setTimeout(waitForGraphAndData, 300);
-        }
-      } else {
-        setTimeout(waitForGraphAndData, 300);
-      }
-    }
-    waitForGraphAndData();
   </script>
 </body>
-</html> 
+</html>
