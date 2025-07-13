@@ -94,6 +94,10 @@
     <button id="create-flashcards" class="corner-btn">単語帳作成</button>
   </div>
   
+  
+    注意: 以下の three.js CDN インポートは r150 以降非推奨となり、r160 で削除予定です。
+    今後のアップデートでは、three.js 公式ドキュメントで推奨されている ES Modules への切り替えを検討してください:
+    https://threejs.org/docs/index.html#manual/ja/introduction/Installation
   <script src="https://unpkg.com/3d-force-graph"></script>
   <script src="https://unpkg.com/three@0.150.1/build/three.min.js"></script>
   <script>
@@ -138,37 +142,12 @@
         graphInstance = ForceGraph3D()(document.getElementById('3d-graph'))
           .graphData(graphData)
           .nodeThreeObject(node => {
-            // 球体とラベルを保持するグループを作成
+            // 球体のみ（ラベルは表示しない）
             const group = new THREE.Group();
-            // 球体（デフォルトノード）
             const sphereGeometry = new THREE.SphereGeometry(4, 16, 16);
             const sphereMaterial = new THREE.MeshBasicMaterial({ color: node.color });
             const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
             group.add(sphere);
-            // ラベル（常に表示、シンプルな高コントラストテキスト）
-            const canvas = document.createElement('canvas');
-            const width = 256, height = 64;
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, width, height);
-            ctx.font = 'bold 32px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#fff';
-            ctx.strokeStyle = '#222';
-            ctx.lineWidth = 6;
-            // コントラストのためのストロークを描画
-            ctx.strokeText(node.name, width / 2, height / 2);
-            ctx.fillText(node.name, width / 2, height / 2);
-            // テクスチャとスプライトを作成
-            const texture = new THREE.CanvasTexture(canvas);
-            texture.needsUpdate = true;
-            const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
-            const sprite = new THREE.Sprite(spriteMaterial);
-            sprite.scale.set(24, 6, 1); // 適切なラベルサイズ
-            sprite.position.set(0, 10, 0); // 球体の上にラベルを配置
-            group.add(sprite);
             return group;
           })
           .nodeThreeObjectExtend(false)
@@ -188,6 +167,7 @@
           const canvas = document.querySelector('canvas');
           if (canvas) {
             const ctx = canvas.getContext('2d');
+            if (!ctx) return; // null check for context
             for (let i = 0; i < 200; i++) {
               const x = Math.random() * canvas.width;
               const y = Math.random() * canvas.height;
@@ -218,22 +198,20 @@
         `;
       });
 
-    // 中心表示ボタン
-    document.getElementById('center-view-btn').addEventListener('click', function() {
-      centerView();
-    });
+    // 中心表示ボタン（存在しないため削除）
+    // document.getElementById('center-view-btn').addEventListener('click', function() {
+    //   centerView();
+    // });
 
     // ボタングループを表示
     document.querySelector('.corner-btn-group').classList.add('visible');
 
     function centerView() {
       if (!graphInstance) return;
-      
       // カメラを原点に移動し、全ノードが見えるようにズームアウト
       graphInstance.cameraPosition({ x: 0, y: 0, z: 200 }, { x: 0, y: 0, z: 0 }, 1000);
       graphInstance.controls().target.set(0, 0, 0);
       graphInstance.controls().update();
-      
       console.log('3Dビューを中心に移動しました');
     }
   </script>
