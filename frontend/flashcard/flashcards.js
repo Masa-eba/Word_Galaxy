@@ -93,7 +93,7 @@ function setupButtonListeners(flashcards) {
       const card = flashcards.find(f => String(f.id) === String(id));
       if (card) {
         localStorage.setItem('studyFlashcard', JSON.stringify(card.words));
-        window.location.href = '/';
+        window.location.href = 'flashcard_view.html';
       }
     });
   });
@@ -106,7 +106,7 @@ function setupButtonListeners(flashcards) {
       const card = flashcards.find(f => String(f.id) === String(id));
       if (card) {
         localStorage.setItem('testFlashcard', JSON.stringify(card.words));
-        window.location.href = '/';
+        window.location.href = 'flashcard_view.html';
       }
     });
   });
@@ -120,7 +120,7 @@ function setupButtonListeners(flashcards) {
       if (card) {
         const shuffled = [...card.words].sort(() => Math.random() - 0.5);
         localStorage.setItem('studyFlashcard', JSON.stringify(shuffled));
-        window.location.href = '/';
+        window.location.href = 'flashcard_view.html';
       }
     });
   });
@@ -133,7 +133,7 @@ function setupButtonListeners(flashcards) {
       const card = flashcards.find(f => String(f.id) === String(id));
       if (card) {
         localStorage.setItem('editFlashcard', JSON.stringify(card));
-        window.location.href = '/';
+        window.location.href = 'flashcard_view.html';
       }
     });
   });

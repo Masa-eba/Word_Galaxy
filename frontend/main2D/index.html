@@ -25,7 +25,12 @@
   <div id="search-container" class="">
     <div id="search-box">
       <input type="text" id="search-input" placeholder="単語を検索..." autocomplete="off">
-      <button id="search-btn">🔍</button>
+      <button id="search-btn">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="7" stroke="#f7c873" stroke-width="2"/>
+          <line x1="16" y1="16" x2="20" y2="20" stroke="#f7c873" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
       <button id="clear-search-btn" class="hidden">&times;</button>
     </div>
     <div id="search-results" class="hidden">
@@ -77,7 +82,7 @@
 
   <div class="corner-btn-group">
     <button id="zoom-out-btn" class="corner-btn">全体表示</button>
-    <button id="view-flashcards" class="corner-btn" onclick="window.location.href='../flashcard/flashcards.html'">単語帳一覧</button>
+    <button id="view-flashcards" class="corner-btn" onclick="window.location.href='../flashcard/flashcard_menu.html'">単語帳一覧</button>
     <button id="create-flashcards" class="corner-btn">単語帳作成</button>
 
 
@@ -89,84 +94,7 @@
 
 
   <!-- 単語帳ビュー（デフォルトは非表示） -->
-  <div id="flashcard-view" class="hidden">
-    <div id="flashcard-container">
-      <div class="flashcard-header">
-        <div class="card-counter">
-          <span id="current-card-number">1</span> / <span id="total-cards">0</span>
-        </div>
-        <button id="back-to-map" class="close-btn">&times;</button>
-      </div>
-
-      <div class="cards-wrapper">
-        <div id="flashcard" class="card">
-          <div class="card-face card-front">
-            <div class="card-content">
-              <h2 class="card-title"></h2>
-              <p class="card-hint">タップして裏面を見る</p>
-            </div>
-          </div>
-          <div class="card-face card-back">
-            <div class="card-content">
-              <h3 class="card-subtitle">詳細</h3>
-              <p class="card-description"></p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flashcard-controls">
-        <button id="prev-card" class="control-btn">
-          <span>←</span>
-        </button>
-        <button id="flip-card" class="control-btn flip-btn">
-          <span>🔄</span>
-        </button>
-        <button id="next-card" class="control-btn">
-          <span>→</span>
-        </button>
-      </div>
-
-
-
-      <div class="progress-bar">
-        <div class="progress-fill"></div>
-      </div>
-    </div>
-  </div>
-
   <!-- テストモードビュー（デフォルトは非表示） -->
-  <div id="test-view" class="hidden">
-    <div id="test-container">
-      <div class="test-header">
-        <div class="test-counter">
-          <span id="test-current-number">1</span> / <span id="test-total-questions">0</span>
-        </div>
-        <button id="back-from-test" class="close-btn">&times;</button>
-      </div>
-
-      <div class="test-question">
-        <h2 id="test-question-text"></h2>
-        <div id="test-options" class="test-options">
-          <!-- 選択肢がここに表示されます -->
-        </div>
-      </div>
-
-      <div class="test-controls">
-        <button id="test-pass-btn" class="control-btn">
-          <span>pass</span>
-        </button>
-        <button id="test-next-btn" class="control-btn">
-          <span>next</span>
-        </button>
-      </div>
-
-      <div class="test-progress-bar">
-        <div class="test-progress-fill"></div>
-      </div>
-    </div>
-  </div>
-
 
 
   <script src="app.js"></script>

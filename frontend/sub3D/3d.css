@@ -682,19 +682,15 @@ html, body {
 /* 単語帳選択用の作成/キャンセル */
 #flashcard-select-controls {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #2d313a;
-  border-radius: 20px;
-  padding: 2rem;
-  max-width: 600px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  top: 6rem;
+  right: 2rem;
+  width: 350px;
+  background: #22252a;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  z-index: 1001;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
   border: 1px solid rgba(247, 200, 115, 0.2);
-  z-index: 1000;
 }
 
 #flashcard-select-controls.hidden {
@@ -702,116 +698,99 @@ html, body {
 }
 
 .edit-panel-header {
-  margin-bottom: 1.5rem;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
 .edit-panel-header h3 {
   color: #f7c873;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
+  font-weight: bold;
   margin: 0;
 }
 
 .selected-words-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .selected-words-section h4,
 .add-word-section h4 {
   color: #f7c873;
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
+  font-size: 1rem;
+  margin: 0 0 0.5rem 0;
 }
 
 #selected-words-list {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  min-height: 60px;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  border: 2px dashed rgba(247, 200, 115, 0.3);
+  margin-bottom: 0.5rem;
 }
 
 .selected-word-item {
-  background: rgba(247, 200, 115, 0.2);
-  color: #f7c873;
-  padding: 8px 12px;
-  border-radius: 20px;
+  background: #2d313a;
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.3rem 0.8rem;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
+  gap: 0.5rem;
+  font-size: 0.95rem;
 }
 
 .word-label {
-  font-weight: 500;
+  font-weight: bold;
 }
 
 .remove-word-btn {
   background: none;
   border: none;
   color: #f7c873;
+  font-size: 1.1rem;
   cursor: pointer;
-  font-size: 16px;
-  padding: 0;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   border-radius: 50%;
+  padding: 0 0.3rem;
   transition: background 0.2s;
 }
 
-.remove-word-btn:hover {
-  background: rgba(247, 200, 115, 0.2);
-}
+.remove-word-btn:hover { background: rgba(247, 200, 115, 0.1); }
 
 .add-word-section {
-  margin-top: 1rem;
+  margin-bottom: 0.5rem;
 }
 
-#add-word-input,
-#flashcard-name {
+#add-word-input {
   width: 100%;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(247, 200, 115, 0.3);
-  border-radius: 12px;
+  background: #181a1b;
+  border: 1px solid rgba(247, 200, 115, 0.2);
+  border-radius: 8px;
   color: #fff;
   font-size: 1rem;
+  padding: 0.5rem 0.8rem;
+  margin-bottom: 0.3rem;
   outline: none;
-  transition: border-color 0.2s;
+  transition: border 0.2s;
 }
 
-#add-word-input:focus,
-#flashcard-name:focus {
-  border-color: #f7c873;
+#add-word-input:focus {
+  border: 1.5px solid #f7c873;
 }
 
-#add-word-input::placeholder,
-#flashcard-name::placeholder {
-  color: rgba(255, 255, 255, 0.5);
-}
+#add-word-input::placeholder { color: #888; }
 
 #add-word-suggestions {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: rgba(34, 37, 42, 0.95);
-  border-radius: 12px;
-  margin-top: 8px;
-  max-height: 200px;
-  overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(10px);
+  background: #2d313a;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
   border: 1px solid rgba(247, 200, 115, 0.2);
-  z-index: 1001;
+  margin-top: 2px;
+  max-height: 120px;
+  overflow-y: auto;
+  position: absolute;
+  width: calc(100% - 2px);
+  z-index: 1002;
 }
 
 #add-word-suggestions.hidden {
@@ -819,113 +798,74 @@ html, body {
 }
 
 .suggestion-item {
-  padding: 12px 16px;
+  padding: 8px 14px;
   color: #fff;
   cursor: pointer;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   transition: background 0.2s;
 }
 
-.suggestion-item:hover {
-  background: rgba(247, 200, 115, 0.1);
-}
+.suggestion-item:hover { background: rgba(247, 200, 115, 0.1); }
 
-.suggestion-item:last-child {
-  border-bottom: none;
-}
+.suggestion-item:last-child { border-bottom: none; }
 
 .edit-panel-name-input {
-  margin-top: 1rem;
+  margin-bottom: 0.7rem;
 }
 
 .edit-panel-name-input label {
-  display: block;
   color: #f7c873;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  margin-bottom: 0.2rem;
+  display: block;
 }
 
 .edit-panel-buttons {
   display: flex;
   gap: 1rem;
-  margin-top: 2rem;
-  justify-content: center;
+  justify-content: flex-end;
+  margin-top: 0.5rem;
 }
 
 .edit-btn {
-  background: rgba(247, 200, 115, 0.2);
-  color: #f7c873;
-  border: 2px solid rgba(247, 200, 115, 0.3);
-  border-radius: 12px;
-  padding: 12px 24px;
-  cursor: pointer;
-  transition: all 0.2s;
+  background: #f7c873;
+  color: #22252a;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.2rem;
   font-size: 1rem;
-  font-weight: 500;
-  min-width: 120px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
 }
 
-.edit-btn:first-child {
-  background: rgba(76, 175, 80, 0.2);
-  color: #4caf50;
-  border-color: rgba(76, 175, 80, 0.3);
+.edit-btn:hover {
+  background: #ffd77a;
+  color: #181a1b;
 }
 
-.edit-btn:first-child:hover {
-  background: rgba(76, 175, 80, 0.3);
-}
-
-.edit-btn:last-child {
-  background: rgba(158, 158, 158, 0.2);
-  color: #9e9e9e;
-  border-color: rgba(158, 158, 158, 0.3);
-}
-
-.edit-btn:last-child:hover {
-  background: rgba(158, 158, 158, 0.3);
-}
-
-.no-selection {
-  color: rgba(255, 255, 255, 0.5);
-  font-style: italic;
-  text-align: center;
-  padding: 2rem;
-}
-
-/* ボタンを垂直に並べる */
+/* Corner button group */
 .corner-btn-group {
   position: fixed;
-  left: 2rem;
-  right: auto;
   bottom: 2rem;
+  left: 2rem;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 1.5rem;
-  z-index: 9999;
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  gap: 1rem;
+  z-index: 100;
 }
-
-.corner-btn-group.visible {
-  opacity: 1;
-}
-
+.corner-btn-group.visible { display: flex; }
 .corner-btn {
-  width: 200px;
-  height: 56px;
+  background: #2d313a;
+  color: #fff;
+  border: none;
   border-radius: 50px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-  padding: 0;
-  margin: 0;
+  padding: 0.7rem 2.2rem;
   font-size: 1.1rem;
   font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Arial, Helvetica, sans-serif;
   font-weight: 400;
   opacity: 0.85;
-  background: #2d313a;
-  color: #fff;
-  border: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   transition: opacity 0.2s, background 0.2s;
   display: flex;
@@ -936,27 +876,22 @@ html, body {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-
 .corner-btn:hover {
   opacity: 1;
   background: #3a3f4b;
 }
-
-#zoom-out-btn.corner-btn,
-#view-flashcards.corner-btn,
-#create-flashcards.corner-btn {
-  background: rgba(247, 200, 115, 0.2);
-  color: #f7c873;
-  border: 2px solid rgba(247, 200, 115, 0.3);
+#zoom-out-btn.corner-btn {
+  background: #f7c873;
+  color: #22252a;
+  font-weight: bold;
+}
+#zoom-out-btn.corner-btn:hover {
+  background: #ffd77a;
+  color: #181a1b;
 }
 
-.hide-corner-btns .corner-btn-group {
-  opacity: 0;
-}
-
-.hidden {
-  display: none !important;
-}
+/* Utility */
+.hidden { display: none !important; }
 
 .page-title {
   position: fixed;

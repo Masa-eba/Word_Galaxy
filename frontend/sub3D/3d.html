@@ -3,24 +3,101 @@
 <head>
   <meta charset="UTF-8">
   <title>3Dネットワークグラフ</title>
-  <link rel="stylesheet" href="3d.css">
+  <link rel="stylesheet" href="../main2D/style.css">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #181a1b;
+    }
+    #3d-graph {
+      width: 100vw;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background: #181a1b;
+      z-index: 1;
+    }
+  </style>
 </head>
 <body>
-
-
-
-  
   <!-- 2D表示ボタン -->
-  <button id="view-2d" onclick="window.location.href='../main2D/index.html'">2D表示</button>
-  
-  <!-- 左下のボタングループ -->
-  <div class="corner-btn-group">
+  <button id="view-2d" class="corner-btn" style="position: fixed; bottom: 2rem; right: 2rem; left: auto; margin: 0; z-index: 1001;" onclick="window.location.href='../main2D/index.html'">2D表示</button>
 
-    <button class="corner-btn" id="center-view-btn">中心表示</button>
+  <!-- 検索バー（ID/クラス名は2Dと一致） -->
+  <div id="search-container">
+    <div id="search-box">
+      <input type="text" id="search-input" placeholder="単語を検索..." autocomplete="off">
+      <button id="search-btn">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="7" stroke="#f7c873" stroke-width="2"/>
+          <line x1="16" y1="16" x2="20" y2="20" stroke="#f7c873" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button id="clear-search-btn" class="hidden">&times;</button>
+    </div>
+    <div id="search-results" class="hidden">
+      <!-- 検索結果がここに表示されます -->
+    </div>
+  </div>
 
+  <!-- 3Dグラフのメインコンテナ（そのまま保持） -->
+  <div id="3d-graph"></div>
+
+  <!-- 詳細オーバーレイ（ID/クラス名は2Dと一致） -->
+  <div id="details-overlay" class="hidden">
+    <div id="details-box">
+      <button id="close-details">&times;</button>
+      <h3 id="details-title"></h3>
+      <p id="details-text"></p>
+    </div>
+  </div>
+
+  <!-- フラッシュカード選択コントロール（ID/クラス名は2Dと一致） -->
+  <div id="flashcard-select-controls" class="hidden">
+    <div class="edit-panel-header">
+      <h3>単語帳作成</h3>
+    </div>
+    <div class="selected-words-container">
+      <div class="selected-words-section">
+        <h4>選択された単語</h4>
+        <div id="selected-words-list">
+          <!-- 選択された単語がここに表示されます -->
+        </div>
+      </div>
+      <div class="add-word-section">
+        <h4>単語を追加</h4>
+        <input type="text" id="add-word-input" placeholder="単語を検索して追加...">
+        <div id="add-word-suggestions" class="hidden">
+          <!-- 検索候補がここに表示されます -->
+        </div>
+      </div>
+      <div class="edit-panel-name-input">
+        <label for="flashcard-name">単語帳の名前:</label>
+        <input type="text" id="flashcard-name" placeholder="例: 基礎単語帳" maxlength="50">
+      </div>
+      <div class="edit-panel-buttons">
+        <button id="create-flashcard-select" class="edit-btn">作成</button>
+        <button id="cancel-flashcard-select" class="edit-btn">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- コーナーボタングループ（ID/クラス名は2Dと一致） -->
+  <div class="corner-btn-group visible">
+    <button id="zoom-out-btn" class="corner-btn">全体表示</button>
+    <button id="view-flashcards" class="corner-btn" onclick="window.location.href='../flashcard/flashcard_menu.html'">単語帳一覧</button>
+    <button id="create-flashcards" class="corner-btn">単語帳作成</button>
   </div>
   
-  <div id="3d-graph"></div>
+  
+    注意: 以下の three.js CDN インポートは r150 以降非推奨となり、r160 で削除予定です。
+    今後のアップデートでは、three.js 公式ドキュメントで推奨されている ES Modules への切り替えを検討してください:
+    https://threejs.org/docs/index.html#manual/ja/introduction/Installation
   <script src="https://unpkg.com/3d-force-graph"></script>
   <script src="https://unpkg.com/three@0.150.1/build/three.min.js"></script>
   <script>
@@ -64,47 +141,21 @@
         // 3Dグラフ描画
         graphInstance = ForceGraph3D()(document.getElementById('3d-graph'))
           .graphData(graphData)
-          .nodeLabel('name')
           .nodeThreeObject(node => {
-            // 星っぽい球体＋発光エフェクト
+            // 球体のみ（ラベルは表示しない）
             const group = new THREE.Group();
-            const color = node.color || starColors[Math.floor(Math.random() * starColors.length)];
-            const radius = Math.min(1.5 + (node.val || 1) * 0.7, 6); // サイズ制限
-            // 球体
-            const geometry = new THREE.SphereGeometry(radius, 24, 24);
-            const material = new THREE.MeshBasicMaterial({ color });
-            const sphere = new THREE.Mesh(geometry, material);
+            const sphereGeometry = new THREE.SphereGeometry(4, 16, 16);
+            const sphereMaterial = new THREE.MeshBasicMaterial({ color: node.color });
+            const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
             group.add(sphere);
-            // 発光（glow）
-            const glowMaterial = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.18 });
-            const glow = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.7, 24, 24), glowMaterial);
-            group.add(glow);
-            
-            // テキストラベルを追加
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.width = 256;
-            canvas.height = 64;
-            
-            context.font = 'bold 24px Arial';
-            context.fillStyle = '#ffffff';
-            context.textAlign = 'center';
-            context.fillText(node.name || node.id, 128, 32);
-            
-            const texture = new THREE.CanvasTexture(canvas);
-            const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-            const sprite = new THREE.Sprite(spriteMaterial);
-            sprite.scale.set(20, 5, 1);
-            sprite.position.set(0, radius + 8, 0);
-            group.add(sprite);
-            
             return group;
           })
-          .nodeThreeObjectExtend(true)
+          .nodeThreeObjectExtend(false)
           .nodeColor(node => node.color)
           .linkOpacity(0.35)
-          .linkColor(() => '#b5e3ff')
-          .backgroundColor('#0a1020');
+          .linkColor(() => '#444')
+          .linkWidth(() => 2)
+          .backgroundColor('#181a1b');
 
         // カメラを原点に固定し、常に原点を注視
         graphInstance.cameraPosition({ x: 0, y: 0, z: 200 }, { x: 0, y: 0, z: 0 }, 0);
@@ -116,6 +167,7 @@
           const canvas = document.querySelector('canvas');
           if (canvas) {
             const ctx = canvas.getContext('2d');
+            if (!ctx) return; // null check for context
             for (let i = 0; i < 200; i++) {
               const x = Math.random() * canvas.width;
               const y = Math.random() * canvas.height;
@@ -146,30 +198,394 @@
         `;
       });
 
-
-
-    // 中心表示ボタン
-    document.getElementById('center-view-btn').addEventListener('click', function() {
-      centerView();
-    });
+    // 中心表示ボタン（存在しないため削除）
+    // document.getElementById('center-view-btn').addEventListener('click', function() {
+    //   centerView();
+    // });
 
     // ボタングループを表示
     document.querySelector('.corner-btn-group').classList.add('visible');
 
-
-
-
-
     function centerView() {
       if (!graphInstance) return;
-      
       // カメラを原点に移動し、全ノードが見えるようにズームアウト
       graphInstance.cameraPosition({ x: 0, y: 0, z: 200 }, { x: 0, y: 0, z: 0 }, 1000);
       graphInstance.controls().target.set(0, 0, 0);
       graphInstance.controls().update();
-      
       console.log('3Dビューを中心に移動しました');
     }
+  </script>
+  <script>
+    // --- 3Dビュー機能統合（2Dから移植） ---
+    let nodes = [];
+    let edges = [];
+    let selectedNodeIds = [];
+    let isSelectingFlashcards = false;
+    let searchResultsArray = [];
+    let currentSearchIndex = -1;
+    let graphDataCache = null;
+
+    // DOM要素
+    const zoomOutBtn = document.getElementById('zoom-out-btn');
+    const searchInput = document.getElementById('search-input');
+    const searchBtn = document.getElementById('search-btn');
+    const clearSearchBtn = document.getElementById('clear-search-btn');
+    const searchResultsElement = document.getElementById('search-results');
+    const createFlashcardsBtn = document.getElementById('create-flashcards');
+    const viewFlashcardsBtn = document.getElementById('view-flashcards');
+    const selectControls = document.getElementById('flashcard-select-controls');
+    const createSelectBtn = document.getElementById('create-flashcard-select');
+    const cancelSelectBtn = document.getElementById('cancel-flashcard-select');
+    const selectedWordsList = document.getElementById('selected-words-list');
+    const addWordInput = document.getElementById('add-word-input');
+    const addWordSuggestions = document.getElementById('add-word-suggestions');
+    const flashcardNameInput = document.getElementById('flashcard-name');
+
+    // --- ズームアウト（全体表示） ---
+    if (zoomOutBtn) {
+      zoomOutBtn.addEventListener('click', function () {
+        if (graphInstance && graphDataCache && graphDataCache.nodes && graphDataCache.nodes.length > 0) {
+          // バウンディングボックスを計算
+          let minX = Infinity, minY = Infinity, minZ = Infinity;
+          let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+          graphDataCache.nodes.forEach(node => {
+            const x = node.x || 0, y = node.y || 0, z = node.z || 0;
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (z < minZ) minZ = z;
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+            if (z > maxZ) maxZ = z;
+          });
+          // バウンディングボックスの中心
+          const center = {
+            x: (minX + maxX) / 2,
+            y: (minY + maxY) / 2,
+            z: (minZ + maxZ) / 2
+          };
+          // バウンディングボックスのサイズ
+          const dx = maxX - minX;
+          const dy = maxY - minY;
+          const dz = maxZ - minZ;
+          const maxDim = Math.max(dx, dy, dz, 1);
+          // 全ノードがビューに収まる距離（係数は調整が必要かもしれません）
+          const distance = maxDim * 1.5 + 100;
+          graphInstance.cameraPosition(
+            { x: center.x, y: center.y, z: distance },
+            { x: center.x, y: center.y, z: 0 },
+            1000
+          );
+          graphInstance.controls().target.set(center.x, center.y, 0);
+          graphInstance.controls().update();
+        }
+      });
+    }
+
+    // --- 検索ロジック ---
+    function searchNodes3D(query) {
+      if (!query.trim() || !nodes.length) {
+        searchResultsArray = [];
+        hideSearchResults3D();
+        return;
+      }
+      const searchTerm = query.toLowerCase();
+      searchResultsArray = nodes.filter(node =>
+        (node.label || node.name).toLowerCase().includes(searchTerm)
+      );
+      showSearchResults3D();
+    }
+
+    function showSearchResults3D() {
+      if (searchResultsArray.length === 0) {
+        hideSearchResults3D();
+        return;
+      }
+      searchResultsElement.innerHTML = '';
+      // ナビゲーション
+      const navigationContainer = document.createElement('div');
+      navigationContainer.className = 'search-navigation';
+      navigationContainer.innerHTML = `
+        <button id="search-prev-btn" class="search-nav-btn" disabled>←</button>
+        <span id="search-counter" class="search-counter">0 / 0</span>
+        <button id="search-next-btn" class="search-nav-btn" disabled>→</button>
+      `;
+      searchResultsElement.appendChild(navigationContainer);
+      // 結果
+      searchResultsArray.forEach((node, index) => {
+        const resultItem = document.createElement('div');
+        resultItem.className = 'search-result-item';
+        resultItem.innerHTML = `
+          <div class="search-result-term">${node.label || node.name}</div>
+          <div class="search-result-details">${(node.details || '').substring(0, 100)}${(node.details && node.details.length > 100 ? '...' : '')}</div>
+        `;
+        resultItem.addEventListener('click', () => {
+          focusOnNode3D(node.id, true);
+        });
+        searchResultsElement.appendChild(resultItem);
+      });
+      // ナビゲーションイベント
+      const prevBtn = document.getElementById('search-prev-btn');
+      const nextBtn = document.getElementById('search-next-btn');
+      prevBtn.addEventListener('click', () => navigateSearchResults3D('prev'));
+      nextBtn.addEventListener('click', () => navigateSearchResults3D('next'));
+      currentSearchIndex = -1;
+      updateSearchNavigation3D();
+      searchResultsElement.classList.remove('hidden');
+      clearSearchBtn.classList.remove('hidden');
+    }
+    function navigateSearchResults3D(direction) {
+      if (searchResultsArray.length === 0) return;
+      if (direction === 'prev') {
+        if (currentSearchIndex > 0) {
+          currentSearchIndex--;
+        } else {
+          currentSearchIndex = searchResultsArray.length - 1;
+        }
+      } else if (direction === 'next') {
+        if (currentSearchIndex < searchResultsArray.length - 1) {
+          currentSearchIndex++;
+        } else {
+          currentSearchIndex = 0;
+        }
+      }
+      const selectedNode = searchResultsArray[currentSearchIndex];
+      if (selectedNode) {
+        focusOnNode3D(selectedNode.id, false);
+        updateSearchNavigation3D();
+      }
+    }
+    function updateSearchNavigation3D() {
+      const prevBtn = document.getElementById('search-prev-btn');
+      const nextBtn = document.getElementById('search-next-btn');
+      const counter = document.getElementById('search-counter');
+      if (searchResultsArray.length === 0) {
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        counter.textContent = '0 / 0';
+        return;
+      }
+      prevBtn.disabled = false;
+      nextBtn.disabled = false;
+      const current = currentSearchIndex >= 0 ? currentSearchIndex + 1 : 0;
+      counter.textContent = `${current} / ${searchResultsArray.length}`;
+      const resultItems = searchResultsElement.querySelectorAll('.search-result-item');
+      resultItems.forEach((item, index) => {
+        item.classList.remove('selected');
+        if (index === currentSearchIndex) {
+          item.classList.add('selected');
+        }
+      });
+    }
+    function hideSearchResults3D() {
+      searchResultsElement.classList.add('hidden');
+      clearSearchBtn.classList.add('hidden');
+      currentSearchIndex = -1;
+    }
+    function focusOnNode3D(nodeId, hideAfterZoom = false) {
+      if (!graphInstance) return;
+      // ノード位置を検索
+      const nodeObj = graphDataCache.nodes.find(n => n.id === nodeId);
+      if (nodeObj) {
+        // カメラをノードにアニメーション
+        graphInstance.cameraPosition(
+          { x: nodeObj.x || 0, y: nodeObj.y || 0, z: 80 },
+          { x: nodeObj.x || 0, y: nodeObj.y || 0, z: 0 },
+          1000
+        );
+        if (hideAfterZoom) hideSearchResults3D();
+      }
+    }
+    if (searchInput) {
+      searchInput.addEventListener('input', function () {
+        searchNodes3D(this.value);
+      });
+      searchInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          if (searchResultsArray.length > 0) {
+            currentSearchIndex = 0;
+            focusOnNode3D(searchResultsArray[0].id, true);
+            updateSearchNavigation3D();
+          }
+        } else if (e.key === 'ArrowLeft' && searchResultsArray.length > 0) {
+          e.preventDefault();
+          navigateSearchResults3D('prev');
+        } else if (e.key === 'ArrowRight' && searchResultsArray.length > 0) {
+          e.preventDefault();
+          navigateSearchResults3D('next');
+        }
+      });
+    }
+    if (searchBtn) {
+      searchBtn.addEventListener('click', function () {
+        if (searchResultsArray.length > 0) {
+          currentSearchIndex = 0;
+          focusOnNode3D(searchResultsArray[0].id, true);
+          updateSearchNavigation3D();
+        }
+      });
+    }
+    if (clearSearchBtn) {
+      clearSearchBtn.addEventListener('click', function () {
+        searchInput.value = '';
+        hideSearchResults3D();
+      });
+    }
+
+    // --- フラッシュカード選択モード ---
+    if (createFlashcardsBtn) {
+      createFlashcardsBtn.addEventListener('click', function () {
+        enterFlashcardSelectMode3D();
+      });
+    }
+    function enterFlashcardSelectMode3D() {
+      isSelectingFlashcards = true;
+      if (selectControls) selectControls.classList.remove('hidden');
+      if (createFlashcardsBtn) createFlashcardsBtn.style.display = 'none';
+      document.body.classList.add('hide-corner-btns');
+      const cornerBtnGroup = document.querySelector('.corner-btn-group');
+      if (cornerBtnGroup) cornerBtnGroup.classList.remove('visible');
+      if (flashcardNameInput) flashcardNameInput.value = '';
+      selectedNodeIds = [];
+      updateSelectedWordsList3D();
+    }
+    if (cancelSelectBtn) {
+      cancelSelectBtn.addEventListener('click', function () {
+        exitFlashcardSelectMode3D();
+      });
+    }
+    function exitFlashcardSelectMode3D() {
+      isSelectingFlashcards = false;
+      if (selectControls) selectControls.classList.add('hidden');
+      if (createFlashcardsBtn) createFlashcardsBtn.style.display = '';
+      selectedNodeIds = [];
+      updateSelectedWordsList3D();
+      document.body.classList.remove('hide-corner-btns');
+      const cornerBtnGroup = document.querySelector('.corner-btn-group');
+      if (cornerBtnGroup) cornerBtnGroup.classList.add('visible');
+    }
+    function updateSelectedWordsList3D() {
+      if (!selectedWordsList) return;
+      selectedWordsList.innerHTML = '';
+      selectedNodeIds.forEach(id => {
+        const node = nodes.find(n => n.id === id);
+        if (node) {
+          const item = document.createElement('div');
+          item.className = 'selected-word-item';
+          item.innerHTML = `<span class='word-label'>${node.label || node.name}</span><button class='remove-word-btn'>&times;</button>`;
+          item.querySelector('.remove-word-btn').addEventListener('click', () => {
+            selectedNodeIds = selectedNodeIds.filter(nid => nid !== id);
+            updateSelectedWordsList3D();
+          });
+          selectedWordsList.appendChild(item);
+        }
+      });
+    }
+    // 選択モードで検索して単語を追加
+    if (addWordInput) {
+      addWordInput.addEventListener('input', function () {
+        const query = this.value.trim();
+        if (!query) {
+          addWordSuggestions.classList.add('hidden');
+          return;
+        }
+        const suggestions = nodes.filter(node =>
+          (node.label || node.name).toLowerCase().includes(query.toLowerCase()) &&
+          !selectedNodeIds.includes(node.id)
+        ).slice(0, 5);
+        if (suggestions.length > 0) {
+          addWordSuggestions.innerHTML = '';
+          suggestions.forEach(node => {
+            const suggestionItem = document.createElement('div');
+            suggestionItem.className = 'suggestion-item';
+            suggestionItem.textContent = node.label || node.name;
+            suggestionItem.addEventListener('click', () => {
+              if (!selectedNodeIds.includes(node.id)) {
+                selectedNodeIds.push(node.id);
+                updateSelectedWordsList3D();
+              }
+              addWordInput.value = '';
+              addWordSuggestions.classList.add('hidden');
+            });
+            addWordSuggestions.appendChild(suggestionItem);
+          });
+          addWordSuggestions.classList.remove('hidden');
+        } else {
+          addWordSuggestions.classList.add('hidden');
+        }
+      });
+      addWordInput.addEventListener('blur', function () {
+        setTimeout(() => {
+          addWordSuggestions.classList.add('hidden');
+        }, 200);
+      });
+    }
+    // フラッシュカード作成（フラッシュカードビューにリダイレクト）
+    if (createSelectBtn) {
+      createSelectBtn.addEventListener('click', function () {
+        if (selectedNodeIds.length > 0) {
+          // 選択された単語をlocalStorageに保存してリダイレクト
+          const selectedWords = selectedNodeIds.map(id => nodes.find(n => n.id === id)).filter(Boolean);
+          localStorage.setItem('studyFlashcard', JSON.stringify(selectedWords));
+          window.location.href = '../flashcard/flashcard_view.html';
+        }
+      });
+    }
+    // --- ノードクリックで選択/詳細表示 ---
+    // グラフデータの読み込みを待つ
+    function setup3DNodeSelection() {
+      if (!graphInstance) return;
+      // ノード選択/詳細表示のクリックイベントを追加
+      graphInstance.onNodeClick(node => {
+        if (isSelectingFlashcards) {
+          if (!selectedNodeIds.includes(node.id)) {
+            selectedNodeIds.push(node.id);
+          } else {
+            selectedNodeIds = selectedNodeIds.filter(nid => nid !== node.id);
+          }
+          updateSelectedWordsList3D();
+        } else {
+          // 詳細オーバーレイを表示
+          showNodeDetails3D(node.id);
+        }
+      });
+    }
+    // --- 詳細オーバーレイ ---
+    function showNodeDetails3D(nodeId) {
+      const node = nodes.find(n => n.id === nodeId);
+      if (!node) return;
+      document.getElementById('details-title').textContent = node.label || node.name;
+      document.getElementById('details-text').textContent = node.details || '';
+      document.getElementById('details-overlay').classList.remove('hidden');
+    }
+    document.getElementById('close-details').addEventListener('click', function () {
+      document.getElementById('details-overlay').classList.add('hidden');
+    });
+    // --- 読み込み時のデータ同期 ---
+    function sync3DDataFromGraph(graphData) {
+      // graphData: {nodes, links}
+      nodes = (graphData.nodes || []).map(n => ({
+        ...n,
+        label: n.name || n.label || '',
+        details: n.details || ''
+      }));
+      edges = graphData.links || [];
+      graphDataCache = graphData;
+    }
+    // graphInstanceの準備とデータ読み込みを待つ
+    function waitForGraphAndData() {
+      if (graphInstance && graphInstance.graphData) {
+        const data = graphInstance.graphData();
+        if (data && data.nodes && data.nodes.length > 0) {
+          sync3DDataFromGraph(data);
+          setup3DNodeSelection();
+        } else {
+          setTimeout(waitForGraphAndData, 300);
+        }
+      } else {
+        setTimeout(waitForGraphAndData, 300);
+      }
+    }
+    waitForGraphAndData();
   </script>
 </body>
 </html> 
