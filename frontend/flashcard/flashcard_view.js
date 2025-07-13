@@ -55,8 +55,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (Array.isArray(words) && words.length > 0) {
           flashcards = words.map(word => ({ front: word.label, back: word.details }));
           currentCardIndex = 0;
-          generateTestQuestions();
-          showTestView();
+          generateTestQuestions().then(() => {
+            showTestView();
+          });
         }
       } catch (e) {}
       localStorage.removeItem('testFlashcard');
@@ -146,17 +147,31 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // テストモードロジック
-  function generateTestQuestions() {
+  async function generateTestQuestions() {
     testQuestions = [];
     const shuffledCards = [...flashcards].sort(() => Math.random() - 0.5);
+    
+    // data.jsonから全ノードの詳細を取得
+    let allNodes = [];
+    try {
+      const response = await fetch('/api/data');
+      const data = await response.json();
+      allNodes = data.nodes || [];
+    } catch (error) {
+      console.error('Failed to load data.json:', error);
+      // フォールバック: 単語帳内の他の単語を使用
+      allNodes = shuffledCards.map(card => ({ details: card.back }));
+    }
+    
     shuffledCards.forEach(card => {
       const correctAnswer = card.back;
-      // デモ用に、card.backを正解として使用し、3つのランダムな不正解を生成
-      const wrongAnswers = shuffledCards
-        .filter(c => c.back !== correctAnswer)
+      // data.jsonから正解以外の単語をランダムに選んで偽回答を作成
+      const wrongAnswers = allNodes
+        .filter(node => node.details !== correctAnswer)
         .sort(() => Math.random() - 0.5)
         .slice(0, 3)
-        .map(c => c.back);
+        .map(node => node.details);
+      
       const options = [correctAnswer, ...wrongAnswers].sort(() => Math.random() - 0.5);
       testQuestions.push({
         question: card.front,
@@ -168,10 +183,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function showTestView() {
+  async function showTestView() {
     testView.classList.remove('hidden');
     flashcardView.classList.add('hidden');
     currentTestIndex = 0;
+    await generateTestQuestions();
     renderTestQuestion();
   }
 
@@ -242,11 +258,12 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
     `;
-    document.getElementById('retry-test').addEventListener('click', () => {
+    document.getElementById('retry-test').addEventListener('click', async () => {
       // コントロールとプログレスバーを復元
       if (testControls) testControls.style.display = '';
       if (testProgressBar) testProgressBar.style.display = '';
       currentTestIndex = 0;
+      await generateTestQuestions();
       renderTestQuestion();
     });
     document.getElementById('back-to-cards').addEventListener('click', () => {
