@@ -7,6 +7,7 @@
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![BERT](https://img.shields.io/badge/BERT-NLP-orange.svg)](https://huggingface.co/transformers/)
 
+https://docs.google.com/presentation/d/16Fi5WfwiokDrPDSavv5lUgfpazfzo0fI/edit?usp=drive_link&ouid=112332990813659906112&rtpof=true&sd=true
 ## 目次
 
 - [プロジェクト概要](#プロジェクト概要)
